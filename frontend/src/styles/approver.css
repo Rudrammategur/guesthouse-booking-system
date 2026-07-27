@@ -77,27 +77,9 @@
    Approver Cards
 ========================================== */
 
-.approved-card{
-
-    border-top:4px solid var(--info);
-
-}
-
 .pending-approval-card{
 
     border-top:4px solid var(--warning);
-
-}
-
-.rejected-card{
-
-    border-top:4px solid var(--danger);
-
-}
-
-.processed-card{
-
-    border-top:4px solid var(--success);
 
 }
 

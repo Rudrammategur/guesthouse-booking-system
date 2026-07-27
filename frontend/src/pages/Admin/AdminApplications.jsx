@@ -5,7 +5,7 @@ import GenericDashboardPage from "../../components/Common/GenericDashboardPage";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
-    "http://localhost:5000";
+    "http://localhost:9009";
 
 function AdminApplications() {
 
@@ -35,11 +35,7 @@ function AdminApplications() {
 
             );
 
-            setApplications(
-
-                response.data
-
-            );
+            setApplications(response.data.application);
 
         }
 
@@ -77,8 +73,7 @@ function AdminApplications() {
             label: "Approved",
             count: applications.filter(
                 a => a.BookingStatus === "Approved"
-            ).length,
-            className: "approved-card"
+            ).length
         },
 
         {

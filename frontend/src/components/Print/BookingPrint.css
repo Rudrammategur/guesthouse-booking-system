@@ -1,0 +1,219 @@
+/* ==========================================
+   Booking Print
+========================================== */
+
+.booking-print{
+
+    width:210mm;
+
+    min-height:297mm;
+
+    margin:0 auto;
+
+    padding:15mm;
+
+    background:#fff;
+
+    color:#222;
+
+    font-family:"Segoe UI",sans-serif;
+
+    font-size:14px;
+
+    line-height:1.5;
+
+}
+
+
+/* ==========================================
+   Header
+========================================== */
+
+.print-header{
+
+    text-align:center;
+
+    margin-bottom:30px;
+
+    border-bottom:2px solid #000;
+
+    padding-bottom:15px;
+
+}
+
+.print-header h2{
+
+    margin:0;
+
+    font-size:24px;
+
+    font-weight:700;
+
+    letter-spacing:0.5px;
+
+}
+
+.print-header h3{
+
+    margin-top:8px;
+
+    font-size:18px;
+
+    font-weight:600;
+
+}
+
+
+/* ==========================================
+   Sections
+========================================== */
+
+.print-section{
+
+    margin-bottom:22px;
+
+}
+
+.print-section h4{
+
+    margin-bottom:10px;
+
+    padding:8px 12px;
+
+    background:#efefef;
+
+    border-left:5px solid #2b6cb0;
+
+    font-size:16px;
+
+}
+
+
+/* ==========================================
+   Information Table
+========================================== */
+
+.print-table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+.print-table td{
+
+    border:1px solid #d5d5d5;
+
+    padding:10px;
+
+    vertical-align:top;
+
+}
+
+.print-table td:nth-child(1),
+
+.print-table td:nth-child(3){
+
+    width:20%;
+
+    font-weight:600;
+
+    background:#fafafa;
+
+}
+
+.print-table td:nth-child(2),
+
+.print-table td:nth-child(4){
+
+    width:30%;
+
+}
+
+
+/* ==========================================
+   Grid Table
+========================================== */
+
+.print-grid{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+.print-grid th{
+
+    border:1px solid #999;
+
+    background:#ececec;
+
+    padding:10px;
+
+    text-align:left;
+
+}
+
+.print-grid td{
+
+    border:1px solid #999;
+
+    padding:10px;
+
+}
+
+
+/* ==========================================
+   Footer
+========================================== */
+
+.print-footer{
+
+    margin-top:50px;
+
+    text-align:center;
+
+    font-size:12px;
+
+    color:#555;
+
+}
+
+.print-footer hr{
+
+    margin-bottom:15px;
+
+}
+
+
+/* ==========================================
+   Print
+========================================== */
+
+@media print{
+
+    body{
+
+        margin:0;
+
+        background:#fff;
+
+    }
+
+    .booking-print{
+
+        width:100%;
+
+        min-height:auto;
+
+        margin:0;
+
+        padding:0;
+
+        box-shadow:none;
+
+    }
+
+}

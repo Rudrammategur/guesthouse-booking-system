@@ -3,10 +3,7 @@ import axios from "axios";
 
 import ERPFormModal from "../Common/Form/ERPFormModal";
 import ERPFormField from "../Common/Form/ERPFormField";
-
-const API_URL =
-    import.meta.env.VITE_API_URL ||
-    "http://localhost:5000";
+import api from "../../services/api";
 
 function GuestTypeFormModal({
 
@@ -68,9 +65,9 @@ function GuestTypeFormModal({
 
         if (selectedGuestType) {
 
-            await axios.put(
+            await api.put(
 
-                `${API_URL}/api/admin/guest-types/${selectedGuestType.GuestTypeID}`,
+                `/api/admin/guest-types/${selectedGuestType.GuestTypeID}`,
 
                 form
 
@@ -80,9 +77,9 @@ function GuestTypeFormModal({
 
         else {
 
-            await axios.post(
+            await api.post(
 
-                `${API_URL}/api/admin/guest-types`,
+                `/api/admin/guest-types`,
 
                 form
 

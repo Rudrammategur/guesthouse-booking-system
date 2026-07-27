@@ -7,6 +7,12 @@ function PageHeader({
 
     subtitle,
 
+    description,
+
+    logo,
+
+    hero = false,
+
     breadcrumbs = [],
 
     badge,
@@ -21,111 +27,136 @@ function PageHeader({
 
     return (
 
-        <div className="erp-page-header">
+    <div
+        className={`erp-page-header ${
+            hero ? "hero-header" : ""
+        }`}
+    >
 
-            <div className="erp-page-header-left">
-
-                {
-
-                    showBack && (
-
-                        <button
-
-                            className="erp-back-btn"
-
-                            onClick={onBack}
-
-                        >
-
-                            <FaArrowLeft />
-
-                        </button>
-
-                    )
-
-                }
-
-                <div>
-
-                    {
-
-                        breadcrumbs.length > 0 && (
-
-                            <div className="erp-breadcrumb">
-
-                                {
-
-                                    breadcrumbs.map((item,index)=>(
-
-                                        <span key={index}>
-
-                                            {item}
-
-                                            {
-
-                                                index !==
-
-                                                breadcrumbs.length-1
-
-                                                &&
-
-                                                " / "
-
-                                            }
-
-                                        </span>
-
-                                    ))
-
-                                }
-
-                            </div>
-
-                        )
-
-                    }
-
-                    <h1>
-
-                        {title}
-
-                    </h1>
-
-                    {
-
-                        subtitle && (
-
-                            <p>
-
-                                {subtitle}
-
-                            </p>
-
-                        )
-
-                    }
-
-                </div>
-
-            </div>
+        <div className="erp-page-header-left">
 
             {
 
-                actions && (
+                logo &&
 
-                    <div className="erp-page-header-right">
+                <div className="hero-logo">
 
-                        {actions}
+                    <img
+                        src={logo}
+                        alt="Logo"
+                    />
 
-                    </div>
+                </div>
+
+            }
+
+            {
+
+                showBack && (
+
+                    <button
+
+                        className="erp-back-btn"
+
+                        onClick={onBack}
+
+                    >
+
+                        <FaArrowLeft/>
+
+                    </button>
 
                 )
 
             }
 
+            <div>
+
+                {
+
+                    breadcrumbs.length > 0 && (
+
+                        <div className="erp-breadcrumb">
+
+                            {
+
+                                breadcrumbs.map((item,index)=>(
+
+                                    <span key={index}>
+
+                                        {item}
+
+                                        {
+
+                                            index!==breadcrumbs.length-1
+
+                                            &&
+
+                                            " / "
+
+                                        }
+
+                                    </span>
+
+                                ))
+
+                            }
+
+                        </div>
+
+                    )
+
+                }
+
+                <h1>
+
+                    {title}
+
+                </h1>
+
+                {
+
+                    subtitle &&
+
+                    <h3 className="erp-page-subtitle">
+
+                        {subtitle}
+
+                    </h3>
+
+                }
+
+                {
+
+                    description &&
+
+                    <p className="erp-page-description">
+
+                        {description}
+
+                    </p>
+
+                }
+
+            </div>
+
         </div>
 
-    );
+        {
+
+            actions &&
+
+            <div className="erp-page-header-right">
+
+                {actions}
+
+            </div>
+
+        }
+
+    </div>
+
+);
 
 }
 

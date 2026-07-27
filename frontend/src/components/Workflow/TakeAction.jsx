@@ -41,9 +41,9 @@ function TakeAction({
                 url =
                     status === "Verified"
 
-                        ? `http://localhost:5000/api/verifier/verify/${application.GHBookingID}`
+                        ? `http://localhost:9009/api/verifier/verify/${application.GHBookingID}`
 
-                        : `http://localhost:5000/api/verifier/reject/${application.GHBookingID}`;
+                        : `http://localhost:9009/api/verifier/reject/${application.GHBookingID}`;
 
             }
 
@@ -52,9 +52,9 @@ function TakeAction({
                 url =
                     status === "Approved"
 
-                        ? `http://localhost:5000/api/approver/approve/${application.GHBookingID}`
+                        ? `http://localhost:9009/api/approver/approve/${application.GHBookingID}`
 
-                        : `http://localhost:5000/api/approver/reject/${application.GHBookingID}`;
+                        : `http://localhost:9009/api/approver/reject/${application.GHBookingID}`;
 
             }
 

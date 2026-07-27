@@ -477,11 +477,22 @@ exports.getAvailableRooms = async (req, res) => {
 
     try {
 
+        const currentUser = req.user;
+
+        // Authentication
+        AuthorizationService.ensureAuthenticated(currentUser);
+
+        // Authorization
+        await AuthorizationService.ensureAllocator(currentUser);
+
         const pool = await poolPromise;
 
         const bookingId = req.params.bookingId;
 
-        // Get booking details
+        //-------------------------------------------------------
+        // Booking Details
+        //-------------------------------------------------------
+
         const bookingResult = await pool.request()
 
             .input(
@@ -490,14 +501,42 @@ exports.getAvailableRooms = async (req, res) => {
                 bookingId
             )
 
+            .input(
+                "UserID",
+                sql.BigInt,
+                Number(currentUser.UserId)
+            )
+
             .query(`
 
 SELECT
+
     GuestHouseID,
+
     ArrivalDateTime,
-    DepartureDateTime
+
+    DepartureDateTime,
+
+    AssignedAllocatorID,
+
+    BookingStatus
+
 FROM GuestHouseRoomBookings
-WHERE GHBookingID=@BookingID
+
+WHERE
+
+    GHBookingID = @BookingID
+
+    AND IsActive = 1
+
+    AND AssignedAllocatorID IN
+    (
+        SELECT CAST(RoleMapId AS VARCHAR(20))
+        FROM Proof..OrgUnitUserMapping
+        WHERE
+            UserId = @UserID
+            AND IsActive = 1
+    )
 
 `);
 
@@ -507,7 +546,7 @@ WHERE GHBookingID=@BookingID
 
                 success: false,
 
-                message: "Booking not found."
+                message: "Booking not found or not assigned to you."
 
             });
 
@@ -516,7 +555,19 @@ WHERE GHBookingID=@BookingID
         const booking =
             bookingResult.recordset[0];
 
-        // Get requested room types
+        // Booking must be Approved
+        AuthorizationService.ensureBookingStatus(
+
+            booking,
+
+            "Approved"
+
+        );
+
+        //-------------------------------------------------------
+        // Room Requirements
+        //-------------------------------------------------------
+
         const roomRequirementResult = await pool.request()
 
             .input(
@@ -528,14 +579,23 @@ WHERE GHBookingID=@BookingID
             .query(`
 
 SELECT
+
     RoomTypeID,
+
     NoOfRooms
+
 FROM GuestHouseBookingRoomDetails
-WHERE GHBookingID=@BookingID
+
+WHERE
+
+    GHBookingID = @BookingID
 
 `);
 
-        // Fetch all available rooms
+        //-------------------------------------------------------
+        // Available Rooms
+        //-------------------------------------------------------
+
         const availableRooms = [];
 
         for (const requirement of roomRequirementResult.recordset) {
@@ -584,7 +644,7 @@ SELECT
 
 FROM GuestHouseRoomMaster R
 
-INNER JOIN RoomTypeMaster RT
+LEFT JOIN RoomTypeMaster RT
 ON RT.RoomTypeID = R.RoomTypeID
 
 LEFT JOIN GuestHouseRoomCharges C1
@@ -607,12 +667,23 @@ WHERE
 
     AND NOT EXISTS
     (
+
         SELECT 1
+
         FROM GuestHouseRoomAllocation A
+
         WHERE
+
             A.AllocatedRoom = R.GHRMID
+
             AND A.CheckOutDateTime IS NULL
+
     )
+
+ORDER BY
+
+    R.GHRoomNo
+
 `);
 
             availableRooms.push(
@@ -623,15 +694,23 @@ WHERE
 
         }
 
-        res.json(availableRooms);
+        return res.status(200).json({
+
+            success: true,
+
+            count: availableRooms.length,
+
+            data: availableRooms
+
+        });
 
     }
 
     catch (err) {
 
-        console.log(err);
+        console.error(err);
 
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
 
@@ -642,7 +721,6 @@ WHERE
     }
 
 };
-
 exports.getReceiptDetails = async (req, res) => {
 
     try {
@@ -783,93 +861,6 @@ g.GuestHouseName
 
 };
 
-//     try {
-
-//         const { bookingId } = req.params;
-
-//         const {
-//             accommodationAmount,
-//             mealCharges,
-//             additionalCharges,
-//             discount,
-//             paymentMode,
-//             transactionReference
-//         } = req.body;
-
-//         const totalAmount =
-//             Number(accommodationAmount)
-//             +
-//             Number(mealCharges)
-//             +
-//             Number(additionalCharges)
-//             -
-//             Number(discount);
-
-//         // await generateId(
-//         //     transaction,
-//         //     {
-//         //         table: "GuestHouseReceipt",
-//         //         column: "ReceiptID",
-//         //         prefix: "GHR"
-//         //     }
-//         // );
-
-//         res.status(200).json({
-
-//             success: true,
-
-//             message:
-//                 "Receipt generated successfully",
-
-//             receipt: {
-
-//                 BookingID: bookingId,
-
-//                 ReceiptNumber: receiptNumber,
-
-//                 AccommodationAmount:
-//                     accommodationAmount,
-
-//                 MealCharges:
-//                     mealCharges,
-
-//                 AdditionalCharges:
-//                     additionalCharges,
-
-//                 Discount:
-//                     discount,
-
-//                 TotalAmount:
-//                     totalAmount,
-
-//                 PaymentMode:
-//                     paymentMode,
-
-//                 TransactionReference:
-//                     transactionReference
-
-//             }
-
-//         });
-
-//     }
-//     catch (error) {
-
-//         console.log(error);
-
-//         res.status(500).json({
-
-//             success: false,
-
-//             message:
-//                 "Failed to generate receipt"
-
-//         });
-
-//     }
-
-// };
-
 exports.getCheckInApplication = async (req, res) => {
 
     try {
@@ -917,10 +908,10 @@ SELECT
 FROM GuestHouseRoomBookings B
 
 LEFT JOIN GuestHouseMaster GH
-ON GH.GuestHouseID = B.GuestHouseID
+ON LTRIM(RTRIM(GH.GuestHouseID)) = LTRIM(RTRIM(B.GuestHouseID))
 
 LEFT JOIN GuestTypeMaster GT
-ON GT.GuestTypeID = B.GuestTypeID
+ON LTRIM(RTRIM(GT.GuestTypeID)) = LTRIM(RTRIM(B.GuestTypeID))
 
 WHERE
 
@@ -950,6 +941,17 @@ WHERE
             });
 
         }
+
+        const booking = bookingResult.recordset[0];
+
+        // Validate Status
+        AuthorizationService.ensureBookingStatus(
+
+            booking,
+
+            "Allocated"
+
+        );
 
         //-------------------------------------------------------
         // Allocated Rooms
@@ -993,6 +995,10 @@ WHERE
 
     A.GHBookingID = @BookingID
 
+ORDER BY
+
+    R.GHRoomNo
+
 `);
 
         //-------------------------------------------------------
@@ -1004,10 +1010,6 @@ WHERE
                 "GuestHouseBooking",
                 bookingId
             );
-
-        //-------------------------------------------------------
-
-        const booking = bookingResult.recordset[0];
 
         booking.Allocations =
             allocationResult.recordset;
@@ -1043,17 +1045,22 @@ WHERE
 
 exports.checkoutGuest = async (req, res) => {
 
-    const transaction = new sql.Transaction(await poolPromise);
+    const transaction =
+        new sql.Transaction(await poolPromise);
 
     try {
+
+        const currentUser = req.user;
+
+        // Authentication
+        AuthorizationService.ensureAuthenticated(currentUser);
+
+        // Authorization
+        await AuthorizationService.ensureAllocator(currentUser);
 
         await transaction.begin();
 
         const bookingId = req.params.bookingId;
-
-        const currentUser = req.user;
-
-        const data = req.body;
 
         const {
 
@@ -1067,29 +1074,100 @@ exports.checkoutGuest = async (req, res) => {
 
             transactionReference,
 
-            totalPayableAmount
+            totalPayableAmount,
+
+            remarks = ""
 
         } = req.body;
 
-        // Update Booking
+        //-------------------------------------------------------
+        // Fetch Booking
+        //-------------------------------------------------------
+
+        const booking =
+            await getBookingDetails(bookingId);
+
+        if (!booking) {
+
+            throw new Error(
+                "Booking not found."
+            );
+
+        }
+
+        // Validate Assignment
+        await AuthorizationService.ensureAssignedRole(
+
+            booking.AssignedAllocatorID,
+
+            currentUser,
+
+            "Allocator"
+
+        );
+
+        // Validate Status
+        AuthorizationService.ensureBookingStatus(
+
+            booking,
+
+            "Checked In"
+
+        );
+
+        //-------------------------------------------------------
+        // Update Booking Charges
+        //-------------------------------------------------------
 
         await new sql.Request(transaction)
 
-            .input("BookingID", sql.VarChar, bookingId)
+            .input(
+                "BookingID",
+                sql.VarChar,
+                bookingId
+            )
 
-            .input("MealCharges", sql.Decimal(18, 2), mealCharges)
+            .input(
+                "MealCharges",
+                sql.Decimal(18, 2),
+                mealCharges || 0
+            )
 
-            .input("AdditionalCharges", sql.Decimal(18, 2), additionalCharges)
+            .input(
+                "AdditionalCharges",
+                sql.Decimal(18, 2),
+                additionalCharges || 0
+            )
 
-            .input("DiscountAmount", sql.Decimal(18, 2), discount)
+            .input(
+                "DiscountAmount",
+                sql.Decimal(18, 2),
+                discount || 0
+            )
 
-            .input("TotalPayableAmount", sql.Decimal(18, 2), totalPayableAmount)
+            .input(
+                "TotalPayableAmount",
+                sql.Decimal(18, 2),
+                totalPayableAmount || 0
+            )
 
-            .input("PaymentMode", sql.VarChar, paymentMode)
+            .input(
+                "PaymentMode",
+                sql.VarChar,
+                paymentMode
+            )
 
-            .input("TransactionReference", sql.VarChar, transactionReference)
+            .input(
+                "TransactionReference",
+                sql.VarChar,
+                transactionReference
+            )
 
-            .input("ModifiedBy", sql.VarChar, currentUser.EmployeeId)
+            .input(
+                "ModifiedBy",
+                sql.VarChar,
+                currentUser.EmployeeId
+            )
 
             .query(`
 
@@ -1097,90 +1175,162 @@ UPDATE GuestHouseRoomBookings
 
 SET
 
-MealCharges=@MealCharges,
+    MealCharges = @MealCharges,
 
-AdditionalCharges=@AdditionalCharges,
+    AdditionalCharges = @AdditionalCharges,
 
-DiscountAmount=@DiscountAmount,
+    DiscountAmount = @DiscountAmount,
 
-TotalPayableAmount=@TotalPayableAmount,
+    TotalPayableAmount = @TotalPayableAmount,
 
-PaymentMode=@PaymentMode,
+    PaymentMode = @PaymentMode,
 
-TransactionReference=@TransactionReference,
+    TransactionReference = @TransactionReference,
 
-BookingStatus='Checked Out',
+    ModifiedBy = @ModifiedBy,
 
-ModifiedBy=@ModifiedBy,
+    ModifiedDate = GETDATE()
 
-ModifiedDate=GETDATE()
+WHERE
 
-WHERE GHBookingID=@BookingID
+    GHBookingID = @BookingID
 
 `);
 
-        // Update Allocation
+        //-------------------------------------------------------
+        // Update Room Allocation
+        //-------------------------------------------------------
+
+        await new sql.Request(transaction)
+
+            .input(
+                "BookingID",
+                sql.VarChar,
+                bookingId
+            )
+
+            .input(
+                "CheckOutBy",
+                sql.VarChar,
+                currentUser.EmployeeId
+            )
+
+            .query(`
+
+UPDATE GuestHouseRoomAllocation
+
+SET
+
+    CheckOutDateTime = GETDATE(),
+
+    CheckOutBy = @CheckOutBy,
+
+    AllocationStatus = 'Checked Out'
+
+WHERE
+
+    GHBookingID = @BookingID
+
+`);
+
+        //-------------------------------------------------------
+        // Update Workflow
+        //-------------------------------------------------------
 
         await changeWorkflowStatus(
+
             transaction,
+
             {
+
                 bookingId,
-                previousStatus: "Checked In",
+
+                moduleName: "GuestHouseBooking",
+
+                previousStatus: booking.BookingStatus,
+
                 currentStatus: "Checked Out",
+
                 actionName: "Check Out",
+
                 authorityRole: "Guest House Incharge",
+
                 authorityName: currentUser.EmployeeName,
+
                 actionBy: currentUser.EmployeeId,
+
                 remarks
+
             }
+
         );
 
         await transaction.commit();
+
+        //-------------------------------------------------------
+        // Notification
+        //-------------------------------------------------------
 
         try {
 
             await NotificationService.sendCheckOut(
 
-                req.user.EmployeeEmail,
+                booking.EmployeeEmail,
 
                 {
 
-                    EmployeeName: req.user.EmployeeName,
+                    EmployeeName:
+                        booking.EmployeeName,
 
-                    BookingNo: data.GHRBookingNo,
+                    BookingNo:
+                        booking.GHRBookingNo,
 
-                    GuestName: data.GuestName,
+                    GuestName:
+                        booking.GuestName,
 
-                    GuestType: data.GuestTypeName,
+                    GuestType:
+                        booking.GuestTypeName,
 
-                    Purpose: data.PurposeOfVisit,
+                    Purpose:
+                        booking.PurposeOfVisit,
 
-                    ArrivalDate: formatDate(booking.ArrivalDateTime),
+                    ArrivalDate:
+                        formatDate(
+                            booking.ArrivalDateTime
+                        ),
 
-                    DepartureDate: formatDate(booking.DepartureDateTime),
+                    DepartureDate:
+                        formatDate(
+                            booking.DepartureDateTime
+                        ),
 
-                    GuestHouse: data.GuestHouseName,
+                    GuestHouse:
+                        booking.GuestHouseName,
 
-                    RoomNo: data.RoomNo,
+                    RoomNo:
+                        booking.RoomNo || "",
 
-                    RoomType: data.RoomTypeName
+                    RoomType:
+                        booking.RoomTypeName || ""
 
                 }
 
             );
 
-        } catch (err) {
+        }
 
-            console.error(err);
+        catch (mailError) {
+
+            console.error(mailError);
 
         }
 
-
-        res.json({
+        return res.status(200).json({
 
             success: true,
 
-            message: "Guest checked out successfully."
+            message:
+                "Guest checked out successfully."
 
         });
 
@@ -1188,11 +1338,25 @@ WHERE GHBookingID=@BookingID
 
     catch (err) {
 
-        await transaction.rollback();
+        try {
 
-        console.log(err);
+            if (transaction._aborted !== true) {
 
-        res.status(500).json({
+                await transaction.rollback();
+
+            }
+
+        }
+
+        catch (rollbackError) {
+
+            console.error(rollbackError);
+
+        }
+
+        console.error(err);
+
+        return res.status(500).json({
 
             success: false,
 
@@ -1208,77 +1372,94 @@ exports.getCheckoutApplications = async (req, res) => {
 
     try {
 
-        const pool = await poolPromise;
-
         const currentUser = req.user;
 
-        const remarks = req.body.remarks || "";
+        // Authentication
+        AuthorizationService.ensureAuthenticated(currentUser);
+
+        // Authorization
+        await AuthorizationService.ensureAllocator(currentUser);
+
+        const pool = await poolPromise;
 
         const result = await pool.request()
 
             .input(
-                "EmployeeID",
-                sql.VarChar,
-                currentUser.EmployeeId
+                "UserID",
+                sql.BigInt,
+                Number(currentUser.UserId)
             )
 
             .query(`
 
 SELECT
 
-B.GHBookingID,
+    B.GHBookingID,
 
-B.GHRBookingNo,
+    B.GHRBookingNo,
 
-B.GuestName,
+    B.GuestName,
 
-B.ArrivalDateTime,
+    B.ArrivalDateTime,
 
-B.DepartureDateTime,
+    B.DepartureDateTime,
 
-B.BookingStatus,
+    B.BookingStatus,
 
-R.GHRoomNo AS RoomNo,
+    R.GHRoomNo AS RoomNo,
 
-A.CheckInDateTime,
+    A.CheckInDateTime,
 
-A.DayRate,
+    A.DayRate,
 
-A.IsSingleOccupancy
+    A.IsSingleOccupancy
 
 FROM GuestHouseRoomBookings B
 
-INNER JOIN GuestHouseRoomAllocation A
+LEFT JOIN GuestHouseRoomAllocation A
+ON B.GHBookingID = A.GHBookingID
 
-ON B.GHBookingID=A.GHBookingID
-
-INNER JOIN GuestHouseRoomMaster R
-
-ON R.GHRMID=A.AllocatedRoom
+LEFT JOIN GuestHouseRoomMaster R
+ON R.GHRMID = A.AllocatedRoom
 
 WHERE
 
-B.AssignedAllocatorID=@EmployeeID
+    B.IsActive = 1
 
-AND
+    AND B.BookingStatus = 'Checked In'
 
-B.BookingStatus='Checked In'
+    AND B.AssignedAllocatorID IN
+    (
+        SELECT CAST(RoleMapId AS VARCHAR(20))
+        FROM Proof..OrgUnitUserMapping
+        WHERE
+            UserId = @UserID
+            AND IsActive = 1
+    )
 
 ORDER BY
 
-A.CheckInDateTime DESC
+    A.CheckInDateTime DESC
 
 `);
 
-        res.json(result.recordset);
+        return res.status(200).json({
+
+            success: true,
+
+            count: result.recordset.length,
+
+            data: result.recordset
+
+        });
 
     }
 
     catch (err) {
 
-        console.log(err);
+        console.error(err);
 
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
 
@@ -1294,13 +1475,21 @@ exports.getCheckoutDetails = async (req, res) => {
 
     try {
 
+        const currentUser = req.user;
+
+        // Authentication
+        AuthorizationService.ensureAuthenticated(currentUser);
+
+        // Authorization
+        await AuthorizationService.ensureAllocator(currentUser);
+
         const bookingId = req.params.bookingId;
 
         const pool = await poolPromise;
 
-        //--------------------------------------------------
+        //-------------------------------------------------------
         // Booking Details
-        //--------------------------------------------------
+        //-------------------------------------------------------
 
         const bookingResult = await pool.request()
 
@@ -1310,19 +1499,76 @@ exports.getCheckoutDetails = async (req, res) => {
                 bookingId
             )
 
+            .input(
+                "UserID",
+                sql.BigInt,
+                Number(currentUser.UserId)
+            )
+
             .query(`
 
-SELECT *
+SELECT
 
-FROM GuestHouseRoomBookings
+    B.*,
 
-WHERE GHBookingID=@BookingID
+    GH.GuestHouseName,
+
+    GT.GuestTypeName
+
+FROM GuestHouseRoomBookings B
+
+LEFT JOIN GuestHouseMaster GH
+ON LTRIM(RTRIM(GH.GuestHouseID)) =
+   LTRIM(RTRIM(B.GuestHouseID))
+
+LEFT JOIN GuestTypeMaster GT
+ON LTRIM(RTRIM(GT.GuestTypeID)) =
+   LTRIM(RTRIM(B.GuestTypeID))
+
+WHERE
+
+    B.GHBookingID = @BookingID
+
+    AND B.IsActive = 1
+
+    AND B.AssignedAllocatorID IN
+    (
+        SELECT CAST(RoleMapId AS VARCHAR(20))
+        FROM Proof..OrgUnitUserMapping
+        WHERE
+            UserId = @UserID
+            AND IsActive = 1
+    )
 
 `);
 
-        //--------------------------------------------------
+        if (bookingResult.recordset.length === 0) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message: "Booking not found or not assigned to you."
+
+            });
+
+        }
+
+        const booking =
+            bookingResult.recordset[0];
+
+        // Status Validation
+        AuthorizationService.ensureBookingStatus(
+
+            booking,
+
+            "Checked In"
+
+        );
+
+        //-------------------------------------------------------
         // Allocated Rooms
-        //--------------------------------------------------
+        //-------------------------------------------------------
 
         const roomResult = await pool.request()
 
@@ -1336,69 +1582,90 @@ WHERE GHBookingID=@BookingID
 
 SELECT
 
-A.GHRAllocationID,
+    A.GHRAllocationID,
 
-RM.GHRoomNo,
+    RM.GHRoomNo,
 
-RT.RoomTypeName,
+    RT.RoomTypeName,
 
-A.IsSingleOccupancy,
+    A.IsSingleOccupancy,
 
-A.DayRate,
+    A.DayRate,
 
-A.CheckInDateTime,
+    A.CheckInDateTime,
 
-DATEDIFF(
+    DATEDIFF
+    (
+        DAY,
+        A.CheckInDateTime,
+        GETDATE()
+    ) + 1 AS StayDays,
 
-DAY,
-
-A.CheckInDateTime,
-
-GETDATE()
-
-)+1 AS StayDays,
-
-A.DayRate *
-
-(
-
-DATEDIFF(
-
-DAY,
-
-A.CheckInDateTime,
-
-GETDATE()
-
-)+1
-
-) AS Amount
+    A.DayRate *
+    (
+        DATEDIFF
+        (
+            DAY,
+            A.CheckInDateTime,
+            GETDATE()
+        ) + 1
+    ) AS Amount
 
 FROM GuestHouseRoomAllocation A
 
-INNER JOIN GuestHouseRoomMaster RM
+LEFT JOIN GuestHouseRoomMaster RM
+ON RM.GHRMID = A.AllocatedRoom
 
-ON RM.GHRMID=A.AllocatedRoom
-
-INNER JOIN RoomTypeMaster RT
-
-ON RT.RoomTypeID=RM.RoomTypeID
+LEFT JOIN RoomTypeMaster RT
+ON RT.RoomTypeID = RM.RoomTypeID
 
 WHERE
 
-A.GHBookingID=@BookingID
+    A.GHBookingID = @BookingID
+
+ORDER BY
+
+    RM.GHRoomNo
 
 `);
 
-        res.json({
+        //-------------------------------------------------------
+        // Workflow History
+        //-------------------------------------------------------
 
-            booking:
+        const workflowHistory =
+            await getWorkflowHistory(
 
-                bookingResult.recordset[0],
+                "GuestHouseBooking",
 
-            rooms:
+                bookingId
 
-                roomResult.recordset
+            );
+
+        //-------------------------------------------------------
+
+        booking.Rooms =
+            roomResult.recordset;
+
+        booking.WorkflowHistory =
+            workflowHistory;
+
+        booking.TotalAccommodationCharges =
+            roomResult.recordset.reduce(
+
+                (sum, room) =>
+
+                    sum + Number(room.Amount),
+
+                0
+
+            );
+
+        return res.status(200).json({
+
+            success: true,
+
+            data: booking
 
         });
 
@@ -1406,9 +1673,9 @@ A.GHBookingID=@BookingID
 
     catch (err) {
 
-        console.log(err);
+        console.error(err);
 
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
 
@@ -1420,22 +1687,73 @@ A.GHBookingID=@BookingID
 
 };
 
-
 exports.allocateRooms = async (req, res) => {
 
-    const transaction = new sql.Transaction(await poolPromise);
+    const transaction =
+        new sql.Transaction(await poolPromise);
 
     try {
+
+        const currentUser = req.user;
+
+        // Authentication
+        AuthorizationService.ensureAuthenticated(currentUser);
+
+        // Authorization
+        await AuthorizationService.ensureAllocator(currentUser);
 
         await transaction.begin();
 
         const bookingId = req.params.bookingId;
 
-        const currentUser = req.user;
+        const {
 
-        const data = req.body;
+            rooms,
 
-        const { rooms, accommodationAmount, remarks } = req.body;
+            accommodationAmount,
+
+            remarks = ""
+
+        } = req.body;
+
+        //-------------------------------------------------------
+        // Fetch Booking
+        //-------------------------------------------------------
+
+        const booking =
+            await getBookingDetails(bookingId);
+
+        if (!booking) {
+
+            throw new Error(
+                "Booking not found."
+            );
+
+        }
+
+        // Validate Assignment
+        await AuthorizationService.ensureAssignedRole(
+
+            booking.AssignedAllocatorID,
+
+            currentUser,
+
+            "Allocator"
+
+        );
+
+        // Validate Status
+        AuthorizationService.ensureBookingStatus(
+
+            booking,
+
+            "Approved"
+
+        );
+
+        //-------------------------------------------------------
+        // Prevent Duplicate Allocation
+        //-------------------------------------------------------
 
         const alreadyAllocated =
             await new sql.Request(transaction)
@@ -1448,44 +1766,72 @@ exports.allocateRooms = async (req, res) => {
 
                 .query(`
 
-SELECT COUNT(*) Total
+SELECT COUNT(*) AS Total
 
 FROM GuestHouseRoomAllocation
 
 WHERE
 
-GHBookingID=@BookingID
+    GHBookingID = @BookingID
 
-AND
-
-AllocationStatus='Allocated'
+    AND AllocationStatus = 'Allocated'
 
 `);
 
         if (alreadyAllocated.recordset[0].Total > 0) {
 
-            throw new Error("Rooms already allocated.");
+            throw new Error(
+                "Rooms have already been allocated."
+            );
 
         }
 
+        //-------------------------------------------------------
+        // Allocate Rooms
+        //-------------------------------------------------------
+
         for (const room of rooms) {
 
-            const allocationId = await generateAllocationId(transaction);
-
+            const allocationId =
+                await generateAllocationId(transaction);
 
             await new sql.Request(transaction)
 
-                .input("AllocationID", sql.VarChar, allocationId)
+                .input(
+                    "AllocationID",
+                    sql.VarChar,
+                    allocationId
+                )
 
-                .input("BookingID", sql.VarChar, bookingId)
+                .input(
+                    "BookingID",
+                    sql.VarChar,
+                    bookingId
+                )
 
-                .input("RoomID", sql.VarChar, room.roomId)
+                .input(
+                    "RoomID",
+                    sql.VarChar,
+                    room.roomId
+                )
 
-                .input("AllocatedBy", sql.VarChar, currentUser.EmployeeId)
+                .input(
+                    "AllocatedBy",
+                    sql.VarChar,
+                    currentUser.EmployeeId
+                )
 
-                .input("IsSingleOccupancy", sql.Bit, room.isSingleOccupancy)
+                .input(
+                    "IsSingleOccupancy",
+                    sql.Bit,
+                    room.isSingleOccupancy
+                )
 
-                .input("DayRate", sql.Decimal(10, 2), room.dayRate)
+                .input(
+                    "DayRate",
+                    sql.Decimal(10, 2),
+                    room.dayRate
+                )
 
                 .query(`
 
@@ -1517,8 +1863,13 @@ VALUES
     GETDATE()
 )
 
-                `);
+`);
+
         }
+
+        //-------------------------------------------------------
+        // Update Booking
+        //-------------------------------------------------------
 
         await new sql.Request(transaction)
 
@@ -1537,7 +1888,7 @@ VALUES
             .input(
                 "Remarks",
                 sql.NVarChar,
-                remarks || ""
+                remarks
             )
 
             .input(
@@ -1552,77 +1903,116 @@ UPDATE GuestHouseRoomBookings
 
 SET
 
-AccommodationAmount = @AccommodationAmount,
+    AccommodationAmount = @AccommodationAmount,
 
-AllocationRemarks = @Remarks,
+    AllocationRemarks = @Remarks,
 
-ModifiedBy = @AllocatedBy,
+    ModifiedBy = @AllocatedBy,
 
-ModifiedDate = GETDATE()
+    ModifiedDate = GETDATE()
 
-WHERE GHBookingID = @BookingID
+WHERE
+
+    GHBookingID = @BookingID
 
 `);
 
+        //-------------------------------------------------------
+        // Update Workflow
+        //-------------------------------------------------------
+
         await changeWorkflowStatus(
+
             transaction,
+
             {
+
                 bookingId,
-                previousStatus: "Approved",
+
+                moduleName: "GuestHouseBooking",
+
+                previousStatus: booking.BookingStatus,
+
                 currentStatus: "Allocated",
+
                 actionName: "Allocate Room",
+
                 authorityRole: "Guest House Incharge",
+
                 authorityName: currentUser.EmployeeName,
+
                 actionBy: currentUser.EmployeeId,
+
                 remarks
+
             }
+
         );
 
         await transaction.commit();
+
+        //-------------------------------------------------------
+        // Notification
+        //-------------------------------------------------------
 
         try {
 
             await NotificationService.sendRoomAllocated(
 
-                req.user.EmployeeEmail,
+                booking.EmployeeEmail,
 
                 {
 
-                    EmployeeName: req.user.EmployeeName,
+                    EmployeeName:
+                        booking.EmployeeName,
 
-                    BookingNo: data.GHRBookingNo,
+                    BookingNo:
+                        booking.GHRBookingNo,
 
-                    GuestName: data.GuestName,
+                    GuestName:
+                        booking.GuestName,
 
-                    GuestType: data.GuestTypeName,
+                    GuestType:
+                        booking.GuestTypeName,
 
-                    Purpose: data.PurposeOfVisit,
+                    Purpose:
+                        booking.PurposeOfVisit,
 
-                    ArrivalDate: formatDate(booking.ArrivalDateTime),
+                    ArrivalDate:
+                        formatDate(
+                            booking.ArrivalDateTime
+                        ),
 
-                    DepartureDate: formatDate(booking.DepartureDateTime),
+                    DepartureDate:
+                        formatDate(
+                            booking.DepartureDateTime
+                        ),
 
-                    GuestHouse: data.GuestHouseName,
+                    GuestHouse:
+                        booking.GuestHouseName,
 
-                    RoomNo: data.RoomNo,
+                    RoomNo: "",
 
-                    RoomType: data.RoomTypeName
+                    RoomType: ""
 
                 }
 
             );
 
-        } catch (err) {
+        }
 
-            console.error(err);
+        catch (mailError) {
+
+            console.error(mailError);
 
         }
 
-        res.json({
+        return res.status(200).json({
 
             success: true,
 
-            message: "Rooms allocated successfully."
+            message:
+                "Rooms allocated successfully."
 
         });
 
@@ -1630,11 +2020,25 @@ WHERE GHBookingID = @BookingID
 
     catch (err) {
 
-        await transaction.rollback();
+        try {
 
-        console.log(err);
+            if (transaction._aborted !== true) {
 
-        res.status(500).json({
+                await transaction.rollback();
+
+            }
+
+        }
+
+        catch (rollbackError) {
+
+            console.error(rollbackError);
+
+        }
+
+        console.error(err);
+
+        return res.status(500).json({
 
             success: false,
 
@@ -1648,35 +2052,25 @@ WHERE GHBookingID = @BookingID
 
 exports.checkInGuest = async (req, res) => {
 
-    const transaction =
-        new sql.Transaction(await poolPromise);
+    const transaction = new sql.Transaction(await poolPromise);
 
     try {
+
+        const currentUser = req.user;
+
+        AuthorizationService.ensureAuthenticated(currentUser);
+
+        await AuthorizationService.ensureAllocator(currentUser);
 
         await transaction.begin();
 
         const bookingId = req.params.bookingId;
 
-        const currentUser = req.user;
-
-        const data = req.body;
-
-        if (!currentUser) {
-
-            throw new Error("User not found.");
-
-        }
-
         const {
-
             proofType,
-
             proofNumber,
-
             remarks,
-
             occupants
-
         } = req.body;
 
         const occupantList =
@@ -1689,9 +2083,42 @@ exports.checkInGuest = async (req, res) => {
                 ? req.file.buffer
                 : null;
 
-        //----------------------------------------------------
-        // Update all allocated rooms for this booking
-        //----------------------------------------------------
+        //-------------------------------------------------------
+        // Fetch Booking
+        //-------------------------------------------------------
+
+        const booking =
+            await getBookingDetails(bookingId);
+
+        if (!booking) {
+
+            throw new Error("Booking not found.");
+
+        }
+
+        // Role Assignment Validation
+        await AuthorizationService.ensureAssignedRole(
+
+            booking.AssignedAllocatorID,
+
+            currentUser,
+
+            "Allocator"
+
+        );
+
+        // Status Validation
+        AuthorizationService.ensureBookingStatus(
+
+            booking,
+
+            "Allocated"
+
+        );
+
+        //-------------------------------------------------------
+        // Update Room Allocation
+        //-------------------------------------------------------
 
         await new sql.Request(transaction)
 
@@ -1725,7 +2152,7 @@ exports.checkInGuest = async (req, res) => {
                 currentUser.EmployeeId
             )
 
-            // Uncomment after adding the column
+            // Uncomment after column creation
             // .input(
             //     "Document",
             //     sql.VarBinary(sql.MAX),
@@ -1738,74 +2165,101 @@ UPDATE GuestHouseRoomAllocation
 
 SET
 
-CheckOutDateTime=GETDATE(),
+    CheckInDateTime = GETDATE(),
 
-CheckOutBy=@EmployeeId,
+    CheckInBy = @CheckInBy,
 
-AllocationStatus='Checked Out'
+    AllocationStatus = 'Checked In'
+
+WHERE
+
+    GHBookingID = @BookingID
 
 `);
 
-        //----------------------------------------------------
-        // Update Booking Status
-        //----------------------------------------------------
+        //-------------------------------------------------------
+        // Update Booking Status & Workflow
+        //-------------------------------------------------------
 
         await changeWorkflowStatus(
+
             transaction,
+
             {
+
                 bookingId,
-                previousStatus: "Allocated",
+
+                moduleName: "GuestHouseBooking",
+
+                previousStatus: booking.BookingStatus,
+
                 currentStatus: "Checked In",
+
                 actionName: "Check In",
+
                 authorityRole: "Guest House Incharge",
+
                 authorityName: currentUser.EmployeeName,
+
                 actionBy: currentUser.EmployeeId,
+
                 remarks
+
             }
+
         );
 
         await transaction.commit();
+
+        //-------------------------------------------------------
+        // Notification
+        //-------------------------------------------------------
 
         try {
 
             await NotificationService.sendCheckIn(
 
-                req.user.EmployeeEmail,
+                booking.EmployeeEmail,
 
                 {
 
-                    EmployeeName: req.user.EmployeeName,
+                    EmployeeName: booking.EmployeeName,
 
-                    BookingNo: data.GHRBookingNo,
+                    BookingNo: booking.GHRBookingNo,
 
-                    GuestName: data.GuestName,
+                    GuestName: booking.GuestName,
 
-                    GuestType: data.GuestTypeName,
+                    GuestType: booking.GuestTypeName,
 
-                    Purpose: data.PurposeOfVisit,
+                    Purpose: booking.PurposeOfVisit,
 
-                    ArrivalDate: formatDate(booking.ArrivalDateTime),
+                    ArrivalDate: formatDate(
+                        booking.ArrivalDateTime
+                    ),
 
-                    DepartureDate: formatDate(booking.DepartureDateTime),
+                    DepartureDate: formatDate(
+                        booking.DepartureDateTime
+                    ),
 
-                    GuestHouse: data.GuestHouseName,
+                    GuestHouse: booking.GuestHouseName,
 
-                    RoomNo: data.RoomNo,
+                    RoomNo: booking.RoomNo || "",
 
-                    RoomType: data.RoomTypeName
+                    RoomType: booking.RoomTypeName || ""
 
                 }
 
             );
 
-        } catch (err) {
+        }
 
-            console.error(err);
+        catch (mailError) {
+
+            console.error(mailError);
 
         }
 
-
-        res.json({
+        return res.status(200).json({
 
             success: true,
 
@@ -1817,11 +2271,25 @@ AllocationStatus='Checked Out'
 
     catch (err) {
 
-        await transaction.rollback();
+        try {
 
-        console.log(err);
+            if (transaction._aborted !== true) {
 
-        res.status(500).json({
+                await transaction.rollback();
+
+            }
+
+        }
+
+        catch (rollbackError) {
+
+            console.error(rollbackError);
+
+        }
+
+        console.error(err);
+
+        return res.status(500).json({
 
             success: false,
 
@@ -1837,27 +2305,107 @@ exports.getOccupancySummary = async (req, res) => {
 
     try {
 
+        const currentUser = req.user;
+
+        // Authentication
+        AuthorizationService.ensureAuthenticated(currentUser);
+
+        // Authorization
+        await AuthorizationService.ensureAllocator(currentUser);
+
         const pool = await poolPromise;
 
-        const result = await pool.request().query(`
+        const result = await pool.request()
+
+            .input(
+                "UserID",
+                sql.BigInt,
+                Number(currentUser.UserId)
+            )
+
+            .query(`
 
 SELECT
 
-    (SELECT COUNT(*)
-     FROM GuestHouseRoomMaster
-     WHERE IsActive = 1) AS TotalRooms,
+(
+    SELECT COUNT(*)
+    FROM GuestHouseRoomMaster RM
+    WHERE
+        RM.IsActive = 1
+        AND LTRIM(RTRIM(RM.GuestHouseID)) IN
+        (
+            SELECT DISTINCT
+                LTRIM(RTRIM(B.GuestHouseID))
+            FROM GuestHouseRoomBookings B
+            WHERE
+                B.AssignedAllocatorID IN
+                (
+                    SELECT CAST(RoleMapId AS VARCHAR(20))
+                    FROM Proof..OrgUnitUserMapping
+                    WHERE
+                        UserId = @UserID
+                        AND IsActive = 1
+                )
+        )
+) AS TotalRooms,
 
-    (SELECT COUNT(DISTINCT AllocatedRoom)
-     FROM GuestHouseRoomAllocation
-     WHERE AllocationStatus = 'Checked In') AS OccupiedRooms,
+(
+    SELECT COUNT(DISTINCT A.AllocatedRoom)
+    FROM GuestHouseRoomAllocation A
 
-    (SELECT COUNT(*)
-     FROM GuestHouseRoomBookings
-     WHERE BookingStatus = 'Allocated') AS PendingCheckIn,
+    INNER JOIN GuestHouseRoomBookings B
+    ON B.GHBookingID = A.GHBookingID
 
-    (SELECT COUNT(*)
-     FROM GuestHouseRoomBookings
-     WHERE BookingStatus = 'Checked In') AS CurrentGuests
+    WHERE
+
+        A.AllocationStatus = 'Checked In'
+
+        AND B.AssignedAllocatorID IN
+        (
+            SELECT CAST(RoleMapId AS VARCHAR(20))
+            FROM Proof..OrgUnitUserMapping
+            WHERE
+                UserId = @UserID
+                AND IsActive = 1
+        )
+
+) AS OccupiedRooms,
+
+(
+    SELECT COUNT(*)
+    FROM GuestHouseRoomBookings B
+    WHERE
+
+        B.BookingStatus = 'Allocated'
+
+        AND B.AssignedAllocatorID IN
+        (
+            SELECT CAST(RoleMapId AS VARCHAR(20))
+            FROM Proof..OrgUnitUserMapping
+            WHERE
+                UserId = @UserID
+                AND IsActive = 1
+        )
+
+) AS PendingCheckIn,
+
+(
+    SELECT COUNT(*)
+    FROM GuestHouseRoomBookings B
+    WHERE
+
+        B.BookingStatus = 'Checked In'
+
+        AND B.AssignedAllocatorID IN
+        (
+            SELECT CAST(RoleMapId AS VARCHAR(20))
+            FROM Proof..OrgUnitUserMapping
+            WHERE
+                UserId = @UserID
+                AND IsActive = 1
+        )
+
+) AS CurrentGuests
 
 `);
 
@@ -1866,15 +2414,21 @@ SELECT
         data.AvailableRooms =
             data.TotalRooms - data.OccupiedRooms;
 
-        res.json(data);
+        return res.status(200).json({
+
+            success: true,
+
+            data
+
+        });
 
     }
 
     catch (err) {
 
-        console.log(err);
+        console.error(err);
 
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
 
@@ -1886,57 +2440,100 @@ SELECT
 
 };
 
-
 exports.getRoomAvailability = async (req, res) => {
 
     try {
 
+        const currentUser = req.user;
+
+        // Authentication
+        AuthorizationService.ensureAuthenticated(currentUser);
+
+        // Authorization
+        await AuthorizationService.ensureAllocator(currentUser);
+
         const pool = await poolPromise;
 
-        const result = await pool.request().query(`
+        const result = await pool.request()
+
+            .input(
+                "UserID",
+                sql.BigInt,
+                Number(currentUser.UserId)
+            )
+
+            .query(`
 
 SELECT
 
-    r.GHRMID AS RoomID,
+    R.GHRMID AS RoomID,
 
-    r.GHRoomNo AS RoomNo,
+    R.GHRoomNo AS RoomNo,
 
-    gh.GuestHouseName,
+    GH.GuestHouseName,
 
-    rt.RoomTypeName,
+    RT.RoomTypeName,
 
-    b.GHBookingID,
+    B.GHBookingID,
 
-    b.GuestName,
+    B.GuestName,
 
-    b.ArrivalDateTime,
+    B.ArrivalDateTime,
 
-    b.DepartureDateTime,
+    B.DepartureDateTime,
 
-    a.AllocationStatus
+    A.AllocationStatus
 
-FROM GuestHouseRoomMaster r
+FROM GuestHouseRoomMaster R
 
-INNER JOIN GuestHouseMaster gh
-    ON r.GuestHouseID = gh.GuestHouseID
+LEFT JOIN GuestHouseMaster GH
+ON LTRIM(RTRIM(R.GuestHouseID)) =
+   LTRIM(RTRIM(GH.GuestHouseID))
 
-INNER JOIN RoomTypeMaster rt
-    ON r.RoomTypeID = rt.RoomTypeID
+LEFT JOIN RoomTypeMaster RT
+ON RT.RoomTypeID = R.RoomTypeID
 
-LEFT JOIN GuestHouseRoomAllocation a
-    ON r.GHRMID = a.AllocatedRoom
-    AND a.AllocationStatus IN ('Allocated','Checked In')
+LEFT JOIN GuestHouseRoomAllocation A
+ON R.GHRMID = A.AllocatedRoom
+AND A.AllocationStatus IN
+(
+    'Allocated',
+    'Checked In'
+)
 
-LEFT JOIN GuestHouseRoomBookings b
-    ON a.GHBookingID = b.GHBookingID
+LEFT JOIN GuestHouseRoomBookings B
+ON B.GHBookingID = A.GHBookingID
 
-WHERE r.IsActive = 1
+WHERE
+
+    R.IsActive = 1
+
+    AND LTRIM(RTRIM(R.GuestHouseID)) IN
+    (
+
+        SELECT DISTINCT
+            LTRIM(RTRIM(BK.GuestHouseID))
+
+        FROM GuestHouseRoomBookings BK
+
+        WHERE
+
+            BK.AssignedAllocatorID IN
+            (
+                SELECT CAST(RoleMapId AS VARCHAR(20))
+                FROM Proof..OrgUnitUserMapping
+                WHERE
+                    UserId = @UserID
+                    AND IsActive = 1
+            )
+
+    )
 
 ORDER BY
 
-gh.GuestHouseName,
+    GH.GuestHouseName,
 
-r.GHRoomNo
+    R.GHRoomNo
 
 `);
 
@@ -1982,15 +2579,23 @@ r.GHRoomNo
 
         });
 
-        res.json(Object.values(rooms));
+        return res.status(200).json({
+
+            success: true,
+
+            count: Object.keys(rooms).length,
+
+            data: Object.values(rooms)
+
+        });
 
     }
 
     catch (err) {
 
-        console.log(err);
+        console.error(err);
 
-        res.status(500).json({
+        return res.status(500).json({
 
             success: false,
 

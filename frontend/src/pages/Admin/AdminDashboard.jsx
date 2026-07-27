@@ -16,7 +16,7 @@ function AdminDashboard() {
 
     const API_URL =
         import.meta.env.VITE_API_URL ||
-        "http://localhost:5000";
+        "http://localhost:9009";
 
     const [dashboard, setDashboard] = useState({
 
@@ -110,9 +110,7 @@ function AdminDashboard() {
 
             label: "Checked Out",
 
-            count: dashboard?.counts?.checkedOut ?? 0,
-
-            className: "approved-card"
+            count: dashboard?.counts?.checkedOut ?? 0
 
         },
 

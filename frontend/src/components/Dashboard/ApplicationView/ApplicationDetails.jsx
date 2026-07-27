@@ -184,7 +184,7 @@ function ApplicationDetails({ application }) {
                             <Button
                                 onClick={() =>
                                     window.open(
-                                        `http://localhost:5000/api/verifier/document/${application.GHBookingID}`,
+                                        `http://localhost:9009/api/verifier/document/${application.GHBookingID}`,
                                         "_blank"
                                     )
                                 }

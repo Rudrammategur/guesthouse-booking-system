@@ -8,10 +8,6 @@
     border-top:4px solid var(--warning);
 }
 
-.approved-card{
-    border-top:4px solid var(--info);
-}
-
 .allocated-card{
     border-top:4px solid var(--purple);
 }

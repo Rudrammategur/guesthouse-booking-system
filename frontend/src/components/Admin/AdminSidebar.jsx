@@ -72,35 +72,6 @@ function AdminSidebar({ collapsed, setCollapsed }) {
 
             </nav>
 
-            <div className="sidebar-footer">
-
-                <NavLink
-                    to="/login"
-                    className="sidebar-link logout-link"
-                >
-
-                    <span className="menu-icon">
-
-                        🚪
-
-                    </span>
-
-                    {
-
-                        !collapsed &&
-
-                        <span className="menu-text">
-
-                            Logout
-
-                        </span>
-
-                    }
-
-                </NavLink>
-
-            </div>
-
         </aside>
 
     );

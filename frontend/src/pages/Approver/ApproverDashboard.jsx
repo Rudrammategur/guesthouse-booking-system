@@ -13,7 +13,7 @@ function ApproverDashboard() {
 
   const [counts, setCounts] = useState({});
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
 
   const filteredApplications = applications.filter(app => {
 
@@ -111,7 +111,7 @@ function ApproverDashboard() {
   const fetchCounts = async () => {
 
     const res = await axios.get(
-      "http://localhost:5000/api/approver/dashboard-counts"
+      "http://localhost:9009/api/approver/dashboard-counts"
     );
 
     setCounts(res.data);

@@ -7,7 +7,7 @@ import RoomAllocationPanel from "./RoomAllocationPanel";
 import "../../styles/ghIncharge.css";
 import RoomAvailabilityCalendar from "../../components/Common/RoomAvailabilityCalendar";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
 
 function GHAllocationPage() {
   const { bookingId, id } = useParams();

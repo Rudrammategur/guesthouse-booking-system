@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 
 import PageHeader from "../../Common/PageHeader";
@@ -12,9 +13,13 @@ function ApplicationHeader({ application }) {
 
     const handlePrint = () => {
 
-        window.print();
+    navigate(
 
-    };
+        `/print/${application.GHBookingID}`
+
+    );
+
+};
 
     return (
 
@@ -93,3 +98,104 @@ function ApplicationHeader({ application }) {
 }
 
 export default ApplicationHeader;
+
+// import { useNavigate } from "react-router-dom";
+
+// import PageHeader from "../../Common/PageHeader";
+// import Button from "../../Common/Button/Button";
+// import StatusBadge from "../../Common/StatusBadge";
+
+// import logo from "../../../assets/iitdh-logo.png";
+
+// import "./ApplicationHeader.css";
+
+// function ApplicationHeader({ application }) {
+
+//     console.log("ApplicationHeader Loaded");
+
+//     const navigate = useNavigate();
+
+//     return (
+
+//         <header className="application-hero">
+
+//             <div className="application-top-actions">
+
+//                 <Button
+//                     variant="outline"
+//                     onClick={() => navigate(-1)}
+//                 >
+//                     ← Back
+//                 </Button>
+
+//                 <Button
+//                     onClick={() =>
+//                         navigate(`/guesthouse/print/${application.GHBookingID}`)
+//                     }
+//                 >
+//                     🖨 Print
+//                 </Button>
+
+//             </div>
+
+//             <div className="application-hero-content">
+
+//                 <div className="application-brand">
+
+//                     <img
+//                         src={logo}
+//                         alt="IIT Dharwad"
+//                     />
+
+//                     <div>
+
+//                         <span className="hero-kicker">
+
+//                             Guest House Booking
+
+//                         </span>
+
+//                         <h1>
+
+//                             Indian Institute of Technology Dharwad
+
+//                         </h1>
+
+//                         <p>
+
+//                             Booking No :
+//                             <strong>
+
+//                                 {application.GHRBookingNo}
+
+//                             </strong>
+
+//                         </p>
+
+//                     </div>
+
+//                 </div>
+
+//                 <div className="application-status">
+
+//                     <span>
+
+//                         Current Status
+
+//                     </span>
+
+//                     <StatusBadge
+//                         status={application.BookingStatus}
+//                     />
+
+//                 </div>
+
+//             </div>
+
+//         </header>
+
+//     );
+
+// }
+
+// export default ApplicationHeader;

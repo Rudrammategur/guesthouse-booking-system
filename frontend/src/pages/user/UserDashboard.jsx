@@ -32,7 +32,7 @@ function UserDashboard() {
         const user = JSON.parse(localStorage.getItem("user"));
 
         const res = await axios.get(
-          `http://localhost:5000/api/dashboard-stats/${user.EmployeeId}`
+          `http://localhost:9009/api/dashboard-stats/${user.EmployeeId}`
         );
 
         setStats(res.data);

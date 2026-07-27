@@ -1,8 +1,8 @@
 
 :root {
 
-  --primary: #851b9a;
-  --primary-dark: #58126d;
+  --primary: rgb(137,40,143);
+  --primary-dark: #67207d;
   --primary-light: #F3E5F5;
 
   --secondary: #8720a1;
@@ -39,25 +39,25 @@
 
   /* Status Colors */
 
-  --success: #16A34A;
+  --success: #44a066;
   --success-soft: #DCFCE7;
   --success-text: #166534;
 
-  --warning: #F59E0B;
+  --warning: #f1b44b;
   --warning-soft: #FEF3C7;
   --warning-text: #92400E;
 
-  --danger: #DC2626;
+  --danger: #f34d4d;
   --danger-soft: #FEE2E2;
   --danger-text: #991B1B;
 
-  --info: #2563EB;
+  --info: #6190f7;
   --info-soft: #DBEAFE;
   --info-text: #1E40AF;
 
   /* Room Allocation */
 
-  --allocated: #932bc3;
+  --allocated: #b451e1;
   --allocated-soft: #EDE9FE;
   --allocated-text: #e6e2ed;
 
@@ -93,8 +93,8 @@
 --checkedout:#64748B;
 --checkedout-soft:#F1F5F9;
 
---sidebar:#6c148c;
---sidebar-hover:#7a1f96;
+--sidebar:#a441c8;
+--sidebar-hover:#952fb4;
 
 --primary-gradient:
 linear-gradient(

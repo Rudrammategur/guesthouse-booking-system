@@ -12,13 +12,13 @@ import DashboardCards from "../../components/Dashboard/DashboardCards";
 import StatusBadge from "../../components/Common/StatusBadge";
 import BookingActions from "../../components/Guesthouse/BookingActions.jsx";
 import ERPConfirmDialog from "../../components/Common/ERPConfirmDialog";
-
+import logo from "../../assets/iit-dharwad-logo.png";
 
 
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
-    "http://localhost:5000";
+    "http://localhost:9009";
 
 const formatDate = value =>
     value
@@ -71,12 +71,13 @@ function EmployeeDashboard() {
             ]);
 
             setApplications(
-                applicationResponse.data
+                applicationResponse.data.data
             );
 
             setCounts(
                 countResponse.data
             );
+
 
         }
 
@@ -311,15 +312,27 @@ function EmployeeDashboard() {
         <ERPPage>
 
             <PageHeader
-                title="Guest House Dashboard"
-                subtitle="Manage your guest house bookings"
+
+                hero
+
+                logo={logo}
+
+                title="Guest House Management System"
+
+                subtitle="Transit Facility Accommodation"
+
+                description="Book accommodation for institute guests, track applications and manage your requests."
+
                 actions={
+
                     <Button
-                        onClick={() => navigate("/guesthouse/apply")}
+                        onClick={() => navigate("/apply")}
                     >
-                        + Apply New Request
+                        + Apply for Guest House
                     </Button>
+
                 }
+
             />
 
             <DashboardCards cards={cards} />
@@ -455,16 +468,12 @@ function EmployeeDashboard() {
                             booking={row}
 
                             onView={() =>
-                                navigate(`/guesthouse/application/${row.GHBookingID}`)
+                                navigate(`/application/${row.GHBookingID}`)
                             }
 
                             onEdit={() =>
-                                navigate(`/guesthouse/application/${row.GHBookingID}/edit`)
+                                navigate(`/application/${row.GHBookingID}/edit`)
                             }
-
-                            onPrint={() => {
-                                // TODO
-                            }}
 
                             onCancel={() => {
 

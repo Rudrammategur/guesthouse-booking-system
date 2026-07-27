@@ -16,7 +16,7 @@ import { ACTIONS, getAvailableActions } from "../../utils/applicationActions";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
-    "http://localhost:5000";
+    "http://localhost:9009";
 
 const formatDate = (value) => {
 
@@ -102,7 +102,7 @@ function GuestHouseApplicationView() {
 
                 axios.get(
 
-                    `${API_URL}/api/guesthouse/application/${bookingId}`
+                    `${API_URL}/api/application/${bookingId}`
 
                 ),
 
@@ -116,7 +116,7 @@ function GuestHouseApplicationView() {
 
             setDetails(
 
-                applicationResponse.data
+                applicationResponse.data.data
 
             );
 
@@ -798,7 +798,7 @@ function GuestHouseApplicationView() {
 
                             onClick={() =>
 
-                                navigate(`/guesthouse/application/${bookingId}/edit`)
+                                navigate(`/application/${bookingId}/edit`)
 
                             }
 
@@ -820,7 +820,7 @@ function GuestHouseApplicationView() {
 
                             className="danger-btn"
 
-                            onClick={() => navigate(`/guesthouse/application/${bookingId}/cancel`)}
+                            onClick={() => navigate(`/application/${bookingId}/cancel`)}
 
                         >
 
@@ -839,7 +839,7 @@ function GuestHouseApplicationView() {
                         <button
 
                             className="danger-btn"
-                            onClick={() => navigate(`/guesthouse/application/${bookingId}/cancel`)}
+                            onClick={() => navigate(`/application/${bookingId}/cancel`)}
 
                         >
 

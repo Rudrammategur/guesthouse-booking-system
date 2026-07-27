@@ -8,7 +8,7 @@ import "../../styles/ghIncharge.css";
 import RoomAvailabilityCalendar from "../../components/Common/RoomAvailabilityCalendar";
 import Button from "../../components/Common/Button/Button";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
 
 const formatDate = (value) => value
   ? new Date(value).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
@@ -91,7 +91,6 @@ function GHInchargeDashboard() {
     {
         label: "Pending For Room Allocation",
         count: counts.PendingForRoomAllocation ?? 0,
-        className: "approved-card",
         active: activeFilter === "PendingForRoomAllocation",
         onClick: () => setActiveFilter("PendingForRoomAllocation")
     },

@@ -7,7 +7,7 @@ function BookingActions({ booking,
 
     onCancel,
 
-    onPrint,
+    // onPrint,
 
     onEdit }) {
 
@@ -51,12 +51,12 @@ function BookingActions({ booking,
                         View
                     </Button>
 
-                    <Button
+                    {/* <Button
                         variant="outline"
                         onClick={onPrint}
                     >
                         Print
-                    </Button>
+                    </Button> */}
 
                 </div>
             );
@@ -66,7 +66,7 @@ function BookingActions({ booking,
             return (
                 <Button
                     onClick={() =>
-                        navigate(`/guesthouse/application/${booking.GHBookingID}`)
+                        navigate(`/application/${booking.GHBookingID}`)
                     }
                 >
                     View

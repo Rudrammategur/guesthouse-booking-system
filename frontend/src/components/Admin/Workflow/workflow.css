@@ -259,49 +259,49 @@
 
 .status-submitted{
 
-    background:#FFB300;
+    background:#f9dc98;
 
 }
 
 .status-verified{
 
-    background:#29B6F6;
+    background:#a5daf3;
 
 }
 
 .status-approved{
 
-    background:#43A047;
+    background:#aaf5ad;
 
 }
 
 .status-allocated{
 
-    background:#7E57C2;
+    background:#dfd2f5;
 
 }
 
 .status-checkedin{
 
-    background:#00897B;
+    background:#bcefea;
 
 }
 
 .status-checkedout{
 
-    background:#546E7A;
+    background:#a6cadb;
 
 }
 
 .status-rejected{
 
-    background:#E53935;
+    background:#ee7674;
 
 }
 
 .status-cancelled{
 
-    background:#8D6E63;
+    background:#8f7870;
 
 }
 

@@ -54,7 +54,7 @@ function DashboardTable({
 
                         <button
                             className="print-btn"
-                            onClick={() => navigate(`/guesthouse/print/${item.GHBookingID}`)}
+                            onClick={() => navigate(`/print/${item.GHBookingID}`)}
                         >
                             Print
                         </button>

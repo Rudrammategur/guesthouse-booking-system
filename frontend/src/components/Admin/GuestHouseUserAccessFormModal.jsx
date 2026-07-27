@@ -3,10 +3,7 @@ import axios from "axios";
 
 import ERPFormModal from "../Common/Form/ERPFormModal";
 import ERPSelectField from "../Common/Form/ERPSelectField";
-
-const API_URL =
-    import.meta.env.VITE_API_URL ||
-    "http://localhost:5000";
+import api from "../../services/api";
 
 function GuestHouseUserAccessFormModal({
 
@@ -128,9 +125,9 @@ function GuestHouseUserAccessFormModal({
 
             if (selectedUserAccess) {
 
-                await axios.put(
+                await api.put(
 
-                    `${API_URL}/api/admin/user-access/${selectedUserAccess.UserAccessID}`,
+                    `/api/admin/user-access/${selectedUserAccess.UserAccessID}`,
 
                     form
 
@@ -140,9 +137,9 @@ function GuestHouseUserAccessFormModal({
 
             else {
 
-                await axios.post(
+                await api.post(
 
-                    `${API_URL}/api/admin/user-access`,
+                    `/api/admin/user-access`,
 
                     form
 

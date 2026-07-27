@@ -16,7 +16,6 @@ import VerifierDashboard from "./pages/Verifier/VerifierDashboard";
 import VerifierApplicationPage from "./pages/Verifier/VerifierApplicationPage";
 import GuestHousePrintPage from "./components/Dashboard/GuestHousePrintPage";
 import GHReceiptPage from "./pages/guesthouseIncharge/GHReceiptPage";
-import UserSwitcher from "./components/UserSwitcher";
 import GHCheckInDashboard from "./pages/guesthouseIncharge/GHCheckInDashboard";
 import GHCheckInPage from "./pages/guesthouseIncharge/GHCheckInPage";
 import GHCheckOutPage from "./pages/guesthouseIncharge/GHCheckOutPage";
@@ -52,10 +51,8 @@ import AdminRoomAvailability from "./pages/Admin/AdminRoomAvailability";
 function App() {
   return (
     <BrowserRouter>
-      <UserSwitcher />
       <Routes>
         <Route path="/" element={<MainDashboard />} />
-        <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/tracking/:id" element={<RequestTracking />} />
         <Route path="/approver" element={<ApproverDashboard />} />
@@ -65,7 +62,7 @@ function App() {
         <Route path="/guesthouse/allocation/:bookingId" element={<GHAllocationPage />} />
         <Route path="/verifier" element={<VerifierDashboard />} />
         <Route path="/verifier/application/:bookingId" element={<VerifierApplicationPage />} />
-        <Route path="/guesthouse/print/:id" element={<GuestHousePrintPage />} />
+        <Route path="/print/:id" element={<GuestHousePrintPage />} />
         <Route path="/guesthouse/receipt/:bookingId" element={<GHReceiptPage />} />
         <Route path="/gh-incharge/checkins" element={<GHCheckInDashboard />} />
         <Route path="/gh-incharge/checkin/:bookingId" element={<GHCheckInPage />} />
@@ -83,27 +80,27 @@ function App() {
 =========================== */}
 
         <Route
-          path="/guesthouse/dashboard"
+          path="/dashboard"
           element={<EmployeeDashboard />}
         />
 
         <Route
-          path="/guesthouse/apply"
+          path="/apply"
           element={<GuestHouseForm />}
         />
 
         <Route
-          path="/guesthouse/preview"
+          path="/preview"
           element={<GuestHousePreview />}
         />
 
         <Route
-    path="/guesthouse/application/:bookingId"
+    path="/application/:bookingId"
     element={<ApplicantApplicationPage />}
 />
 
         <Route
-          path="/guesthouse/my-bookings"
+          path="/my-bookings"
           element={<MyGuestHouseBookings />}
         />
 

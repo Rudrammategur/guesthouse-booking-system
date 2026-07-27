@@ -20,8 +20,9 @@ import NationalityInput from "../../components/Common/NationalityInput";
 import TariffModal from "../../components/TariffModal";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../styles/guestHouseForm.css";
+import iitLogo from "../../assets/iit-dharwad-logo.png";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
 
 const isSameCalendarDay = (first, second) => Boolean(
   first && second &&
@@ -108,6 +109,7 @@ function GuestHouseForm() {
     ]);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [filePreview, setFilePreview] = useState(draft.uploadedFileUrl || "");
+  const [activeSection, setActiveSection] = useState("guest-details");
 
   useEffect(() => {
     let active = true;
@@ -177,6 +179,48 @@ function GuestHouseForm() {
     }
 
   }, [formData.expenditureHeadType]);
+
+  useEffect(() => {
+
+    const sections = document.querySelectorAll(
+      ".form-section"
+    );
+
+    const observer = new IntersectionObserver(
+
+      (entries) => {
+
+        entries.forEach(entry => {
+
+          if (entry.isIntersecting) {
+
+            setActiveSection(
+              entry.target.id
+            );
+
+          }
+
+        });
+
+      },
+
+      {
+
+        threshold: 0.35,
+
+        rootMargin: "-80px 0px -45% 0px"
+
+      }
+
+    );
+
+    sections.forEach(section =>
+      observer.observe(section)
+    );
+
+    return () => observer.disconnect();
+
+  }, []);
 
 
   const loadProjects = async () => {
@@ -404,8 +448,8 @@ function GuestHouseForm() {
     const previewData = buildPreviewData();
     localStorage.setItem("guestHouseDraft", JSON.stringify({ ...previewData, uploadedFileUrl: "" }));
     navigate("/guesthouse/preview", {
-    state: previewData
-});
+      state: previewData
+    });
   };
 
   const openTariff = async () => {
@@ -421,18 +465,59 @@ function GuestHouseForm() {
   return (
     <main className="booking-form-page">
       <header className="booking-form-hero">
-        <button type="button" className="form-back-button" onClick={() => navigate("/guesthouse/dashboard")}>
-          <FaArrowLeft /> Back
+
+        <button
+          type="button"
+          className="form-back-button"
+          onClick={() => navigate("/dashboard")}
+        >
+          <FaArrowLeft />
+          Back
         </button>
-        <div className="hero-copy">
-          <span className="hero-kicker">Guest House Services</span>
-          <h1>Apply for Guest House Accommodation</h1>
-          <p>Provide the guest and visit details below. Fields marked with * are required.</p>
+
+        <div className="hero-main">
+
+          <div className="hero-logo">
+
+            <img
+              src={iitLogo}
+              alt="IIT Dharwad"
+            />
+
+          </div>
+
+          <div className="hero-center">
+
+            <h2>
+              INDIAN INSTITUTE OF TECHNOLOGY DHARWAD
+            </h2>
+
+            <div className="hero-line"></div>
+
+            <h3>
+              Guest House Management System
+            </h3>
+
+            <p className="hero-kicker">
+              GUEST HOUSE APPLICATION
+            </p>
+
+            <h1>
+              Transit Request
+            </h1>
+
+          </div>
+
+          <div className="hero-status">
+
+            <span>Status</span>
+
+            <strong>Draft</strong>
+
+          </div>
+
         </div>
-        <div className="hero-reference">
-          <span>Application status</span>
-          <strong>Draft</strong>
-        </div>
+
       </header>
 
       <div className="booking-form-layout">
@@ -445,16 +530,44 @@ function GuestHouseForm() {
             {employee.DepartmentName && <p>{employee.DepartmentName}</p>}
           </div>
           <nav className="form-outline" aria-label="Form sections">
-            <a href="#guest-details"><span>1</span> Guest details</a>
-            <a href="#visit-details"><span>2</span> Visit schedule</a>
-            <a href="#stay-details"><span>3</span> Accommodation</a>
-            <a href="#finance-details"><span>4</span> Billing & notes</a>
+            <a
+              href="#guest-details"
+              className={
+                activeSection === "guest-details"
+                  ? "active"
+                  : ""
+              }
+            ><span>1</span> Guest details</a>
+            <a
+              href="#visit-details"
+              className={
+                activeSection === "visit-details"
+                  ? "active"
+                  : ""
+              }
+            ><span>2</span> Visit schedule</a>
+            <a
+              href="#stay-details"
+              className={
+                activeSection === "stay-details"
+                  ? "active"
+                  : ""
+              }
+            ><span>3</span> Accommodation</a>
+            <a
+              href="#finance-details"
+              className={
+                activeSection === "finance-details"
+                  ? "active"
+                  : ""
+              }
+            ><span>4</span> Billing & notes</a>
           </nav>
           <div className="privacy-note"><FaInfoCircle /><p>Guest information is used only for accommodation processing and institute records.</p></div>
         </aside>
 
         <form className="booking-form" onSubmit={continueToPreview} noValidate>
-          <div id="guest-details">
+          <div id="guest-details" className="form-section">
             <FormSection icon={<FaUser />} step="01" title="Guest Details">
               <div className="booking-grid">
                 <Field label="Guest type" required>
@@ -493,7 +606,7 @@ function GuestHouseForm() {
             </FormSection>
           </div>
 
-          <div id="visit-details">
+          <div id="visit-details" className="form-section">
             <FormSection icon={<FaCalendarAlt />} step="02" title="Visit Schedule">
               <div className="booking-grid">
                 <Field label="Purpose of visit" required className="span-2">
@@ -510,7 +623,7 @@ function GuestHouseForm() {
             </FormSection>
           </div>
 
-          <div id="stay-details">
+          <div id="stay-details" className="form-section">
             <FormSection icon={<FaBed />} step="03" title="Accommodation Details">
               <div className="booking-grid">
                 <Field label="Guest house" required>
@@ -610,7 +723,7 @@ function GuestHouseForm() {
             </FormSection>
           </div>
 
-          <div id="finance-details">
+          <div id="finance-details" className="form-section">
             <FormSection icon={<FaWallet />} step="04" title="Billing and Supporting Information">
               <div className="booking-grid">
                 <Field label="Expenditure head" required>

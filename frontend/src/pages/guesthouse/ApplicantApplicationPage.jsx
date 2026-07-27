@@ -6,7 +6,7 @@ import ApplicationView from "../../components/Dashboard/ApplicationView/Applicat
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
-    "http://localhost:5000";
+    "http://localhost:9009";
 
 function ApplicantApplicationPage() {
 
@@ -28,7 +28,19 @@ function ApplicantApplicationPage() {
                 `${API_URL}/api/guesthouse/application/${bookingId}`
             );
 
-            setApplication(res.data.application);
+            const response = res.data.data;
+
+            setApplication({
+
+                ...response.application,
+
+                Header: response.header,
+
+                RoomRequirements: response.roomRequirements,
+
+                WorkflowHistory: response.workflowHistory
+
+            });
 
         }
 

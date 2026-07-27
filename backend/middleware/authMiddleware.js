@@ -115,7 +115,7 @@ const mockUsers = {
 exports.mockLogin = (req, res, next) => {
 
     const loginAs =
-        (req.headers["login-as"] || "allocator");
+        (req.headers["login-as"] || "applicant");
 
     req.user =
         mockUsers[loginAs] ||

@@ -3,10 +3,8 @@ import axios from "axios";
 
 import ERPFormModal from "../Common/Form/ERPFormModal";
 import ERPFormField from "../Common/Form/ERPFormField";
+import api from "../../services/api";
 
-const API_URL =
-    import.meta.env.VITE_API_URL ||
-    "http://localhost:5000";
 
 function RoleFormModal({
 
@@ -86,9 +84,9 @@ function RoleFormModal({
 
             if (selectedRole) {
 
-                await axios.put(
+                await api.put(
 
-                    `${API_URL}/api/admin/roles/${selectedRole.RoleID}`,
+                    `/api/admin/roles/${selectedRole.RoleID}`,
 
                     form
 
@@ -98,9 +96,9 @@ function RoleFormModal({
 
             else {
 
-                await axios.post(
+                await api.post(
 
-                    `${API_URL}/api/admin/roles`,
+                    `/api/admin/roles`,
 
                     form
 

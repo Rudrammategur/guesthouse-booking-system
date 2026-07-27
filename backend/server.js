@@ -34,7 +34,7 @@ app.use("/api/test/workflow", require("./routes/testWorkflowRoutes"));
 
 const { sql, poolPromise } = require("./config/db");
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 9009;
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
 });

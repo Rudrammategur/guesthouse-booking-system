@@ -5,7 +5,7 @@ import VerifierApplicationPage from "./VerifierApplicationPage.jsx";
 import TakeAction from "../../components/Workflow/TakeAction.jsx";
 import "../../styles/verifier.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
 
 function VerifierDashboard() {
 
@@ -74,7 +74,7 @@ function VerifierDashboard() {
     {
       label: "Rejected Applications",
       count: counts.RejectedApplications ?? 0,
-      className: "rejected-card",
+      // className: "rejected-card",
       active: activeFilter === "RejectedApplications",
       onClick: () => setActiveFilter("RejectedApplications")
     },
@@ -82,7 +82,7 @@ function VerifierDashboard() {
     {
       label: "All Processed Applications",
       count: counts.AllProcessedApplications ?? 0,
-      className: "processed-card",
+      // className: "processed-card",
       active: activeFilter === "ProcessedApplications",
       onClick: () => setActiveFilter("ProcessedApplications")
     }
@@ -111,7 +111,7 @@ function VerifierDashboard() {
   const fetchCounts = async () => {
 
     const res = await axios.get(
-      "http://localhost:5000/api/verifier/dashboard-counts"
+      "http://localhost:9009/api/verifier/dashboard-counts"
     );
 
     setCounts(res.data);

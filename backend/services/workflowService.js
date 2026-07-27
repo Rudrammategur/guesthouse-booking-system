@@ -229,129 +229,112 @@ Insert Workflow History
 */
 
 exports.insertWorkflowHistory = async (
-
     transaction,
-
-    {
-
-        moduleName,
-
-        referenceId,
-
-        previousStatus,
-
-        currentStatus,
-
-        actionName,
-
-        authorityRole,
-
-        authorityName,
-
-        actionBy,
-
-        remarks = "",
-
-        ipAddress = null,
-
-        deviceInfo = null
-
-    }
-
+    history
 ) => {
 
-    const workflowHistoryId =
-        await generateWorkflowHistoryId(transaction);
+    const sequenceResult =
+        await new sql.Request(transaction)
 
-    const sequenceNo =
-        await exports.getNextSequenceNo(
+            .input(
+                "ModuleName",
+                sql.VarChar,
+                history.moduleName
+            )
 
-            transaction,
+            .input(
+                "ReferenceID",
+                sql.VarChar,
+                history.referenceId
+            )
 
-            moduleName,
+            .query(`
 
-            referenceId
+SELECT
+    ISNULL(MAX(SequenceNo),0)+1 AS NextSequenceNo
+FROM WorkflowHistory
+WHERE
+    ModuleName=@ModuleName
+AND
+    ReferenceID=@ReferenceID
 
-        );
+`);
+
+    const nextSequenceNo =
+        sequenceResult.recordset[0].NextSequenceNo;
 
     await new sql.Request(transaction)
 
         .input(
             "WorkflowHistoryID",
             sql.VarChar,
-            workflowHistoryId
+            generateWorkflowHistoryId()
         )
 
         .input(
             "ModuleName",
             sql.VarChar,
-            moduleName
+            history.moduleName
         )
 
         .input(
             "ReferenceID",
             sql.VarChar,
-            referenceId
+            history.referenceId
         )
 
         .input(
             "SequenceNo",
             sql.Int,
-            sequenceNo
+            nextSequenceNo
         )
 
         .input(
             "PreviousStatus",
             sql.VarChar,
-            previousStatus
+            history.previousStatus
         )
 
         .input(
             "CurrentStatus",
             sql.VarChar,
-            currentStatus
+            history.currentStatus
         )
 
         .input(
             "ActionName",
             sql.VarChar,
-            actionName
+            history.actionName
         )
 
         .input(
             "AuthorityRole",
             sql.VarChar,
-            authorityRole
+            history.authorityRole
         )
 
         .input(
             "AuthorityName",
-            sql.VarChar,
-            authorityName
+            sql.NVarChar,
+            history.authorityName
         )
 
         .input(
             "ActionBy",
             sql.VarChar,
-            actionBy
+            history.actionBy
+        )
+
+        .input(
+            "ActionDateTime",
+            sql.DateTime,
+            new Date()
         )
 
         .input(
             "Remarks",
             sql.NVarChar,
-            remarks
-        )
-
-        .input(
-            "IPAddress",
-            sql.VarChar,
-            ipAddress
-        )
-
-        .input(
-            "DeviceInfo",
-            sql.NVarChar,
-            deviceInfo
+            history.remarks || ""
         )
 
         .query(`
@@ -370,13 +353,9 @@ INSERT INTO WorkflowHistory
     ActionBy,
     ActionDateTime,
     Remarks,
-    IPAddress,
-    DeviceInfo,
     IsActive,
-    CreatedBy,
     CreatedDate
 )
-
 VALUES
 (
     @WorkflowHistoryID,
@@ -389,12 +368,9 @@ VALUES
     @AuthorityRole,
     @AuthorityName,
     @ActionBy,
-    GETDATE(),
+    @ActionDateTime,
     @Remarks,
-    @IPAddress,
-    @DeviceInfo,
     1,
-    @ActionBy,
     GETDATE()
 )
 
@@ -410,235 +386,42 @@ Change Workflow Status
 */
 
 exports.changeWorkflowStatus = async (
-
     transaction,
-
     {
-
         bookingId,
-
-        moduleName = "GuestHouse",
-
+        moduleName = "GuestHouseBooking",
         previousStatus,
-
         currentStatus,
-
         actionName,
-
         authorityRole,
-
         authorityName,
-
         actionBy,
-
-        remarks = "",
-
-        ipAddress = null,
-
-        deviceInfo = null
-
+        remarks = ""
     }
-
 ) => {
 
+    // Update Booking Status
     await exports.updateBookingStatus(
-
         transaction,
-
         bookingId,
-
         currentStatus,
-
         actionBy
-
     );
 
-    exports.insertWorkflowHistory = async (
-
+    // Insert Workflow History
+    await exports.insertWorkflowHistory(
         transaction,
-
-        history
-
-    ) => {
-
-        // Get Next Sequence Number
-        const sequenceResult = await new sql.Request(transaction)
-
-            .input(
-                "ModuleName",
-                sql.VarChar,
-                history.moduleName
-            )
-
-            .input(
-                "ReferenceID",
-                sql.VarChar,
-                history.referenceId
-            )
-
-            .query(`
-
-SELECT
-
-    ISNULL(MAX(SequenceNo),0) + 1 AS NextSequenceNo
-
-FROM WorkflowHistory
-
-WHERE
-
-ModuleName = @ModuleName
-
-AND
-
-ReferenceID = @ReferenceID
-
-`);
-
-        const nextSequenceNo =
-            sequenceResult.recordset[0].NextSequenceNo;
-
-        await new sql.Request(transaction)
-
-            .input(
-                "WorkflowHistoryID",
-                sql.VarChar,
-                generateWorkflowHistoryId()
-            )
-
-            .input(
-                "ModuleName",
-                sql.VarChar,
-                history.moduleName
-            )
-
-            .input(
-                "ReferenceID",
-                sql.VarChar,
-                history.referenceId
-            )
-
-            .input(
-                "SequenceNo",
-                sql.Int,
-                nextSequenceNo
-            )
-
-            .input(
-                "PreviousStatus",
-                sql.VarChar,
-                history.previousStatus
-            )
-
-            .input(
-                "CurrentStatus",
-                sql.VarChar,
-                history.currentStatus
-            )
-
-            .input(
-                "ActionName",
-                sql.VarChar,
-                history.actionName
-            )
-
-            .input(
-                "AuthorityRole",
-                sql.VarChar,
-                history.authorityRole
-            )
-
-            .input(
-                "AuthorityName",
-                sql.NVarChar,
-                history.authorityName
-            )
-
-            .input(
-                "ActionBy",
-                sql.VarChar,
-                history.actionBy
-            )
-
-            .input(
-                "ActionDateTime",
-                sql.DateTime,
-                new Date()
-            )
-
-            .input(
-                "Remarks",
-                sql.NVarChar,
-                history.remarks || ""
-            )
-
-            .query(`
-
-INSERT INTO WorkflowHistory(
-
-WorkflowHistoryID,
-
-ModuleName,
-
-ReferenceID,
-
-SequenceNo,
-
-PreviousStatus,
-
-CurrentStatus,
-
-ActionName,
-
-AuthorityRole,
-
-AuthorityName,
-
-ActionBy,
-
-ActionDateTime,
-
-Remarks,
-
-IsActive,
-
-CreatedDate
-
-)
-
-VALUES(
-
-@WorkflowHistoryID,
-
-@ModuleName,
-
-@ReferenceID,
-
-@SequenceNo,
-
-@PreviousStatus,
-
-@CurrentStatus,
-
-@ActionName,
-
-@AuthorityRole,
-
-@AuthorityName,
-
-@ActionBy,
-
-@ActionDateTime,
-
-@Remarks,
-
-1,
-
-GETDATE()
-
-)
-
-`);
-
-    };
+        {
+            moduleName,
+            referenceId: bookingId,
+            previousStatus,
+            currentStatus,
+            actionName,
+            authorityRole,
+            authorityName,
+            actionBy,
+            remarks
+        }
+    );
 
 };

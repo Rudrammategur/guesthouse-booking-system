@@ -21,7 +21,7 @@ function MyGuestHouseBookings() {
         }
 
         const res = await axios.get(
-          `http://localhost:5000/api/my-bookings/${user.EmployeeId}`
+          `http://localhost:9009/api/my-bookings/${user.EmployeeId}`
         );
 
         setBookings(res.data);
@@ -103,7 +103,7 @@ function MyGuestHouseBookings() {
                     <button
                       onClick={() =>
                         navigate(
-    `/guesthouse/application/${b.GHBookingID}`
+    `/application/${b.GHBookingID}`
 )
                       }
                     >
