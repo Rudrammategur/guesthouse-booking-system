@@ -4,7 +4,7 @@ const { poolPromise } = require("../config/db");
 const {
   getWorkflowHistory,
   changeWorkflowStatus
-} = require("../services/WorkflowService");
+} = require("../services/workflowService");
 
 const {
   getBookingDetails
@@ -13,7 +13,7 @@ const {
 
 const { getEmployeeById } = require("../services/employeeService");
 const { formatDate } = require("../utils/dateFormater");
-const NotificationService = require("../notifications/notificationService");
+
 const AuthorizationService = require("../services/AuthorizationService");
 
 exports.getDashboardCounts = async (req, res) => {
@@ -218,49 +218,49 @@ exports.rejectApplication = async (req, res) => {
     await transaction.commit();
 
     // Notify Applicant
-    try {
+    // try {
 
-      if (booking.EmployeeEmail) {
+    //   if (booking.EmployeeEmail) {
 
-        await NotificationService.sendBookingRejected(
+    //     await NotificationService.sendBookingRejected(
 
-          booking.EmployeeEmail,
+    //       booking.EmployeeEmail,
 
-          {
+    //       {
 
-            EmployeeName: booking.EmployeeName,
+    //         EmployeeName: booking.EmployeeName,
 
-            BookingNo: booking.GHRBookingNo,
+    //         BookingNo: booking.GHRBookingNo,
 
-            GuestName: booking.GuestName,
+    //         GuestName: booking.GuestName,
 
-            GuestType: booking.GuestTypeName,
+    //         GuestType: booking.GuestTypeName,
 
-            Purpose: booking.PurposeOfVisit,
+    //         Purpose: booking.PurposeOfVisit,
 
-            ArrivalDate: formatDate(
-              booking.ArrivalDateTime
-            ),
+    //         ArrivalDate: formatDate(
+    //           booking.ArrivalDateTime
+    //         ),
 
-            DepartureDate: formatDate(
-              booking.DepartureDateTime
-            ),
+    //         DepartureDate: formatDate(
+    //           booking.DepartureDateTime
+    //         ),
 
-            Remarks: remarks
+    //         Remarks: remarks
 
-          }
+    //       }
 
-        );
+    //     );
 
-      }
+    //   }
 
-    }
+    // }
 
-    catch (mailError) {
+    // catch (mailError) {
 
-      console.error("Email Error:", mailError);
+    //   console.error("Email Error:", mailError);
 
-    }
+    // }
 
     return res.status(200).json({
 
@@ -757,54 +757,54 @@ exports.approveApplication = async (req, res) => {
     await transaction.commit();
 
     // Notify Applicant
-    try {
+    // try {
 
-      if (booking.EmployeeEmail) {
+    //   if (booking.EmployeeEmail) {
 
-        await NotificationService.sendBookingApproved(
+    //     await NotificationService.sendBookingApproved(
 
-          booking.EmployeeEmail,
+    //       booking.EmployeeEmail,
 
-          {
+    //       {
 
-            EmployeeName:
-              booking.EmployeeName,
+    //         EmployeeName:
+    //           booking.EmployeeName,
 
-            BookingNo:
-              booking.GHRBookingNo,
+    //         BookingNo:
+    //           booking.GHRBookingNo,
 
-            GuestName:
-              booking.GuestName,
+    //         GuestName:
+    //           booking.GuestName,
 
-            GuestType:
-              booking.GuestTypeName,
+    //         GuestType:
+    //           booking.GuestTypeName,
 
-            Purpose:
-              booking.PurposeOfVisit,
+    //         Purpose:
+    //           booking.PurposeOfVisit,
 
-            ArrivalDate:
-              formatDate(
-                booking.ArrivalDateTime
-              ),
+    //         ArrivalDate:
+    //           formatDate(
+    //             booking.ArrivalDateTime
+    //           ),
 
-            DepartureDate:
-              formatDate(
-                booking.DepartureDateTime
-              )
+    //         DepartureDate:
+    //           formatDate(
+    //             booking.DepartureDateTime
+    //           )
 
-          }
+    //       }
 
-        );
+    //     );
 
-      }
+    //   }
 
-    }
+    // }
 
-    catch (mailError) {
+    // catch (mailError) {
 
-      console.error("Email Error:", mailError);
+    //   console.error("Email Error:", mailError);
 
-    }
+    // }
 
     return res.status(200).json({
 

@@ -3,7 +3,7 @@ const { poolPromise } = require("../config/db");
 const {
     getWorkflowHistory,
     changeWorkflowStatus
-} = require("../services/WorkflowService");
+} = require("../services/workflowService");
 
 const {
     getBookingDetails
@@ -12,7 +12,7 @@ const {
 const AuthorizationService = require("../services/AuthorizationService");
 
 const { generateAllocationId } = require("../utils/idGenerator");
-const NotificationService = require("../notifications/notificationService");
+
 const { formatDate } = require("../utils/dateFormater");
 
 exports.getApplications = async (req, res) => {
@@ -1137,43 +1137,43 @@ WHERE GHBookingID=@BookingID
 
         await transaction.commit();
 
-        try {
+        // try {
 
-            await NotificationService.sendCheckOut(
+        //     await NotificationService.sendCheckOut(
 
-                req.user.EmployeeEmail,
+        //         req.user.EmployeeEmail,
 
-                {
+        //         {
 
-                    EmployeeName: req.user.EmployeeName,
+        //             EmployeeName: req.user.EmployeeName,
 
-                    BookingNo: data.GHRBookingNo,
+        //             BookingNo: data.GHRBookingNo,
 
-                    GuestName: data.GuestName,
+        //             GuestName: data.GuestName,
 
-                    GuestType: data.GuestTypeName,
+        //             GuestType: data.GuestTypeName,
 
-                    Purpose: data.PurposeOfVisit,
+        //             Purpose: data.PurposeOfVisit,
 
-                    ArrivalDate: formatDate(booking.ArrivalDateTime),
+        //             ArrivalDate: formatDate(booking.ArrivalDateTime),
 
-                    DepartureDate: formatDate(booking.DepartureDateTime),
+        //             DepartureDate: formatDate(booking.DepartureDateTime),
 
-                    GuestHouse: data.GuestHouseName,
+        //             GuestHouse: data.GuestHouseName,
 
-                    RoomNo: data.RoomNo,
+        //             RoomNo: data.RoomNo,
 
-                    RoomType: data.RoomTypeName
+        //             RoomType: data.RoomTypeName
 
-                }
+        //         }
 
-            );
+        //     );
 
-        } catch (err) {
+        // } catch (err) {
 
-            console.error(err);
+        //     console.error(err);
 
-        }
+        // }
 
 
         res.json({
@@ -1580,43 +1580,43 @@ WHERE GHBookingID = @BookingID
 
         await transaction.commit();
 
-        try {
+        // try {
 
-            await NotificationService.sendRoomAllocated(
+        //     await NotificationService.sendRoomAllocated(
 
-                req.user.EmployeeEmail,
+        //         req.user.EmployeeEmail,
 
-                {
+        //         {
 
-                    EmployeeName: req.user.EmployeeName,
+        //             EmployeeName: req.user.EmployeeName,
 
-                    BookingNo: data.GHRBookingNo,
+        //             BookingNo: data.GHRBookingNo,
 
-                    GuestName: data.GuestName,
+        //             GuestName: data.GuestName,
 
-                    GuestType: data.GuestTypeName,
+        //             GuestType: data.GuestTypeName,
 
-                    Purpose: data.PurposeOfVisit,
+        //             Purpose: data.PurposeOfVisit,
 
-                    ArrivalDate: formatDate(booking.ArrivalDateTime),
+        //             ArrivalDate: formatDate(booking.ArrivalDateTime),
 
-                    DepartureDate: formatDate(booking.DepartureDateTime),
+        //             DepartureDate: formatDate(booking.DepartureDateTime),
 
-                    GuestHouse: data.GuestHouseName,
+        //             GuestHouse: data.GuestHouseName,
 
-                    RoomNo: data.RoomNo,
+        //             RoomNo: data.RoomNo,
 
-                    RoomType: data.RoomTypeName
+        //             RoomType: data.RoomTypeName
 
-                }
+        //         }
 
-            );
+        //     );
 
-        } catch (err) {
+        // } catch (err) {
 
-            console.error(err);
+        //     console.error(err);
 
-        }
+        // }
 
         res.json({
 
@@ -1766,43 +1766,43 @@ AllocationStatus='Checked Out'
 
         await transaction.commit();
 
-        try {
+        // try {
 
-            await NotificationService.sendCheckIn(
+        //     await NotificationService.sendCheckIn(
 
-                req.user.EmployeeEmail,
+        //         req.user.EmployeeEmail,
 
-                {
+        //         {
 
-                    EmployeeName: req.user.EmployeeName,
+        //             EmployeeName: req.user.EmployeeName,
 
-                    BookingNo: data.GHRBookingNo,
+        //             BookingNo: data.GHRBookingNo,
 
-                    GuestName: data.GuestName,
+        //             GuestName: data.GuestName,
 
-                    GuestType: data.GuestTypeName,
+        //             GuestType: data.GuestTypeName,
 
-                    Purpose: data.PurposeOfVisit,
+        //             Purpose: data.PurposeOfVisit,
 
-                    ArrivalDate: formatDate(booking.ArrivalDateTime),
+        //             ArrivalDate: formatDate(booking.ArrivalDateTime),
 
-                    DepartureDate: formatDate(booking.DepartureDateTime),
+        //             DepartureDate: formatDate(booking.DepartureDateTime),
 
-                    GuestHouse: data.GuestHouseName,
+        //             GuestHouse: data.GuestHouseName,
 
-                    RoomNo: data.RoomNo,
+        //             RoomNo: data.RoomNo,
 
-                    RoomType: data.RoomTypeName
+        //             RoomType: data.RoomTypeName
 
-                }
+        //         }
 
-            );
+        //     );
 
-        } catch (err) {
+        // } catch (err) {
 
-            console.error(err);
+        //     console.error(err);
 
-        }
+        // }
 
 
         res.json({

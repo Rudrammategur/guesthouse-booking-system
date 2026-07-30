@@ -32,7 +32,7 @@ import WorkflowManagement from "./pages/Admin/WorkflowManagement";
 import GHInchargeApplicationPage from "./pages/guesthouseIncharge/GHInchargeApplicationPage";
 import AdminApplicationPage from "./pages/Admin/AdminApplicationPage";
 
-
+import FixERPUrl from "./components/FixERPUrl";
 
 import AdminLayout from "./components/Admin/AdminLayout";
 
@@ -51,11 +51,12 @@ import AdminRoomAvailability from "./pages/Admin/AdminRoomAvailability";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/guesthouse">
       <UserSwitcher />
+      <FixERPUrl /> 
       <Routes>
         <Route path="/" element={<MainDashboard />} />
-        <Route path="/dashboard" element={<UserDashboard />} />
+        {/* <Route path="/dashboard" element={<UserDashboard />} /> */}
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/tracking/:id" element={<RequestTracking />} />
         <Route path="/approver" element={<ApproverDashboard />} />
@@ -83,27 +84,27 @@ function App() {
 =========================== */}
 
         <Route
-          path="/guesthouse/dashboard"
+          path="/dashboard"
           element={<EmployeeDashboard />}
         />
 
         <Route
-          path="/guesthouse/apply"
+          path="/apply"
           element={<GuestHouseForm />}
         />
 
         <Route
-          path="/guesthouse/preview"
+          path="/preview"
           element={<GuestHousePreview />}
         />
 
         <Route
-    path="/guesthouse/application/:bookingId"
+    path="/application/:bookingId"
     element={<ApplicantApplicationPage />}
 />
 
         <Route
-          path="/guesthouse/my-bookings"
+          path="/my-bookings"
           element={<MyGuestHouseBookings />}
         />
 
