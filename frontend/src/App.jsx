@@ -52,7 +52,7 @@ import AdminRoomAvailability from "./pages/Admin/AdminRoomAvailability";
 function App() {
   return (
     <BrowserRouter basename="/guesthouse">
-      <UserSwitcher />
+      {/* <UserSwitcher /> */}
       <FixERPUrl /> 
       <Routes>
         <Route path="/" element={<MainDashboard />} />
