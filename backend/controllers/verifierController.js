@@ -181,9 +181,6 @@ ORDER BY
 };
 
 
-
-
-
 exports.getApplications = async (req, res) => {
 
     try {
