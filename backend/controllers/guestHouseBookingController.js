@@ -9,13 +9,14 @@ const AuthorizationService = require ("../services/AuthorizationService");
 
 const { generateGuestHouseBookingId, generateGuestHouseBookingNo } = require("../utils/idGenerator");
 
-const NotificationService = require("../notifications/notificationService");
 
-const { insertWorkflowHistory, changeWorkflowStatus } = require("../services/WorkflowService");
+const { insertWorkflowHistory, changeWorkflowStatus } =
+    require("../services/workflowService");
 
 const { formatDate } = require("../utils/dateFormater");
 
-const WorkflowResolverService = require("../services/WorkflowResolverService");
+const WorkflowResolverService =
+    require("../services/workflowResolverService");
 
 
 exports.createBooking = async (req, res) => {
@@ -329,33 +330,33 @@ VALUES(
 
         await transaction.commit();
 
-        try {
-            await NotificationService.sendBookingSubmitted(
+        // try {
+        //     await NotificationService.sendBookingSubmitted(
 
-                req.user.EmployeeEmail,
+        //         req.user.EmployeeEmail,
 
-                {
+        //         {
 
-                    EmployeeName: req.user.EmployeeName,
+        //             EmployeeName: req.user.EmployeeName,
 
-                    BookingNo: bookingNo,
+        //             BookingNo: bookingNo,
 
-                    GuestName: data.GuestName,
+        //             GuestName: data.GuestName,
 
-                    Purpose: data.PurposeOfVisit,
+        //             Purpose: data.PurposeOfVisit,
 
-                    ArrivalDate: formatDate(data.ArrivalDateTime),
+        //             ArrivalDate: formatDate(data.ArrivalDateTime),
 
-                    DepartureDate: formatDate(data.DepartureDateTime),
+        //             DepartureDate: formatDate(data.DepartureDateTime),
 
-                    SubmittedOn: formatDate(new Date())
+        //             SubmittedOn: formatDate(new Date())
 
-                }
+        //         }
 
-            );
-        } catch (mailError) {
-            console.error("Email failed:", mailError);
-        }
+        //     );
+        // } catch (mailError) {
+        //     console.error("Email failed:", mailError);
+        // }
 
 
         res.status(201).json({
@@ -398,21 +399,7 @@ exports.getDashboardCounts = async (req, res) => {
 
         const pool = await poolPromise;
 
-        const currentUser = req.user;
-
-        AuthorizationService.ensureAuthenticated(currentUser);
-
-        await AuthorizationService.ensureApplicant(currentUser);
-
-        const employeeId = currentUser.EmployeeId;
-
         const result = await pool.request()
-
-            .input(
-                "EmployeeID",
-                sql.VarChar,
-                employeeId
-            )
 
             .query(`
 
@@ -420,69 +407,78 @@ SELECT
 
 COUNT(*) AS TotalApplications,
 
-ISNULL(SUM(CASE WHEN BookingStatus='Submitted' THEN 1 ELSE 0 END),0) AS Submitted,
+ISNULL(SUM(CASE 
+WHEN BookingStatus='Submitted' 
+THEN 1 ELSE 0 END),0) AS Submitted,
 
-ISNULL(SUM(CASE WHEN BookingStatus='Verified' THEN 1 ELSE 0 END),0) AS Verified,
+ISNULL(SUM(CASE 
+WHEN BookingStatus='Verified' 
+THEN 1 ELSE 0 END),0) AS Verified,
 
-ISNULL(SUM(CASE WHEN BookingStatus='Approved' THEN 1 ELSE 0 END),0) AS Approved,
+ISNULL(SUM(CASE 
+WHEN BookingStatus='Approved' 
+THEN 1 ELSE 0 END),0) AS Approved,
 
-ISNULL(SUM(CASE WHEN BookingStatus='Rejected' THEN 1 ELSE 0 END),0) AS Rejected,
+ISNULL(SUM(CASE 
+WHEN BookingStatus='Rejected' 
+THEN 1 ELSE 0 END),0) AS Rejected,
 
-ISNULL(SUM(CASE WHEN BookingStatus='Allocated' THEN 1 ELSE 0 END),0) AS Allocated,
+ISNULL(SUM(CASE 
+WHEN BookingStatus='Allocated' 
+THEN 1 ELSE 0 END),0) AS Allocated,
 
-ISNULL(SUM(CASE WHEN BookingStatus='Checked In' THEN 1 ELSE 0 END),0) AS CheckedIn,
+ISNULL(SUM(CASE 
+WHEN BookingStatus='Checked In' 
+THEN 1 ELSE 0 END),0) AS CheckedIn,
 
-ISNULL(SUM(CASE WHEN BookingStatus='Checked Out' THEN 1 ELSE 0 END),0) AS Completed,
+ISNULL(SUM(CASE 
+WHEN BookingStatus='Checked Out' 
+THEN 1 ELSE 0 END),0) AS Completed,
 
-ISNULL(SUM(CASE WHEN BookingStatus='Cancelled' THEN 1 ELSE 0 END),0) AS Cancelled
+ISNULL(SUM(CASE 
+WHEN BookingStatus='Cancelled' 
+THEN 1 ELSE 0 END),0) AS Cancelled
 
 FROM GuestHouseRoomBookings
 
 WHERE
-    BookedBy = @EmployeeID
-    AND IsActive = 1;
+
+IsActive = 1
 
 `);
 
-        res.json(result.recordset[0]);
+        res.status(200).json({
+
+            success:true,
+
+            data: result.recordset[0]
+
+        });
 
     }
 
-    catch (err) {
+    catch(err){
 
-        console.log(err);
+        console.error(err);
 
         res.status(500).json({
 
-            success: false,
+            success:false,
 
-            message: err.message
+            message:err.message
 
         });
 
     }
 
 };
-
 exports.getMyApplications = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
-
-        AuthorizationService.ensureAuthenticated(currentUser);
-
-await AuthorizationService.ensureApplicant(currentUser);
-
         const pool = await poolPromise;
 
         const result = await pool.request()
-
-            .input(
-                "EmployeeID",
-                sql.VarChar,
-                currentUser.EmployeeId
-            )
 
             .query(`
 
@@ -516,9 +512,7 @@ ON gh.GuestHouseID = b.GuestHouseID
 
 WHERE
 
-    b.BookedBy = @EmployeeID
-
-    AND b.IsActive = 1
+    b.IsActive = 1
 
 ORDER BY
 
@@ -526,9 +520,14 @@ ORDER BY
 
 `);
 
-        res.json({
+        return res.status(200).json({
+
             success: true,
+
+            count: result.recordset.length,
+
             data: result.recordset
+
         });
 
     }
@@ -537,9 +536,12 @@ ORDER BY
 
         console.error(err);
 
-        res.status(500).json({
+        return res.status(500).json({
+
             success: false,
+
             message: err.message
+
         });
 
     }
@@ -864,47 +866,47 @@ WHERE
         await transaction.commit();
 
         // Notify Applicant
-        try {
+        // try {
 
-            await NotificationService.sendBookingCancelled(
+        //     await NotificationService.sendBookingCancelled(
 
-                currentUser.EmployeeEmail,
+        //         currentUser.EmployeeEmail,
 
-                {
+        //         {
 
-                    EmployeeName: currentUser.EmployeeName,
+        //             EmployeeName: currentUser.EmployeeName,
 
-                    BookingNo: booking.GHRBookingNo,
+        //             BookingNo: booking.GHRBookingNo,
 
-                    GuestName: booking.GuestName,
+        //             GuestName: booking.GuestName,
 
-                    GuestType: booking.GuestTypeName,
+        //             GuestType: booking.GuestTypeName,
 
-                    Purpose: booking.PurposeOfVisit,
+        //             Purpose: booking.PurposeOfVisit,
 
-                    ArrivalDate: formatDate(
-                        booking.ArrivalDateTime
-                    ),
+        //             ArrivalDate: formatDate(
+        //                 booking.ArrivalDateTime
+        //             ),
 
-                    DepartureDate: formatDate(
-                        booking.DepartureDateTime
-                    ),
+        //             DepartureDate: formatDate(
+        //                 booking.DepartureDateTime
+        //             ),
 
-                    CancelledOn: formatDate(new Date()),
+        //             CancelledOn: formatDate(new Date()),
 
-                    Remarks: remarks
+        //             Remarks: remarks
 
-                }
+        //         }
 
-            );
+        //     );
 
-        }
+        // }
 
-        catch (mailError) {
+        // catch (mailError) {
 
-            console.error(mailError);
+        //     console.error(mailError);
 
-        }
+        // }
 
         return res.json({
 

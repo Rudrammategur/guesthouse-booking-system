@@ -32,7 +32,7 @@ import GHInchargeApplicationPage from "./pages/guesthouseIncharge/GHInchargeAppl
 import AdminApplicationPage from "./pages/Admin/AdminApplicationPage";
 import GHProcessedApplicationsPage from "./pages/guesthouseIncharge/GHProcessedApplicationsPage";
 
-
+import FixERPUrl from "./components/FixERPUrl";
 
 import AdminLayout from "./components/Admin/AdminLayout";
 
@@ -51,7 +51,9 @@ import AdminRoomAvailability from "./pages/Admin/AdminRoomAvailability";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/guesthouse">
+      <UserSwitcher />
+      <FixERPUrl /> 
       <Routes>
         <Route path="/" element={<MainDashboard />} />
         <Route path="/my-requests" element={<MyRequests />} />

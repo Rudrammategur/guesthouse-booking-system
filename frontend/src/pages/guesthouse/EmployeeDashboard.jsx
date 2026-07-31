@@ -45,63 +45,83 @@ function EmployeeDashboard() {
     const [cancelLoading, setCancelLoading] = useState(false);
 
     const [activeTab, setActiveTab] = useState("all");
+const [employeeName, setEmployeeName] = useState("");
+const [userInfo, setUserInfo] = useState(null);
 
-    const loadDashboard = useCallback(async () => {
+   const loadDashboard = useCallback(async () => {
 
-        setLoading(true);
+    if (!userInfo) return;
 
-        try {
+    setLoading(true);
 
-            const [
+    try {
 
-                applicationResponse,
+const [
+    applicationResponse,
+    countResponse
+] = await Promise.all([
 
-                countResponse
+    axios.get(
+        `${API_URL}/api/guesthouse/my-applications`
+    ),
 
-            ] = await Promise.all([
+    axios.get(
+        `${API_URL}/api/guesthouse/dashboard-counts`
+    )
 
-                axios.get(
-                    `${API_URL}/api/guesthouse/my-applications`
-                ),
+]);
 
-                axios.get(
-                    `${API_URL}/api/guesthouse/dashboard-counts`
-                )
-
-            ]);
 
             setApplications(
                 applicationResponse.data.data
             );
 
-            setCounts(
-                countResponse.data
-            );
+setCounts(
+    countResponse.data.data || {}
+);
+
+    } catch (err) {
+
+        toast.error(
+            err.response?.data?.message ||
+            "Unable to load dashboard"
+        );
+
+    } finally {
+        setLoading(false);
+    }
+
+}, [userInfo]);
 
 
-        }
+useEffect(() => {
+    let el = null;
 
-        catch (err) {
+    try {
+        el = window.top.document.querySelector("#spnUserName");
+    } catch (e) {}
 
-            toast.error(
+    if (!el?.innerText) {
+        toast.error("Unable to determine logged in user.");
+        return;
+    }
 
-                err.response?.data?.message ||
+    const name = el.innerText.trim();
 
-                "Unable to load dashboard"
+    setEmployeeName(name);
 
-            );
-
-        }
-
-        finally { setLoading(false); }
-
-    }, []);
-
-    useEffect(() => {
-
-        loadDashboard();
-
-    }, [loadDashboard]);
+    axios
+        .get(`${API_URL}/api/user/me`, {
+            params: { name }
+        })
+        .then((res) => {
+            setUserInfo(res.data);
+        })
+        .catch((err) => {
+            console.error(err);
+            toast.error("Unable to fetch employee details.");
+        });
+}, []);
 
     const cancelBooking = async () => {
 
@@ -144,7 +164,11 @@ function EmployeeDashboard() {
         }
 
     };
-
+useEffect(() => {
+    if (userInfo) {
+        loadDashboard();
+    }
+}, [userInfo, loadDashboard]);
     const cards = [
 
         {
@@ -257,23 +281,18 @@ function EmployeeDashboard() {
     ];
 
 
-    const filteredApplications =
-        applications.filter(app => {
+  const filteredApplications =
+    Array.isArray(applications)
+        ? applications.filter(app => {
 
             if (activeTab === "pending") {
 
                 return [
-
                     "Submitted",
-
                     "Verified",
-
                     "Approved",
-
                     "Allocated",
-
                     "Checked In"
-
                 ].includes(app.BookingStatus);
 
             }
@@ -293,18 +312,16 @@ function EmployeeDashboard() {
             if (activeTab === "completed") {
 
                 return [
-
                     "Checked Out",
-
                     "Cancelled"
-
                 ].includes(app.BookingStatus);
 
             }
 
             return true;
 
-        });
+        })
+        : [];
 
 
     return (

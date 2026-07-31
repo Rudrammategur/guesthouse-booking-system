@@ -113,23 +113,44 @@ function GuestHouseForm() {
   const [filePreview, setFilePreview] = useState(draft.uploadedFileUrl || "");
   const [activeSection, setActiveSection] = useState("guest-details");
 
-  useEffect(() => {
-    let active = true;
-    Promise.allSettled([
-      axios.get(`${API_URL}/api/user/current-user`),
-      axios.get(`${API_URL}/api/master/guest-types`),
-      axios.get(`${API_URL}/api/master/guesthouse-types`),
-      axios.get(`${API_URL}/api/expenditure-heads`),
-    ]).then(([user, guests, houses, heads]) => {
-      if (!active) return;
-      if (user.status === "fulfilled") setEmployee(user.value.data);
-      if (guests.status === "fulfilled") setGuestTypes(guests.value.data);
-      if (houses.status === "fulfilled") setGuestHouses(houses.value.data);
-      if (heads.status === "fulfilled") setExpenditureHeads(heads.value.data);
-      setLoadingMasters(false);
-    });
-    return () => { active = false; };
-  }, []);
+useEffect(() => {
+  let active = true;
+
+  let el = null;
+
+  try {
+    el = window.top.document.querySelector("#spnUserName");
+  } catch (e) {}
+
+  const employeeRequest = el?.innerText
+    ? axios.get(`${API_URL}/api/user/me`, {
+        params: { name: el.innerText.trim() },
+      })
+    : Promise.resolve({ data: { success: false } });
+
+  Promise.allSettled([
+    employeeRequest,
+    axios.get(`${API_URL}/api/master/guest-types`),
+    axios.get(`${API_URL}/api/master/guesthouse-types`),
+    axios.get(`${API_URL}/api/expenditure-heads`),
+  ]).then(([user, guests, houses, heads]) => {
+    if (!active) return;
+
+    if (user.status === "fulfilled" && user.value.data.success) {
+      setEmployee(user.value.data.data);
+    }
+
+    if (guests.status === "fulfilled") setGuestTypes(guests.value.data);
+    if (houses.status === "fulfilled") setGuestHouses(houses.value.data);
+    if (heads.status === "fulfilled") setExpenditureHeads(heads.value.data);
+
+    setLoadingMasters(false);
+  });
+
+  return () => {
+    active = false;
+  };
+}, []);
 
   useEffect(() => {
 
@@ -410,9 +431,9 @@ function GuestHouseForm() {
     uploadedFile,
     uploadedFileName: uploadedFile?.name || draft.uploadedFileName || "",
     uploadedFileUrl: filePreview,
-    userId: employee.EmployeeId,
-    EmployeeName: employee.EmployeeName,
-    DepartmentName: employee.DepartmentName,
+ userId: employee.EmployeeId,
+EmployeeName: employee.DisplayName,
+DepartmentName: "",
   });
 
   const validate = () => {
@@ -613,10 +634,15 @@ function GuestHouseForm() {
         <aside className="booking-form-sidebar">
           <div className="applicant-card">
             <span className="sidebar-label">Requesting employee</span>
-            <div className="employee-avatar">{employee.EmployeeName?.charAt(0) || "E"}</div>
-            <h3>{employee.EmployeeName || (loadingMasters ? "Loading…" : "Institute Employee")}</h3>
-            <p>{employee.EmployeeId || "Employee ID"}</p>
-            {employee.DepartmentName && <p>{employee.DepartmentName}</p>}
+            <div className="employee-avatar">
+  {employee.DisplayName?.charAt(0) || "E"}
+</div>
+
+<h3>
+  {employee.DisplayName || (loadingMasters ? "Loading..." : "Institute Employee")}
+</h3>
+
+<p>{employee.EmployeeId || "Employee ID"}</p>
           </div>
           <nav className="form-outline" aria-label="Form sections">
             <a
@@ -870,7 +896,13 @@ function GuestHouseForm() {
             <div><strong>Ready to review?</strong><span>Your request will not be submitted until the next screen.</span></div>
             <button type="button" className="cancel-form-button" onClick={() => navigate("/guesthouse/dashboard")}>Cancel</button>
             <button type="button" className="save-draft-button" onClick={saveDraft}>Save draft</button>
-            <button type="submit" className="preview-button">Review application <span>→</span></button>
+          <button
+  type="button"
+  className="preview-button"
+  onClick={() => navigate("/preview")}
+>
+  Review application <span>→</span>
+</button>
           </footer>
         </form>
       </div>

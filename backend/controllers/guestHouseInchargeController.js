@@ -3,7 +3,7 @@ const { poolPromise } = require("../config/db");
 const {
     getWorkflowHistory,
     changeWorkflowStatus
-} = require("../services/WorkflowService");
+} = require("../services/workflowService");
 
 const {
     getBookingDetails
@@ -12,7 +12,7 @@ const {
 const AuthorizationService = require("../services/AuthorizationService");
 
 const { generateAllocationId } = require("../utils/idGenerator");
-const NotificationService = require("../notifications/notificationService");
+
 const { formatDate } = require("../utils/dateFormater");
 
 exports.getApplications = async (req, res) => {
@@ -1266,59 +1266,43 @@ WHERE
 
         await transaction.commit();
 
-        //-------------------------------------------------------
-        // Notification
-        //-------------------------------------------------------
-
         // try {
 
         //     await NotificationService.sendCheckOut(
 
-        //         booking.EmployeeEmail,
+        //         req.user.EmployeeEmail,
 
         //         {
 
-        //             EmployeeName:
-        //                 booking.EmployeeName,
+        //             EmployeeName: req.user.EmployeeName,
 
-        //             BookingNo:
-        //                 booking.GHRBookingNo,
+        //             BookingNo: data.GHRBookingNo,
 
-        //             GuestName:
-        //                 booking.GuestName,
+        //             GuestName: data.GuestName,
 
-        //             GuestType:
-        //                 booking.GuestTypeName,
+        //             GuestType: data.GuestTypeName,
 
-        //             Purpose:
-        //                 booking.PurposeOfVisit,
+        //             Purpose: data.PurposeOfVisit,
 
-        //             ArrivalDate:
-        //                 formatDate(
-        //                     booking.ArrivalDateTime
-        //                 ),
+        //             ArrivalDate: formatDate(booking.ArrivalDateTime),
 
-        //             DepartureDate:
-        //                 formatDate(
-        //                     booking.DepartureDateTime
-        //                 ),
+        //             DepartureDate: formatDate(booking.DepartureDateTime),
 
-        //             GuestHouse:
-        //                 booking.GuestHouseName,
+        //             GuestHouse: data.GuestHouseName,
 
-        //             RoomNo:
-        //                 booking.RoomNo || "",
+        //             RoomNo: data.RoomNo,
 
-        //             RoomType:
-        //                 booking.RoomTypeName || ""
+        //             RoomType: data.RoomTypeName
 
         //         }
 
         //     );
 
-        // }
+        // } catch (err) {
 
-        // catch (mailError) {
+        //     console.error(err);
+
+        // }
 
         //     console.error(mailError);
 
@@ -1950,61 +1934,43 @@ WHERE
 
         await transaction.commit();
 
-        //-------------------------------------------------------
-        // Notification
-        //-------------------------------------------------------
+        // try {
 
-        try {
+        //     await NotificationService.sendRoomAllocated(
 
-            await NotificationService.sendRoomAllocated(
+        //         req.user.EmployeeEmail,
 
-                booking.EmployeeEmail,
+        //         {
 
-                {
+        //             EmployeeName: req.user.EmployeeName,
 
-                    EmployeeName:
-                        booking.EmployeeName,
+        //             BookingNo: data.GHRBookingNo,
 
-                    BookingNo:
-                        booking.GHRBookingNo,
+        //             GuestName: data.GuestName,
 
-                    GuestName:
-                        booking.GuestName,
+        //             GuestType: data.GuestTypeName,
 
-                    GuestType:
-                        booking.GuestTypeName,
+        //             Purpose: data.PurposeOfVisit,
 
-                    Purpose:
-                        booking.PurposeOfVisit,
+        //             ArrivalDate: formatDate(booking.ArrivalDateTime),
 
-                    ArrivalDate:
-                        formatDate(
-                            booking.ArrivalDateTime
-                        ),
+        //             DepartureDate: formatDate(booking.DepartureDateTime),
 
-                    DepartureDate:
-                        formatDate(
-                            booking.DepartureDateTime
-                        ),
+        //             GuestHouse: data.GuestHouseName,
 
-                    GuestHouse:
-                        booking.GuestHouseName,
+        //             RoomNo: data.RoomNo,
 
-                    RoomNo: "",
+        //             RoomType: data.RoomTypeName
 
-                    RoomType: ""
+        //         }
 
-                }
+        //     );
 
-            );
+        // } catch (err) {
 
-        }
+        //     console.error(err);
 
-        catch (mailError) {
-
-            console.error(mailError);
-
-        }
+        // }
 
         return res.status(200).json({
 
@@ -2210,53 +2176,43 @@ WHERE
 
         await transaction.commit();
 
-        //-------------------------------------------------------
-        // Notification
-        //-------------------------------------------------------
+        // try {
 
-        try {
+        //     await NotificationService.sendCheckIn(
 
-            await NotificationService.sendCheckIn(
+        //         req.user.EmployeeEmail,
 
-                booking.EmployeeEmail,
+        //         {
 
-                {
+        //             EmployeeName: req.user.EmployeeName,
 
-                    EmployeeName: booking.EmployeeName,
+        //             BookingNo: data.GHRBookingNo,
 
-                    BookingNo: booking.GHRBookingNo,
+        //             GuestName: data.GuestName,
 
-                    GuestName: booking.GuestName,
+        //             GuestType: data.GuestTypeName,
 
-                    GuestType: booking.GuestTypeName,
+        //             Purpose: data.PurposeOfVisit,
 
-                    Purpose: booking.PurposeOfVisit,
+        //             ArrivalDate: formatDate(booking.ArrivalDateTime),
 
-                    ArrivalDate: formatDate(
-                        booking.ArrivalDateTime
-                    ),
+        //             DepartureDate: formatDate(booking.DepartureDateTime),
 
-                    DepartureDate: formatDate(
-                        booking.DepartureDateTime
-                    ),
+        //             GuestHouse: data.GuestHouseName,
 
-                    GuestHouse: booking.GuestHouseName,
+        //             RoomNo: data.RoomNo,
 
-                    RoomNo: booking.RoomNo || "",
+        //             RoomType: data.RoomTypeName
 
-                    RoomType: booking.RoomTypeName || ""
+        //         }
 
-                }
+        //     );
 
-            );
+        // } catch (err) {
 
-        }
+        //     console.error(err);
 
-        catch (mailError) {
-
-            console.error(mailError);
-
-        }
+        // }
 
         return res.status(200).json({
 
