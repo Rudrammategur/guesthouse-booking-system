@@ -18,32 +18,25 @@ const AuthorizationService = require("../services/AuthorizationService");
 
 exports.getDashboardCounts = async (req, res) => {
 
-  try {
+    try {
 
-    const currentUser = req.user;
+        const currentUser = req.user;
 
-    // Authentication & Authorization
-    AuthorizationService.ensureAuthenticated(currentUser);
+        // Authentication & Authorization
+        AuthorizationService.ensureAuthenticated(currentUser);
+        await AuthorizationService.ensureApprover(currentUser);
 
-    await AuthorizationService.ensureApprover(currentUser);
+        const pool = await poolPromise;
 
-    const pool = await poolPromise;
+        const result = await pool.request()
 
-    const result = await pool.request()
+            .input(
+                "UserID",
+                sql.BigInt,
+                Number(currentUser.UserId)
+            )
 
-      // .input(
-      //   "UserID",
-      //   sql.VarChar,
-      //   currentUser.UserId.toString()
-      // )
-
-      .input(
-        "AssignedApproverID",
-        sql.VarChar,
-        workflow.approverRoleMapID.toString()
-      )
-
-      .query(`
+            .query(`
 
 SELECT
 
@@ -89,15 +82,17 @@ FROM GuestHouseRoomBookings
 
 WHERE AssignedApproverID IN (
 
-SELECT RoleMapId
+    SELECT RoleMapId
 
-FROM OrgUnitUserMapping
+    FROM Proof..OrgUnitUserMapping
 
-WHERE UserId=@UserID
-
-AND IsActive=1
+    WHERE
+        UserId = @UserID
+        AND IsActive = 1
 
 )
+
+AND IsActive = 1
 
 AND BookingStatus IN
 (
@@ -108,29 +103,29 @@ AND BookingStatus IN
 
 `);
 
-    return res.status(200).json({
+        res.json({
 
-      success: true,
+            success: true,
 
-      data: result.recordset[0]
+            data: result.recordset[0]
 
-    });
+        });
 
-  }
+    }
 
-  catch (err) {
+    catch (err) {
 
-    console.error(err);
+        console.error(err);
 
-    return res.status(500).json({
+        res.status(500).json({
 
-      success: false,
+            success: false,
 
-      message: err.message
+            message: err.message
 
-    });
+        });
 
-  }
+    }
 
 };
 
@@ -320,10 +315,10 @@ exports.getApplications = async (req, res) => {
     const result = await pool.request()
 
       .input(
-        "UserID",
-        sql.VarChar,
-        currentUser.AssignedApproverID.toString()
-      )
+    "UserID",
+    sql.BigInt,
+    Number(currentUser.UserId)
+)
 
       .query(`
 
@@ -358,7 +353,7 @@ WHERE b.AssignedApproverID IN (
 
 SELECT RoleMapId
 
-FROM OrgUnitUserMapping
+FROM Proof..OrgUnitUserMapping
 
 WHERE UserId=@UserID
 

@@ -1,25 +1,48 @@
-.erp-btn{
+.erp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 
-    display:inline-flex;
+    min-height: 42px;
+    padding: 0 18px;
 
-    align-items:center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
 
-    justify-content:center;
+    font-weight: 600;
+    font-size: 14px;
 
-    gap:8px;
+    cursor: pointer;
+    user-select: none;
 
-    border:none;
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease,
+        transform .15s ease,
+        box-shadow .2s ease;
+}
 
-    border-radius:8px;
+.erp-btn:hover:not(:disabled){
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
 
-    cursor:pointer;
+.erp-btn:active:not(:disabled){
+    transform: translateY(0);
+}
 
-    transition:.25s;
+.erp-btn:focus-visible{
+    outline:3px solid rgba(123,31,162,.25);
+    outline-offset:2px;
+}
 
-    font-weight:600;
-
-    white-space:nowrap;
-
+.erp-btn:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+    transform:none;
+    box-shadow:none;
 }
 
 /* Sizes */
@@ -59,27 +82,27 @@
 /* Primary */
 
 .erp-btn-primary{
-
     background:var(--primary);
-
-    color:white;
-
+    color:#fff;
 }
 
 .erp-btn-primary:hover{
 
-    background:var(--primary-dark);
-
+  background:var(--primary-dark);
 }
 
 /* Secondary */
 
 .erp-btn-secondary{
 
-    background:#ECEFF1;
+   background:#fff;
+    color:var(--primary);
+    border:1px solid var(--border);
+}
 
-    color:var(--text);
 
+.erp-btn-secondary:hover{
+    background:#f8f8fc;
 }
 
 /* Success */
@@ -96,8 +119,7 @@
 
 .erp-btn-danger{
 
-    background:var(--danger);
-
+    background:#dc3545;
     color:white;
 
 }
@@ -150,6 +172,11 @@
 
     animation:spin .8s linear infinite;
 
+}
+
+:focus-visible{
+    outline:3px solid rgba(123,31,162,.25);
+    outline-offset:2px;
 }
 
 @keyframes spin{

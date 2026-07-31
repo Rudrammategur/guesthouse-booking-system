@@ -1,0 +1,33 @@
+.erp-table-wrapper{
+
+    overflow-x:auto;
+
+}
+
+.erp-table-search{
+
+    width:320px;
+
+    max-width:100%;
+
+    height:42px;
+
+    margin-bottom:18px;
+
+}
+
+.erp-table{
+
+    min-width:900px;
+
+}
+
+.erp-loading{
+
+    padding:32px;
+
+    text-align:center;
+
+    color:var(--text-light);
+
+}

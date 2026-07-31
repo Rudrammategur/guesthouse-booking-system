@@ -440,57 +440,39 @@ textarea:focus{
 }
 
 .calendar-modal-overlay{
-
     position:fixed;
-
     inset:0;
 
-    background:rgba(0,0,0,.45);
+    z-index:9999;
 
     display:flex;
-
     justify-content:center;
-
     align-items:center;
 
-    z-index:1000;
-
+    background:rgba(0,0,0,.45);
 }
 
 .calendar-modal{
-
     width:95%;
+    max-width:1500px;
+    height:90vh;
 
-    max-width:1400px;
-
-    max-height:90vh;
-
-    overflow:auto;
-
-    background:var(--surface);
-
+    background:#fff;
     border-radius:18px;
 
-    box-shadow:var(--shadow-lg);
-
-    padding:24px;
-
+    display:flex;
+    flex-direction:column;
 }
 
-.calendar-modal-header{
+.calendar-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-    display:flex;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
 
-    justify-content:space-between;
-
-    align-items:center;
-
-    padding-bottom:18px;
-
-    margin-bottom:20px;
-
-    border-bottom:1px solid var(--border);
-
+    flex-shrink: 0;
 }
 
 .calendar-modal-header button{
@@ -533,4 +515,25 @@ textarea:focus{
 
     box-shadow:var(--shadow);
 
+}
+.calendar-modal-body{
+    flex:1;
+    overflow:auto;
+}
+.gh-layout{
+    display:flex;
+    gap:24px;
+    align-items:flex-start;
+}
+
+.gh-content{
+    flex:1;
+    min-width:0;
+}
+.admin-sidebar{
+    width:200px;
+    position:sticky;
+    top:20px;
+    height:fit-content;
+    flex-shrink:0;
 }

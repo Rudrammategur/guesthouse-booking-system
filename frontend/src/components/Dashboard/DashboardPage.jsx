@@ -1,24 +1,43 @@
 import DashboardCards from "./DashboardCards";
 import DashboardTable from "./DashboardTable";
 import "../Dashboard/dashboard.css";
+
 function DashboardPage({
     title,
-    cards,
-    applications,
-    viewRoute
+    subtitle,
+    cards = [],
+    applications = [],
+    viewRoute,
+    actions
 }) {
-
     return (
-
         <div className="dashboard-container">
 
-            <h2 className="dashboard-title">
-                {title}
-            </h2>
+            <div className="dashboard-header">
 
-            <DashboardCards
-                cards={cards}
-            />
+                <div className="dashboard-header-content">
+
+                    <h2 className="dashboard-title">
+                        {title}
+                    </h2>
+
+                    {subtitle && (
+                        <p className="dashboard-subtitle">
+                            {subtitle}
+                        </p>
+                    )}
+
+                </div>
+
+                {actions && (
+                    <div className="dashboard-actions">
+                        {actions}
+                    </div>
+                )}
+
+            </div>
+
+            <DashboardCards cards={cards} />
 
             <div className="table-section">
 
@@ -30,7 +49,6 @@ function DashboardPage({
             </div>
 
         </div>
-
     );
 }
 

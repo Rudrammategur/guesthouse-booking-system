@@ -1,15 +1,15 @@
 const sql = require("mssql");
 const { poolPromise } = require("../config/db");
 const {
-  getWorkflowHistory,
-  changeWorkflowStatus
+    getWorkflowHistory,
+    changeWorkflowStatus
 } = require("../services/WorkflowService");
 
 const {
     getBookingDetails
 } = require("../services/bookingService");
 
-const AuthorizationService = require ("../services/AuthorizationService");
+const AuthorizationService = require("../services/AuthorizationService");
 
 const { getEmployeeById } = require("../services/employeeService");
 const NotificationService = require("../notifications/notificationService");
@@ -85,7 +85,7 @@ WHERE AssignedVerifierID IN (
 
 SELECT RoleMapId
 
-FROM OrgUnitUserMapping
+FROM Proof..OrgUnitUserMapping
 
 WHERE
 
@@ -185,7 +185,7 @@ WHERE b.AssignedVerifierID IN (
 
 SELECT RoleMapId
 
-FROM OrgUnitUserMapping
+FROM Proof..OrgUnitUserMapping
 
 WHERE UserId=@UserID
 
@@ -282,7 +282,7 @@ WHERE b.AssignedVerifierID IN (
 
 SELECT RoleMapId
 
-FROM OrgUnitUserMapping
+FROM Proof..OrgUnitUserMapping
 
 WHERE UserId=@UserID
 
@@ -363,7 +363,13 @@ SELECT
 
     gt.GuestTypeName,
 
-    gh.GuestHouseName
+    gh.GuestHouseName,
+
+    vr.RoleName AS VerifierRole,
+
+    ar.RoleName AS ApproverRole,
+
+    gr.RoleName AS AllocatorRole
 
 FROM GuestHouseRoomBookings b
 
@@ -372,6 +378,31 @@ ON gt.GuestTypeID = b.GuestTypeID
 
 LEFT JOIN GuestHouseMaster gh
 ON gh.GuestHouseID = b.GuestHouseID
+
+
+
+LEFT JOIN Proof..OrgUnitRoleMapping ov
+ON ov.RoleMapID = b.AssignedVerifierID
+
+LEFT JOIN Proof..RoleMaster vr
+ON vr.RoleID = ov.RoleID
+
+
+
+LEFT JOIN Proof..OrgUnitRoleMapping oa
+ON oa.RoleMapID = b.AssignedApproverID
+
+LEFT JOIN Proof..RoleMaster ar
+ON ar.RoleID = oa.RoleID
+
+
+/* Guest House Incharge */
+
+LEFT JOIN Proof..OrgUnitRoleMapping og
+ON og.RoleMapID = b.AssignedAllocatorID
+
+LEFT JOIN Proof..RoleMaster gr
+ON gr.RoleID = og.RoleID
 
 WHERE
 
@@ -398,10 +429,10 @@ WHERE
 
         // Verify Assignment
         AuthorizationService.ensureAssignedRole(
-    booking.AssignedVerifierID,
-    currentUser,
-    "Approver"
-);
+            application.AssignedVerifierID,
+            currentUser,
+            "Approver"
+        );
 
         // Room Requirements
         const roomResult = await pool.request()
@@ -439,6 +470,19 @@ WHERE
                 "GuestHouseBooking",
                 bookingId
             );
+
+        application.AssignedVerifier = {
+            RoleName: application.VerifierRole
+        };
+
+        application.AssignedApprover = {
+            RoleName: application.ApproverRole
+        };
+
+        application.AssignedAllocator = {
+            RoleName: application.AllocatorRole
+        };
+        
 
         application.RoomRequirements =
             roomResult.recordset;
@@ -512,10 +556,10 @@ exports.verifyApplication = async (req, res) => {
 
         // Assignment Validation
         AuthorizationService.ensureAssignedRole(
-    booking.AssignedVerifierID,
-    currentUser,
-    "Approver"
-);
+            booking.AssignedVerifierID,
+            currentUser,
+            "Approver"
+        );
 
         // Status Validation
         AuthorizationService.ensureBookingStatus(
@@ -842,10 +886,10 @@ exports.rejectApplication = async (req, res) => {
 
         // Assignment Validation
         AuthorizationService.ensureAssignedRole(
-    booking.AssignedVerifierID,
-    currentUser,
-    "Approver"
-);
+            booking.AssignedVerifierID,
+            currentUser,
+            "Approver"
+        );
 
         // Status Validation
         AuthorizationService.ensureBookingStatus(

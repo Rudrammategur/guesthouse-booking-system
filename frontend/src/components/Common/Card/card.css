@@ -1,13 +1,25 @@
 .erp-card{
+    background:var(--card-bg);
 
-    background:#fff;
+    border:1px solid var(--border);
 
-    border-radius:16px;
+    border-radius:var(--radius-lg);
 
     padding:24px;
 
     box-shadow:var(--shadow-sm);
 
-    border:1px solid var(--border);
+    transition:
+        box-shadow .25s ease,
+        transform .25s ease;
+}
 
+.erp-card:hover{
+    transform:translateY(-2px);
+    box-shadow:var(--shadow);
+}
+
+:focus-visible{
+    outline:3px solid rgba(123,31,162,.25);
+    outline-offset:2px;
 }

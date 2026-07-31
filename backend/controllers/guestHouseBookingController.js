@@ -584,42 +584,35 @@ exports.getApplicationDetails = async (req, res) => {
 SELECT
 
     b.GHBookingID,
-
     b.GHRBookingNo,
-
     b.GuestName,
-
     gt.GuestTypeName,
-
     b.GuestDesignation,
-
     b.GuestAddress,
-
     b.GuestNationality,
-
     b.GuestContactNo,
-
     b.GuestEmailID,
-
     b.PurposeOfVisit,
-
     b.ArrivalDateTime,
-
     b.DepartureDateTime,
-
     b.BookingStatus,
-
+    b.BookingDateTime,
     gh.GuestHouseName,
-
     b.OccupantsNo,
-
+    b.TotalRoomsReq,
     b.ExpenditureHead,
-
     b.ProjectNo,
-
     b.SplRequests,
+    b.BookedBy,
 
-    b.BookedBy
+    b.AssignedVerifierID,
+    rv.RoleName AS VerifierRole,
+
+    b.AssignedApproverID,
+    ra.RoleName AS ApproverRole,
+
+    b.AssignedAllocatorID,
+    rl.RoleName AS AllocatorRole
 
 FROM GuestHouseRoomBookings b
 
@@ -629,10 +622,27 @@ ON gh.GuestHouseID = b.GuestHouseID
 INNER JOIN GuestTypeMaster gt
 ON gt.GuestTypeID = b.GuestTypeID
 
+LEFT JOIN Proof..OrgUnitRoleMapping ov
+ON ov.RoleMapID = b.AssignedVerifierID
+
+LEFT JOIN Proof..RoleMaster rv
+ON rv.RoleID = ov.RoleID
+
+LEFT JOIN Proof..OrgUnitRoleMapping oa
+ON oa.RoleMapID = b.AssignedApproverID
+
+LEFT JOIN Proof..RoleMaster ra
+ON ra.RoleID = oa.RoleID
+
+LEFT JOIN Proof..OrgUnitRoleMapping ol
+ON ol.RoleMapID = b.AssignedAllocatorID
+
+LEFT JOIN Proof..RoleMaster rl
+ON rl.RoleID = ol.RoleID
+
 WHERE
 
     b.GHBookingID = @BookingID
-
     AND b.IsActive = 1
 
 `),
@@ -685,7 +695,6 @@ WHERE
 
         const booking = applicationResult.recordset[0];
 
-        // Check ownership
         AuthorizationService.ensureApplicantOwner(
             booking,
             currentUser
@@ -707,7 +716,21 @@ WHERE
 
                 },
 
-                application: booking,
+                application: {
+    ...booking,
+
+    AssignedVerifier: {
+        RoleName: booking.VerifierRole
+    },
+
+    AssignedApprover: {
+        RoleName: booking.ApproverRole
+    },
+
+    AssignedAllocator: {
+        RoleName: booking.AllocatorRole
+    }
+},
 
                 roomRequirements: roomResult.recordset,
 

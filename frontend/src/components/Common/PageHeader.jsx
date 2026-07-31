@@ -27,136 +27,133 @@ function PageHeader({
 
     return (
 
-    <div
-        className={`erp-page-header ${
-            hero ? "hero-header" : ""
-        }`}
-    >
+        <header
+            className={`erp-page-header ${hero ? "hero-header" : ""
+                }`}
+        >
 
-        <div className="erp-page-header-left">
-
-            {
-
-                logo &&
-
-                <div className="hero-logo">
-
-                    <img
-                        src={logo}
-                        alt="Logo"
-                    />
-
-                </div>
-
-            }
-
-            {
-
-                showBack && (
-
-                    <button
-
-                        className="erp-back-btn"
-
-                        onClick={onBack}
-
-                    >
-
-                        <FaArrowLeft/>
-
-                    </button>
-
-                )
-
-            }
-
-            <div>
+            <div className="erp-page-header-left">
 
                 {
 
-                    breadcrumbs.length > 0 && (
+                    logo &&
 
-                        <div className="erp-breadcrumb">
+                    <div className="hero-logo">
 
-                            {
+                        <img
+                            src={logo}
+                            alt="IIT Dharwad Logo"
+                            loading="lazy"
+                        />
 
-                                breadcrumbs.map((item,index)=>(
+                    </div>
 
-                                    <span key={index}>
+                }
 
-                                        {item}
+                {
 
-                                        {
+                    showBack && (
 
-                                            index!==breadcrumbs.length-1
-
-                                            &&
-
-                                            " / "
-
-                                        }
-
-                                    </span>
-
-                                ))
-
-                            }
-
-                        </div>
+                        <button
+                            type="button"
+                            className="erp-back-btn"
+                            onClick={onBack}
+                            aria-label="Go Back"
+                        >
+                            <FaArrowLeft />
+                        </button>
 
                     )
 
                 }
 
-                <h1>
+                <div>
 
-                    {title}
+                    {
 
-                </h1>
+                        breadcrumbs.length > 0 && (
 
-                {
+                            <div className="erp-breadcrumb">
 
-                    subtitle &&
+                                {
 
-                    <h3 className="erp-page-subtitle">
+                                    breadcrumbs.map((item, index) => (
 
-                        {subtitle}
+                                        <span key={index}>
 
-                    </h3>
+                                            {item}
 
-                }
+                                            {
 
-                {
+                                                index !== breadcrumbs.length - 1
 
-                    description &&
+                                                &&
 
-                    <p className="erp-page-description">
+                                                " / "
 
-                        {description}
+                                            }
 
-                    </p>
+                                        </span>
 
-                }
+                                    ))
+
+                                }
+
+                            </div>
+
+                        )
+
+                    }
+
+                    <h1>
+
+                        {title}
+
+                    </h1>
+
+                    {
+
+                        subtitle &&
+
+                        <h3 className="erp-page-subtitle">
+
+                            {subtitle}
+
+                        </h3>
+
+                    }
+
+                    {
+
+                        description &&
+
+                        <p className=".erp-page-description">
+
+                            {description}
+
+                        </p>
+
+                    }
+
+                </div>
 
             </div>
 
-        </div>
+            {
 
-        {
+                actions &&
 
-            actions &&
+                <div className="erp-page-header-right">
 
-            <div className="erp-page-header-right">
+                    {actions}
 
-                {actions}
+                </div>
 
-            </div>
+            }
 
-        }
+        </header>
 
-    </div>
-
-);
+    );
 
 }
 

@@ -12,11 +12,15 @@ function ERPFormModal({
 
     onClose,
 
+    size = "md",
+
     saveText = "Save",
 
     cancelText = "Cancel",
 
-    saving = false
+    saving = false,
+
+    showFooter = true
 
 }) {
 
@@ -26,11 +30,20 @@ function ERPFormModal({
 
         <div className="modal-overlay">
 
-            <div className="erp-form-modal">
+            <div className={`erp-form-modal ${size}`}>
 
                 <div className="erp-form-header">
 
                     <h2>{title}</h2>
+
+                    <button
+                        type="button"
+                        className="modal-close-btn"
+                        onClick={onClose}
+                        aria-label="Close"
+                    >
+                        ✕
+                    </button>
 
                 </div>
 
@@ -40,43 +53,28 @@ function ERPFormModal({
 
                 </div>
 
-                <div className="erp-form-footer">
+                {showFooter && (
 
-                    <button
+                    <div className="erp-form-footer">
 
-                        className="cancel-btn"
+                        <button
+                            className="cancel-btn"
+                            onClick={onClose}
+                        >
+                            {cancelText}
+                        </button>
 
-                        onClick={onClose}
+                        <button
+                            className="save-btn"
+                            onClick={onSave}
+                            disabled={saving}
+                        >
+                            {saving ? "Saving..." : saveText}
+                        </button>
 
-                    >
+                    </div>
 
-                        {cancelText}
-
-                    </button>
-
-                    <button
-
-                        className="save-btn"
-
-                        onClick={onSave}
-
-                        disabled={saving}
-
-                    >
-
-                        {
-
-                            saving
-
-                                ? "Saving..."
-
-                                : saveText
-
-                        }
-
-                    </button>
-
-                </div>
+                )}
 
             </div>
 

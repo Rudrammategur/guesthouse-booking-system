@@ -37,7 +37,7 @@ function GHCheckOutDashboard() {
 
             const res = await axios.get(
 
-                `${API_URL}/api/guesthouse-incharge/checkout-applications`
+                `${API_URL}/api/gh-incharge/checkout-applications`
 
             );
 

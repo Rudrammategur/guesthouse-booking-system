@@ -7,17 +7,44 @@
 
 html { scroll-behavior: smooth; }
 
-body {
-  margin: 0;
-  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-  background: #f4f7fb;
-  color: #1e293b;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+body{
+margin:0;
+font-family:var(--font-family);
+background:var(--page-bg);
+color:var(--text);
+line-height:1.5;
+-webkit-font-smoothing:antialiased;
+-moz-osx-font-smoothing:grayscale;
 }
 
-button, input, select, textarea {
-  font-family: inherit;
+button{
+cursor:pointer;
+border:none;
+outline:none;
+transition:all .25s ease;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible{
+outline:3px solid rgba(137,40,143,.25);
+outline-offset:2px;
+}
+
+input,
+select,
+textarea{
+font:inherit;
+}
+
+table{
+border-collapse:collapse;
+width:100%;
+}
+
+*{
+box-sizing:border-box;
 }
 
 a { color: inherit; text-decoration: none; }

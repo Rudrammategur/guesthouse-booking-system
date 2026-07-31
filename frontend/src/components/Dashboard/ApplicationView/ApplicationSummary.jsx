@@ -27,16 +27,16 @@ function ApplicationSummary({ application }) {
             />
 
             <StatCard
-                title="Guest"
+                title="Guest Name"
                 value={application.GuestName}
                 subtitle={application.GuestTypeName}
                 color="info"
             />
 
             <StatCard
-                title="Stay"
+                title="Duration"
                 value={`${stayDays} Day${stayDays > 1 ? "s" : ""}`}
-                subtitle={`${arrival.toLocaleDateString()} - ${departure.toLocaleDateString()}`}
+                subtitle={`${arrival.toLocaleDateString("en-IN")} to ${departure.toLocaleDateString("en-IN")}`}
                 color="warning"
             />
 

@@ -8,6 +8,14 @@ import "../../styles/ghIncharge.css";
 import RoomAvailabilityCalendar from "../../components/Common/RoomAvailabilityCalendar";
 import Button from "../../components/Common/Button/Button";
 
+import ERPPage from "../../components/Common/ERPPage";
+import PageHeader from "../../components/Common/PageHeader";
+import ERPSection from "../../components/Common/ERPSection";
+import ERPTable from "../../components/Common/ERPTable";
+import StatusBadge from "../../components/Common/StatusBadge";
+import logo from "../../assets/iit-dharwad-logo.png";
+import GHInchargeSidebar from "./GHInchargeSidebar";
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
 
 const formatDate = (value) => value
@@ -23,12 +31,16 @@ function GHInchargeDashboard() {
   const [loading, setLoading] = useState(true);
   const [occupancy, setOccupancy] = useState({});
   const [roomAvailability, setRoomAvailability] = useState([]);
+  const [collapsed, setCollapsed] = useState(false);
 
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
     try {
-      const actionRequired = activeTab === "action";
+      const actionRequired =
+        activeTab === "allocation" ||
+        activeTab === "checkin" ||
+        activeTab === "checkout";
       const [
         applicationsResponse,
         countsResponse,
@@ -36,21 +48,21 @@ function GHInchargeDashboard() {
         roomAvailabilityResponse
       ] = await Promise.all([
 
-        axios.get(`${API_URL}/api/guesthouse-incharge/applications`, {
+        axios.get(`${API_URL}/api/gh-incharge/applications`, {
           params: { actionRequired }
         }),
 
-        axios.get(`${API_URL}/api/guesthouse-incharge/dashboard-counts`),
+        axios.get(`${API_URL}/api/gh-incharge/dashboard-counts`),
 
-        axios.get(`${API_URL}/api/guesthouse-incharge/occupancy-summary`),
+        axios.get(`${API_URL}/api/gh-incharge/occupancy-summary`),
 
-        axios.get(`${API_URL}/api/guesthouse-incharge/room-availability`)
+        axios.get(`${API_URL}/api/gh-incharge/room-availability`)
 
       ]);
-      setApplications(applicationsResponse.data);
-      setCounts(countsResponse.data);
-      setOccupancy(occupancyResponse.data);
-      setRoomAvailability(roomAvailabilityResponse.data);
+      setApplications(applicationsResponse.data.data);
+      setCounts(countsResponse.data.data);
+      setOccupancy(occupancyResponse.data.data);
+      setRoomAvailability(roomAvailabilityResponse.data.data);
     } catch (error) {
       toast.error(error.response?.data?.message || "Unable to load applications");
     } finally {
@@ -61,82 +73,128 @@ function GHInchargeDashboard() {
   const filteredApplications = applications.filter(app => {
 
     if (activeFilter === "PendingForRoomAllocation")
-        return app.BookingStatus === "Approved";
+      return app.BookingStatus === "Approved";
 
     if (activeFilter === "PendingForCheckIn")
-        return app.BookingStatus === "Allocated";
+      return app.BookingStatus === "Allocated";
 
     if (activeFilter === "PendingForCheckOut")
-        return app.BookingStatus === "Checked In";
+      return app.BookingStatus === "Checked In";
 
-    if (activeFilter === "CheckedOut")
-        return app.BookingStatus === "Checked Out";
 
     return true;
 
-});
+  });
+
+  const displayedApplications = filteredApplications.filter(app => {
+
+    switch (activeTab) {
+
+      case "allocation":
+        return app.BookingStatus === "Approved";
+
+      case "checkin":
+        return app.BookingStatus === "Allocated";
+
+      case "checkout":
+        return app.BookingStatus === "Checked In";
+
+      default:
+        return true;
+
+    }
+
+  });
 
   useEffect(() => { loadDashboard(); }, [loadDashboard]);
 
   const cards = [
 
     {
-        label: "All Applications",
-        count: counts.TotalApplications ?? applications.length,
-        className: "total-card",
-        active: activeFilter === "All",
-        onClick: () => setActiveFilter("All")
+      label: "All Applications",
+      count: counts.TotalApplications ?? applications.length,
+      className: "total-card",
+      active: activeFilter === "All",
+      onClick: () => setActiveFilter("All")
     },
 
     {
-        label: "Pending For Room Allocation",
-        count: counts.PendingForRoomAllocation ?? 0,
-        active: activeFilter === "PendingForRoomAllocation",
-        onClick: () => setActiveFilter("PendingForRoomAllocation")
+      label: "Pending For Room Allocation",
+      count: counts.PendingForRoomAllocation ?? 0,
+      active: activeFilter === "PendingForRoomAllocation",
+      onClick: () => setActiveFilter("PendingForRoomAllocation")
     },
 
     {
-        label: "Rooms Allocated",
-        count: counts.PendingForCheckIn ?? 0,
-        className: "allocated-card",
-        active: activeFilter === "PendingForCheckIn",
-        onClick: () => setActiveFilter("PendingForCheckIn")
+      label: "Rooms Allocated",
+      count: counts.PendingForCheckIn ?? 0,
+      className: "allocated-card",
+      active: activeFilter === "PendingForCheckIn",
+      onClick: () => setActiveFilter("PendingForCheckIn")
     },
 
     {
-        label: "Checked In",
-        count: counts.PendingForCheckOut ?? 0,
-        className: "checkedin-card",
-        active: activeFilter === "PendingForCheckOut",
-        onClick: () => setActiveFilter("PendingForCheckOut")
-    },
-
-    {
-        label: "Checked Out",
-        count: counts.AllProcessedApplications ?? 0,
-        className: "completed-card",
-        active: activeFilter === "CheckedOut",
-        onClick: () => setActiveFilter("CheckedOut")
+      label: "Checked In",
+      count: counts.PendingForCheckOut ?? 0,
+      className: "checkedin-card",
+      active: activeFilter === "PendingForCheckOut",
+      onClick: () => setActiveFilter("PendingForCheckOut")
     }
 
-];
+  ];
+
+  const columns = [
+
+    {
+      key: "BookingNo",
+      label: "Booking No",
+      render: row => row.GHRBookingNo
+    },
+
+    {
+      key: "GuestName",
+      label: "Guest Name"
+    },
+
+    {
+      key: "GuestHouseName",
+      label: "Guest House"
+    },
+
+    {
+      key: "ArrivalDateTime",
+      label: "Arrival",
+      render: row => formatDate(row.ArrivalDateTime)
+    },
+
+    {
+      key: "DepartureDateTime",
+      label: "Departure",
+      render: row => formatDate(row.DepartureDateTime)
+    },
+
+    {
+      key: "BookingStatus",
+      label: "Status",
+      render: row => (
+        <StatusBadge status={row.BookingStatus} />
+      )
+    }
+
+  ];
 
   const getActionButton = (application) => {
 
     if (application.BookingStatus === "Approved") {
 
       return (
-        <button
-          type="button"
-          className="allocate-btn"
+        <Button
           onClick={() =>
-            navigate(
-              `/guesthouse/allocation/${application.GHBookingID}`
-            )
+            navigate(`/guesthouse/allocation/${application.GHBookingID}`)
           }
         >
           Allocate Room
-        </button>
+        </Button>
       );
 
     }
@@ -144,15 +202,14 @@ function GHInchargeDashboard() {
     if (application.BookingStatus === "Allocated") {
 
       return (
-        <button
-          type="button"
+        <Button
           className="checkin-btn"
           onClick={() =>
             navigate(`/gh-incharge/checkin/${application.GHBookingID}`)
           }
         >
           Check In
-        </button>
+        </Button>
       );
 
     }
@@ -183,7 +240,7 @@ function GHInchargeDashboard() {
           className="receipt-btn"
           onClick={() =>
             navigate(
-              `/guesthouse/receipt/${application.GHBookingID}`
+              `/gh-incharge/receipt/${application.GHBookingID}`
             )
           }
         >
@@ -197,7 +254,7 @@ function GHInchargeDashboard() {
 
     return (
       <Button type="button"
-          className="view-btn"
+        className="view-btn"
 
         onClick={() =>
 
@@ -219,140 +276,134 @@ function GHInchargeDashboard() {
   };
 
   return (
-    <main className="dashboard-container incharge-dashboard">
-      <h2 className="dashboard-title">Guest House Incharge Dashboard</h2>
-      <DashboardCards cards={cards} />
+    <ERPPage>
 
+      <PageHeader
+        hero
+        logo={logo}
+        title="Guest House Management System"
+        subtitle="Guest House Incharge Dashboard"
+        description="Manage room allocation, check-in and check-out."
+      />
+      <div className="gh-layout">
 
-      <section className="table-section">
-        <div
-          className="dashboard-tabs"
-          role="tablist"
-        >
+        <GHInchargeSidebar
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+        />
 
-          <button
-            type="button"
-            className={
-              activeTab === "all"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setActiveTab("all")
-            }
+        <div className="gh-content">
+
+          <DashboardCards cards={cards} />
+
+          <ERPSection
+            title="Applications"
+            subtitle="Allocate rooms, perform check-in/check-out and monitor room availability."
           >
-            All
-          </button>
+            <div
+              className="dashboard-tabs"
+              role="tablist"
+            >
 
-          <button
-            type="button"
-            className={
-              activeTab === "allocation"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setActiveTab("allocation")
-            }
-          >
-            Allocation Queue
-          </button>
+              <button
+                type="button"
+                className={
+                  activeTab === "all"
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  setActiveTab("all")
+                }
+              >
+                All
+              </button>
 
-          <button
-            type="button"
-            className={
-              activeTab === "checkin"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setActiveTab("checkin")
-            }
-          >
-            Check-In Queue
-          </button>
+              <button
+                type="button"
+                className={
+                  activeTab === "allocation"
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  setActiveTab("allocation")
+                }
+              >
+                Allocation Queue
+              </button>
 
-          <button
-            type="button"
-            className={
-              activeTab === "checkout"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setActiveTab("checkout")
-            }
-          >
-            Check-Out Queue
-          </button>
+              <button
+                type="button"
+                className={
+                  activeTab === "checkin"
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  setActiveTab("checkin")
+                }
+              >
+                Check-In Queue
+              </button>
 
-          <button
-            type="button"
-            className={activeTab === "availability" ? "active" : ""}
-            onClick={() => setActiveTab("availability")}
-          >
-            Room Availability
-          </button>
+              <button
+                type="button"
+                className={
+                  activeTab === "checkout"
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  setActiveTab("checkout")
+                }
+              >
+                Check-Out Queue
+              </button>
+
+              <button
+                type="button"
+                className={activeTab === "availability" ? "active" : ""}
+                onClick={() => setActiveTab("availability")}
+              >
+                Room Availability
+              </button>
+
+            </div>
+            <div className="table-scroll">
+
+              {activeTab !== "availability" ? (
+
+                <ERPTable
+                  columns={columns}
+                  data={displayedApplications}
+                  loading={loading}
+                  actions={(row) => getActionButton(row)}
+                />
+
+              ) : (
+
+                <div className="calendar-modal-body">
+                  <RoomAvailabilityCalendar
+                    rooms={roomAvailability}
+                    occupancy={occupancy}
+                    title="Guest House Room Availability"
+                    numberOfDays={15}
+                  />
+                </div>
+
+              )}
+
+            </div>
+          </ERPSection>
 
         </div>
-        <div className="table-scroll">
 
-          {
-            activeTab === "availability"
+      </div>
 
-              ?
 
-              <RoomAvailabilityCalendar
 
-                rooms={roomAvailability}
-
-                occupancy={occupancy}
-
-              />
-
-              :
-              <table className="erp-table">
-                <thead>
-                  <tr>
-                    <th>Booking Number</th>
-                    <th>Guest Name</th>
-                    <th>Guest House</th>
-                    <th>Arrival Date</th>
-                    <th>Departure Date</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {!loading && filteredApplications.map((application) => (
-                    <tr key={application.GHBookingID}>
-                      <td>GH{String(application.GHBookingID).padStart(5, "0")}</td>
-                      <td>{application.GuestName || "-"}</td>
-                      <td>{application.GuestHouseName || "-"}</td>
-                      <td>{formatDate(application.ArrivalDateTime)}</td>
-                      <td>{formatDate(application.DepartureDateTime)}</td>
-                      <td>
-                        <span className={`status-pill status-${application.BookingStatus?.toLowerCase()}`}>
-                          {application.BookingStatus}
-                        </span>
-                      </td>
-                      <td>
-                        {getActionButton(application)}
-                      </td>
-                    </tr>
-                  ))}
-                  {!loading && applications.length === 0 && (
-                    <tr><td className="empty-state" colSpan="7">No applications found.</td></tr>
-                  )}
-                  {loading && (
-                    <tr><td className="empty-state" colSpan="7">Loading applications…</td></tr>
-                  )}
-                </tbody>
-              </table>
-          }
-        </div>
-      </section>
-    </main>
+    </ERPPage>
   );
 }
 

@@ -2,8 +2,8 @@
 :root {
 
   --primary: rgb(137,40,143);
-  --primary-dark: #67207d;
-  --primary-light: #F3E5F5;
+  --primary-dark: rgb(90, 5, 94);
+  --primary-light: #e9d3ec;
 
   --secondary: #8720a1;
 
@@ -23,7 +23,7 @@
   /* Text */
 
   --text: #1c2025;
-  --text-light: #b399ba;
+  --text-light:#89888a;
 
   --ink: #1F2937;
   --ink-2: #334155;
@@ -103,13 +103,25 @@ var(--primary-dark),
 var(--primary)
 );
 
+--card-bg: var(--surface);
+
+--page-bg: var(--bg);
+
+--shadow-md: var(--shadow);
+
+--radius-md: var(--radius);
+
+--button-height:44px;
+
+--input-height:44px;
+
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: var(--font);
+  font-family: var(--font-family);
   background: var(--bg);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
@@ -124,35 +136,30 @@ body {
 }
 
 .card{
+background:var(--card-bg);
+border:1px solid var(--border);
+border-radius:var(--radius-lg);
+box-shadow:var(--shadow-sm);
+transition:all .25s ease;
+}
 
-    background:white;
-
-    border:none;
-
-    border-radius:16px;
-
-    box-shadow:var(--shadow);
-
+.card:hover{
+box-shadow:var(--shadow);
 }
 
 .page-heading{
-
-    margin:0;
-
-    color:var(--primary-dark);
-
-    font-size:28px;
-
-    font-weight:700;
-
+margin:0;
+font-size:30px;
+font-weight:700;
+letter-spacing:-0.5px;
+color:var(--primary-dark);
 }
 
 .page-sub{
-
-    margin-top:6px;
-
-    color:var(--text-light);
-
+margin-top:6px;
+font-size:15px;
+line-height:1.6;
+color:var(--text-light);
 }
 
 /* ── Status pills ───────────────────────────────────── */

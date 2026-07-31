@@ -90,12 +90,12 @@ function GuestHousePreview() {
 
     formData.append(
         "GuestContactNo",
-        data.contact
+        data.mobile
     );
 
     formData.append(
         "GuestEmailID",
-        data.email
+        data.emails
     );
 
     formData.append(
@@ -196,7 +196,7 @@ function GuestHousePreview() {
 
             localStorage.removeItem("guestHouseDraft");
 
-            navigate("/guesthouse/dashboard", {
+            navigate("/dashboard", {
                 replace: true
             });
 
@@ -253,7 +253,7 @@ function GuestHousePreview() {
 
                     <div className="preview-item">
                         <label>Guest Address</label>
-                        <span>{data.GuestAddress}</span>
+                        <span>{data.guestAddress}</span>
                     </div>
 
                     <div className="preview-item">
@@ -405,7 +405,7 @@ function GuestHousePreview() {
 
                 <button
                     className="edit-btn"
-                    onClick={() => navigate("/guesthouse/apply")}
+                    onClick={() => navigate("/apply")}
                 >
                     Edit
                 </button>

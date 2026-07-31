@@ -14,7 +14,8 @@ const {
     getCheckInApplication,
     checkoutGuest,
     getOccupancySummary,
-    getRoomAvailability
+    getRoomAvailability,
+    getProcessedApplications
 } = require("../controllers/guestHouseInchargeController");
 
 router.get("/applications", getApplications);
@@ -44,6 +45,8 @@ router.get("/checkout-applications",getCheckoutApplications);
 router.get("/occupancy-summary", getOccupancySummary);
 
 router.get("/room-availability", getRoomAvailability);
+
+router.get("/processed-applications", getProcessedApplications);
 
   
 module.exports = router;

@@ -16,18 +16,16 @@
 
     box-shadow:var(--shadow-sm);
 
-    transition:.25s;
+    transition:
+    transform .2s ease,
+    box-shadow .2s ease;
 
     min-height:110px;
 
 }
 
 .stat-card:hover{
-
-    transform:translateY(-4px);
-
-    box-shadow:var(--shadow-md);
-
+    transform:translateY(-2px);
 }
 
 .stat-card-left{
@@ -44,7 +42,7 @@
 
     margin:0;
 
-    font-size:13px;
+    font-size:14px;
 
     font-weight:600;
 
@@ -60,7 +58,8 @@
 
     margin:0;
 
-    font-size:28px;
+    font-size:30px;
+    line-height:1.2;
 
     font-weight:700;
 
@@ -78,9 +77,8 @@
 
 .stat-icon{
 
-    width:56px;
-
-    height:56px;
+    width:52px;
+height:52px;
 
     border-radius:50%;
 
@@ -168,6 +166,10 @@
 
     background:var(--secondary);
 
+}
+:focus-visible{
+    outline:3px solid rgba(123,31,162,.25);
+    outline-offset:2px;
 }
 
 @media(max-width:768px){

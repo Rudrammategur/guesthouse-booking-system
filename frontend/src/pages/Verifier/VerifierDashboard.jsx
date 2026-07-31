@@ -1,139 +1,288 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import DashboardPage from "../../components/Dashboard/DashboardPage";
-import VerifierApplicationPage from "./VerifierApplicationPage.jsx";
-import TakeAction from "../../components/Workflow/TakeAction.jsx";
-import "../../styles/verifier.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
+import ERPPage from "../../components/Common/ERPPage";
+import PageHeader from "../../components/Common/PageHeader";
+import ERPSection from "../../components/Common/ERPSection";
+import ERPTable from "../../components/Common/ERPTable";
+import DashboardCards from "../../components/Dashboard/DashboardCards";
+import StatusBadge from "../../components/Common/StatusBadge";
+import Button from "../../components/Common/Button/Button";
+
+import logo from "../../assets/iit-dharwad-logo.png";
+
+const API_URL =
+    import.meta.env.VITE_API_URL ||
+    "http://localhost:9009";
+
+const formatDate = value =>
+    value
+        ? new Date(value).toLocaleString("en-IN", {
+            dateStyle: "medium",
+            timeStyle: "short"
+        })
+        : "-";
 
 function VerifierDashboard() {
 
-  const [applications, setApplications] = useState([]);
-  const [selectedApplication, setSelectedApplication] = useState(null);
-  const [activeFilter, setActiveFilter] = useState("All");
+    const navigate = useNavigate();
 
-  const [counts, setCounts] = useState({});
+    const [applications, setApplications] = useState([]);
 
-  const filteredApplications = applications.filter(app => {
+    const [counts, setCounts] = useState({});
 
-    switch (activeFilter) {
+    const [loading, setLoading] = useState(true);
 
-      case "PendingApplications":
+    const [activeFilter, setActiveFilter] = useState("All");
 
-        return app.BookingStatus === "Submitted";
+    const loadDashboard = useCallback(async () => {
 
-      case "VerifiedApplications":
+        try {
 
-        return app.BookingStatus === "Verified";
+            setLoading(true);
 
-      case "RejectedApplications":
+            const [
 
-        return app.BookingStatus === "Rejected";
+                applicationResponse,
 
-      case "ProcessedApplications":
+                countResponse
 
-        return ["Verified", "Rejected"].includes(app.BookingStatus);
+            ] = await Promise.all([
 
-      case "All":
+                axios.get(
+                    `${API_URL}/api/verifier/applications`
+                ),
 
-      default:
+                axios.get(
+                    `${API_URL}/api/verifier/dashboard-counts`
+                )
 
-        return true;
+            ]);
 
-    }
+            setApplications(applicationResponse.data.data);
 
-  });
+            setCounts(countResponse.data.data);
 
-  const cards = [
+        }
 
-    {
-      label: "All Applications",
-      count: counts.TotalApplications ?? 0,
-      className: "total-card",
-      active: activeFilter === "All",
-      onClick: () => setActiveFilter("All")
-    },
+        catch (err) {
 
-    {
-      label: "Pending Applications",
-      count: counts.PendingApplications ?? 0,
-      className: "pending-card",
-      active: activeFilter === "PendingApplications",
-      onClick: () => setActiveFilter("PendingApplications")
-    },
+            console.error(err);
 
-    {
-      label: "Verified Applications",
-      count: counts.VerifiedApplications ?? 0,
-      className: "verified-card",
-      active: activeFilter === "VerifiedApplications",
-      onClick: () => setActiveFilter("VerifiedApplications")
-    },
+        }
 
-    {
-      label: "Rejected Applications",
-      count: counts.RejectedApplications ?? 0,
-      // className: "rejected-card",
-      active: activeFilter === "RejectedApplications",
-      onClick: () => setActiveFilter("RejectedApplications")
-    },
+        finally {
 
-    {
-      label: "All Processed Applications",
-      count: counts.AllProcessedApplications ?? 0,
-      // className: "processed-card",
-      active: activeFilter === "ProcessedApplications",
-      onClick: () => setActiveFilter("ProcessedApplications")
-    }
+            setLoading(false);
 
-  ];
+        }
 
-  useEffect(() => {
+    }, []);
 
-    fetchApplications();
-    fetchCounts();
+    useEffect(() => {
 
-  }, []);
+        loadDashboard();
 
-  const fetchApplications = async () => {
+    }, [loadDashboard]);
 
-    const res = await axios.get(
+    const cards = [
 
-      `${API_URL}/api/verifier/applications`
+        {
+            label: "All Applications",
+            count: counts.TotalApplications ?? 0,
+            color: "primary",
+            active: activeFilter === "All",
+            onClick: () => setActiveFilter("All")
+        },
+
+        {
+            label: "Pending Applications",
+            count: counts.PendingApplications ?? 0,
+            color: "warning",
+            active: activeFilter === "PendingApplications",
+            onClick: () =>
+                setActiveFilter("PendingApplications")
+        },
+
+        {
+            label: "Verified Applications",
+            count: counts.VerifiedApplications ?? 0,
+            color: "success",
+            active: activeFilter === "VerifiedApplications",
+            onClick: () =>
+                setActiveFilter("VerifiedApplications")
+        },
+
+        {
+            label: "Rejected Applications",
+            count: counts.RejectedApplications ?? 0,
+            color: "danger",
+            active: activeFilter === "RejectedApplications",
+            onClick: () =>
+                setActiveFilter("RejectedApplications")
+        },
+
+        {
+            label: "Processed Applications",
+            count: counts.AllProcessedApplications ?? 0,
+            color: "info",
+            active: activeFilter === "ProcessedApplications",
+            onClick: () =>
+                setActiveFilter("ProcessedApplications")
+        }
+
+    ];
+
+    const filteredApplications =
+        applications.filter(app => {
+
+            switch (activeFilter) {
+
+                case "PendingApplications":
+
+                    return app.BookingStatus === "Submitted";
+
+                case "VerifiedApplications":
+
+                    return app.BookingStatus === "Verified";
+
+                case "RejectedApplications":
+
+                    return app.BookingStatus === "Rejected";
+
+                case "ProcessedApplications":
+
+                    return [
+                        "Verified",
+                        "Rejected"
+                    ].includes(app.BookingStatus);
+
+                default:
+
+                    return true;
+
+            }
+
+        });
+
+    const columns = [
+
+        {
+
+            key: "BookingNo",
+
+            label: "Booking No",
+
+            render: row => row.GHRBookingNo
+
+        },
+
+        {
+
+            key: "GuestName",
+
+            label: "Guest Name"
+
+        },
+
+        {
+
+            key: "GuestHouseName",
+
+            label: "Guest House"
+
+        },
+
+        {
+
+            key: "ArrivalDateTime",
+
+            label: "Arrival",
+
+            render: row =>
+                formatDate(row.ArrivalDateTime)
+
+        },
+
+        {
+
+            key: "DepartureDateTime",
+
+            label: "Departure",
+
+            render: row =>
+                formatDate(row.DepartureDateTime)
+
+        },
+
+        {
+
+            key: "BookingStatus",
+
+            label: "Status",
+
+            render: row =>
+
+                <StatusBadge
+                    status={row.BookingStatus}
+                />
+
+        }
+
+    ];
+
+    return (
+
+        <ERPPage>
+
+            <PageHeader
+
+                hero
+
+                logo={logo}
+
+                title="Guest House Management System"
+
+                subtitle="Verifier Dashboard"
+
+                description="Verify guest house booking applications."
+
+            />
+
+            <DashboardCards cards={cards} />
+
+            <ERPSection title="Applications">
+
+                <ERPTable
+
+                    columns={columns}
+
+                    data={filteredApplications}
+
+                    loading={loading}
+
+                    actions={(row) => (
+
+                        <Button
+                            onClick={() =>
+                                navigate(
+                                    `/verifier/application/${row.GHBookingID}`
+                                )
+                            }
+                        >
+                            View
+                        </Button>
+
+                    )}
+
+                />
+
+            </ERPSection>
+
+        </ERPPage>
 
     );
-
-    setApplications(res.data);
-
-  };
-
-  const fetchCounts = async () => {
-
-    const res = await axios.get(
-      "http://localhost:9009/api/verifier/dashboard-counts"
-    );
-
-    setCounts(res.data);
-
-  };
-
-  useEffect(() => {
-    console.log("selectedApplication", selectedApplication);
-  }, [selectedApplication]);
-
-  return (
-
-
-    <><DashboardPage
-      title="Verifier Dashboard"
-      cards={cards}
-      applications={filteredApplications}
-      viewRoute="/verifier/application"
-    />
-    </>
-
-  );
 
 }
 

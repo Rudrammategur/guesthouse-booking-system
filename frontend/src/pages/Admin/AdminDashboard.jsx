@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 import QuickActions from "../../components/Admin/QuickActions";
-import TodayOperations from "../../components/Admin/TodayOperations";
 import TodayGuests from "../../components/Admin/TodayGuests";
 import ActivityTimeline from "../../components/Admin/ActivityTimeline";
 
@@ -13,6 +12,7 @@ import "../../styles/adminDashboard.css";
 function AdminDashboard() {
 
     const navigate = useNavigate();
+
 
     const API_URL =
         import.meta.env.VITE_API_URL ||
@@ -126,29 +126,41 @@ function AdminDashboard() {
 
     ];
 
+    if (loading) {
+        return (
+            <div className="dashboard-loading">
+                Loading dashboard...
+            </div>
+        );
+    }
+
     return (
 
         <div className="admin-dashboard">
 
-            <DashboardCards cards={cards} />
+            <div className="dashboard-content">
 
-            <div className="dashboard-grid">
+                <DashboardCards cards={cards} />
 
-                <QuickActions />
+                <div className="dashboard-grid">
 
-                <TodayGuests
+                    <QuickActions />
 
-                    arrivals={dashboard.arrivals}
+                    <TodayGuests
 
-                    departures={dashboard.departures}
+                        arrivals={dashboard.arrivals}
 
+                        departures={dashboard.departures}
+
+                    />
+
+                </div>
+
+                <ActivityTimeline
+                    activities={dashboard.activities}
                 />
 
             </div>
-
-            <ActivityTimeline
-                activities={dashboard.activities}
-            />
 
         </div>
     );

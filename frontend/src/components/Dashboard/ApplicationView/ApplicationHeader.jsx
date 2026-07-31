@@ -7,19 +7,19 @@ import StatusBadge from "../../Common/StatusBadge";
 
 import "./ApplicationView.css";
 
-function ApplicationHeader({ application }) {
+function ApplicationHeader({ application , extraActions}) {
 
     const navigate = useNavigate();
 
     const handlePrint = () => {
 
-    navigate(
+        navigate(
 
-        `/print/${application.GHBookingID}`
+            `/print/${application.GHBookingID}`
 
-    );
+        );
 
-};
+    };
 
     return (
 
@@ -32,6 +32,11 @@ function ApplicationHeader({ application }) {
                 <div className="application-header-info">
 
                     <span>
+                        <strong>Applicant :</strong>
+                        {application.ApplicantName}
+                    </span>
+
+                    <span>
 
                         <strong>Booking No :</strong>
 
@@ -41,7 +46,7 @@ function ApplicationHeader({ application }) {
 
                     <span>
 
-                        <strong>Submitted :</strong>
+                        <strong>Submitted On:</strong>
 
                         {new Date(
 
@@ -83,9 +88,11 @@ function ApplicationHeader({ application }) {
 
                     >
 
-                        🖨 Print
+                        Print
 
                     </Button>
+
+                    {extraActions}
 
                 </div>
 

@@ -6,35 +6,43 @@ function ERPSection({
 
     actions,
 
-    children
+    children,
+
+    className = ""
 
 }) {
 
     return (
 
-        <div className="erp-section">
+        <section className={`erp-section ${className}`}>
 
-            {
-
-                (title || actions) &&
+            {(title || actions) && (
 
                 <div className="erp-section-header">
 
-                    <h3>
+                    {title &&
 
-                        {title}
+                        <h2 className="erp-section-title">
 
-                    </h3>
+                            {title}
 
-                    <div>
+                        </h2>
 
-                        {actions}
+                    }
 
-                    </div>
+                    {actions && (
+
+                        <div className="erp-section-actions">
+
+                            {actions}
+
+                        </div>
+
+                    )}
 
                 </div>
 
-            }
+            )}
 
             <div className="erp-section-body">
 
@@ -42,7 +50,7 @@ function ERPSection({
 
             </div>
 
-        </div>
+        </section>
 
     );
 

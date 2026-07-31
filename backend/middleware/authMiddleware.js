@@ -65,13 +65,13 @@ const mockUsers = {
 
     deanRnD: {
 
-        UserId: 205,
+        UserId: 112,
 
-        UserName: "deanrd",
+        UserName: "k.kondepu",
 
         EmployeeId: "EMP005",
 
-        EmployeeName: "Rajesh Mahanand Hegde",
+        EmployeeName: "Koteswararao Kondepu",
 
         EmployeeEmail: "rmtegur218@gmail.com",
 
@@ -79,7 +79,7 @@ const mockUsers = {
 
         Designation: "Dean R&D",
 
-        RoleMapIDs: [201],
+        RoleMapIDs: [158],
 
         IsAuthenticated: true,
 
@@ -115,7 +115,7 @@ const mockUsers = {
 exports.mockLogin = (req, res, next) => {
 
     const loginAs =
-        (req.headers["login-as"] || "applicant");
+        (req.headers["login-as"] || "allocator");
 
     req.user =
         mockUsers[loginAs] ||

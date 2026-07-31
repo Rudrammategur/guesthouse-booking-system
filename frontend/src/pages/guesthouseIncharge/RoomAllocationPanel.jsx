@@ -44,12 +44,15 @@ function RoomAllocationPanel({
 
   }, [application]);
 
-  const selectedRoomDetails = rooms.filter(room =>
+  const roomList = Array.isArray(rooms) ? rooms : [];
+
+  const selectedRoomDetails = roomList.filter(room =>
     selectedRooms.some(
-      selected =>
-        selected.roomId === room.GuestHouseRoomID
+      selected => selected.roomId === room.GuestHouseRoomID
     )
   );
+
+
 
   const changeOccupancy = (roomId, isSingle) => {
 
@@ -78,6 +81,10 @@ function RoomAllocationPanel({
     );
 
   };
+
+  useEffect(() => {
+    console.log(rooms);
+  }, [rooms]);
 
 
   const toggleRoom = (room, maxRooms) => {
@@ -114,7 +121,7 @@ function RoomAllocationPanel({
 
         roomTypeName: room.RoomTypeName,
 
-        // ⭐ Store both rates
+
         singleRate: Number(room.SingleRate),
 
         doubleRate: Number(room.DoubleRate),
@@ -143,7 +150,7 @@ function RoomAllocationPanel({
       0
     );
 
-  }, [selectedRooms,durationDays]);
+  }, [selectedRooms, durationDays]);
 
   const selectedCount = (roomTypeId) => {
 
@@ -188,7 +195,7 @@ function RoomAllocationPanel({
       )}
 
       {isApproved && requirements.map((requirement) => {
-        const matchingRooms = rooms.filter((room) => room.RoomTypeID === requirement.RoomTypeID);
+        const matchingRooms = roomList.filter((room) => room.RoomTypeID === requirement.RoomTypeID);
         const chosen = selectedCount(requirement.RoomTypeID);
         return (
           <section className="allocation-section" key={requirement.RoomTypeID}>

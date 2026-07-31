@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
+import ERPPage from "../../components/Common/ERPPage";
+import Button from "../../components/Common/Button/Button";
+import ERPFormModal from "../../components/Common/Form/ERPFormModal";
 import ApplicationView from "../../components/Dashboard/ApplicationView/ApplicationView";
 import TakeAction from "../../components/Workflow/TakeAction";
-import "../../styles/workflowLayout.css";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
@@ -16,6 +18,15 @@ function ApproverApplicationPage() {
 
     const [application, setApplication] = useState(null);
 
+    const [showActionModal, setShowActionModal] =
+        useState(false);
+
+    useEffect(() => {
+
+        fetchApplication();
+
+    }, [bookingId]);
+
     const fetchApplication = async () => {
 
         try {
@@ -24,7 +35,9 @@ function ApproverApplicationPage() {
                 `${API_URL}/api/approver/application/${bookingId}`
             );
 
-            setApplication(res.data);
+            console.log(res.data);
+
+            setApplication(res.data.data);
 
         }
 
@@ -36,41 +49,67 @@ function ApproverApplicationPage() {
 
     };
 
-    useEffect(() => {
+    if (!application)
 
-        fetchApplication();
-
-    }, [bookingId]);
-
-    if (!application) {
-
-        return <h2>Loading...</h2>;
-
-    }
+        return <h3>Loading...</h3>;
 
     return (
 
-        <div className="workflow-layout">
+        <ERPPage>
 
-            <div className="workflow-left">
+            <ApplicationView
 
-                <ApplicationView
-                    application={application}
-                />
+                application={application}
 
-            </div>
+                extraActions={
 
-            <div className="workflow-right">
+                    <Button
+                        onClick={() =>
+                            setShowActionModal(true)
+                        }
+                    >
+                        Take Action
+                    </Button>
+
+                }
+
+            />
+
+            <ERPFormModal
+
+                open={showActionModal}
+
+                title="Take Action"
+
+                showFooter={false}
+
+                onClose={() =>
+                    setShowActionModal(false)
+                }
+
+            >
 
                 <TakeAction
+
                     application={application}
+
                     actionType="Approver"
-                    onSuccess={fetchApplication}
+
+                    showHeader={false}
+
+                    onSuccess={() => {
+
+                        setShowActionModal(false);
+
+                        fetchApplication();
+
+                    }}
+
                 />
 
-            </div>
+            </ERPFormModal>
 
-        </div>
+        </ERPPage>
 
     );
 

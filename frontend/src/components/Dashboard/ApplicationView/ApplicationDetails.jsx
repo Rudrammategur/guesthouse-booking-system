@@ -11,31 +11,6 @@ function ApplicationDetails({ application }) {
         <>
             <div className="application-details">
 
-                {/* Booking Summary */}
-
-                <InfoCard
-                    className="full-width"
-                    title={`Booking #${application.GHRBookingNo}`}
-                    subtitle={`Submitted by ${application.BookedBy}`}
-                    actions={
-                        <StatusBadge
-                            status={application.BookingStatus}
-                        />
-                    }
-                >
-
-                    <InfoRow
-                        label="Booking Date"
-                        value={new Date(application.BookingDateTime).toLocaleString()}
-                    />
-
-                    <InfoRow
-                        label="Booking Status"
-                        value={application.BookingStatus}
-                    />
-
-                </InfoCard>
-
 
                 {/* Guest Information */}
 
@@ -49,7 +24,7 @@ function ApplicationDetails({ application }) {
 
                     <InfoRow label="Designation" value={application.GuestDesignation} />
 
-                    <InfoRow label="Relationship" value={application.GuestRelationship} />
+                    {/* <InfoRow label="Relationship" value={application.GuestRelationship} /> */}
 
                     <InfoRow label="Nationality" value={application.GuestNationality} />
 
@@ -113,7 +88,7 @@ function ApplicationDetails({ application }) {
 
                     <InfoRow
                         label="Project Number"
-                        value={application.ProjectNo}
+                        value={application.ProjectNo || "-"}
                     />
 
                 </InfoCard>
@@ -128,17 +103,17 @@ function ApplicationDetails({ application }) {
 
                     <InfoRow
                         label="Verifier"
-                        value={`${application.AssignedVerifier?.EmployeeName || "-"} (${application.AssignedVerifier?.EmployeeId || "-"})`}
+                        value={application.AssignedVerifier?.RoleName || "-"}
                     />
 
                     <InfoRow
                         label="Approver"
-                        value={`${application.AssignedApprover?.EmployeeName || "-"} (${application.AssignedApprover?.EmployeeId || "-"})`}
+                        value={application.AssignedApprover?.RoleName || "-"}
                     />
 
                     <InfoRow
                         label="GH Incharge"
-                        value={`${application.AssignedAllocator?.EmployeeName || "-"} (${application.AssignedAllocator?.EmployeeId || "-"})`}
+                        value={application.AssignedAllocator?.RoleName || "-"}
                     />
 
                 </InfoCard>
@@ -164,7 +139,7 @@ function ApplicationDetails({ application }) {
                                 label: "Rooms"
                             }
                         ]}
-                        data={application.RoomRequirements || []}
+                        data={application.RoomRequirements ?? []}
                     />
 
                 </InfoCard>
@@ -184,7 +159,7 @@ function ApplicationDetails({ application }) {
                             <Button
                                 onClick={() =>
                                     window.open(
-                                        `http://localhost:9009/api/verifier/document/${application.GHBookingID}`,
+                                        `${API_URL}/api/verifier/document/${application.GHBookingID}`,
                                         "_blank"
                                     )
                                 }
@@ -196,17 +171,15 @@ function ApplicationDetails({ application }) {
 
                             :
 
-                            <p>
-
-                                No supporting document uploaded.
-
+                            <p className="text-muted">
+                                No supporting document available.
                             </p>
 
                     }
 
                 </InfoCard>
 
-            </div>
+            </div >
         </>
 
     );

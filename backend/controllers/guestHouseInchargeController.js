@@ -100,8 +100,7 @@ AND b.BookingStatus IN
 (
     'Approved',
     'Allocated',
-    'Checked In',
-    'Checked Out'
+    'Checked In'
 )
 
 `;
@@ -793,7 +792,7 @@ LEFT JOIN GuestHouseRoomMaster r
 
 ON a.AllocatedRoom = r.GHRMID
 
-WHERE b.GHBookingID='@GHBookingID'
+WHERE b.GHBookingID = @BookingID
 
 GROUP BY
 
@@ -1271,59 +1270,59 @@ WHERE
         // Notification
         //-------------------------------------------------------
 
-        try {
+        // try {
 
-            await NotificationService.sendCheckOut(
+        //     await NotificationService.sendCheckOut(
 
-                booking.EmployeeEmail,
+        //         booking.EmployeeEmail,
 
-                {
+        //         {
 
-                    EmployeeName:
-                        booking.EmployeeName,
+        //             EmployeeName:
+        //                 booking.EmployeeName,
 
-                    BookingNo:
-                        booking.GHRBookingNo,
+        //             BookingNo:
+        //                 booking.GHRBookingNo,
 
-                    GuestName:
-                        booking.GuestName,
+        //             GuestName:
+        //                 booking.GuestName,
 
-                    GuestType:
-                        booking.GuestTypeName,
+        //             GuestType:
+        //                 booking.GuestTypeName,
 
-                    Purpose:
-                        booking.PurposeOfVisit,
+        //             Purpose:
+        //                 booking.PurposeOfVisit,
 
-                    ArrivalDate:
-                        formatDate(
-                            booking.ArrivalDateTime
-                        ),
+        //             ArrivalDate:
+        //                 formatDate(
+        //                     booking.ArrivalDateTime
+        //                 ),
 
-                    DepartureDate:
-                        formatDate(
-                            booking.DepartureDateTime
-                        ),
+        //             DepartureDate:
+        //                 formatDate(
+        //                     booking.DepartureDateTime
+        //                 ),
 
-                    GuestHouse:
-                        booking.GuestHouseName,
+        //             GuestHouse:
+        //                 booking.GuestHouseName,
 
-                    RoomNo:
-                        booking.RoomNo || "",
+        //             RoomNo:
+        //                 booking.RoomNo || "",
 
-                    RoomType:
-                        booking.RoomTypeName || ""
+        //             RoomType:
+        //                 booking.RoomTypeName || ""
 
-                }
+        //         }
 
-            );
+        //     );
 
-        }
+        // }
 
-        catch (mailError) {
+        // catch (mailError) {
 
-            console.error(mailError);
+        //     console.error(mailError);
 
-        }
+        // }
 
         return res.status(200).json({
 
@@ -2503,6 +2502,8 @@ AND A.AllocationStatus IN
 
 LEFT JOIN GuestHouseRoomBookings B
 ON B.GHBookingID = A.GHBookingID
+AND B.ArrivalDateTime <= DATEADD(MONTH,6,GETDATE())
+AND B.DepartureDateTime >= DATEADD(MONTH,-1,GETDATE())
 
 WHERE
 
@@ -2586,6 +2587,132 @@ ORDER BY
             count: Object.keys(rooms).length,
 
             data: Object.values(rooms)
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        return res.status(500).json({
+
+            success: false,
+
+            message: err.message
+
+        });
+
+    }
+
+};
+
+exports.getProcessedApplications = async (req, res) => {
+
+    try {
+
+        const currentUser = req.user;
+
+        // Authentication
+        AuthorizationService.ensureAuthenticated(currentUser);
+
+        // Authorization
+        await AuthorizationService.ensureAllocator(currentUser);
+
+        const pool = await poolPromise;
+
+        const result = await pool.request()
+
+            .input(
+                "UserID",
+                sql.BigInt,
+                Number(currentUser.UserId)
+            )
+
+            .query(`
+
+SELECT
+
+    B.GHBookingID,
+
+    B.GHRBookingNo,
+
+    B.GuestName,
+
+    GT.GuestTypeName,
+
+    GH.GuestHouseName,
+
+    B.ArrivalDateTime,
+
+    B.DepartureDateTime,
+
+    B.TotalPayableAmount,
+
+    B.BookingStatus,
+
+    MAX(A.CheckOutDateTime) AS CheckOutDateTime
+
+FROM GuestHouseRoomBookings B
+
+LEFT JOIN GuestHouseMaster GH
+ON LTRIM(RTRIM(B.GuestHouseID)) =
+   LTRIM(RTRIM(GH.GuestHouseID))
+
+LEFT JOIN GuestTypeMaster GT
+ON LTRIM(RTRIM(B.GuestTypeID)) =
+   LTRIM(RTRIM(GT.GuestTypeID))
+
+LEFT JOIN GuestHouseRoomAllocation A
+ON A.GHBookingID = B.GHBookingID
+
+WHERE
+
+    B.IsActive = 1
+
+    AND B.BookingStatus = 'Checked Out'
+
+    AND B.AssignedAllocatorID IN
+    (
+        SELECT CAST(RoleMapId AS VARCHAR(20))
+        FROM Proof..OrgUnitUserMapping
+        WHERE
+            UserId = @UserID
+            AND IsActive = 1
+    )
+
+GROUP BY
+
+    B.GHBookingID,
+
+    B.GHRBookingNo,
+
+    B.GuestName,
+
+    GT.GuestTypeName,
+
+    GH.GuestHouseName,
+
+    B.ArrivalDateTime,
+
+    B.DepartureDateTime,
+
+    B.TotalPayableAmount,
+
+    B.BookingStatus
+
+ORDER BY
+
+    MAX(A.CheckOutDateTime) DESC
+
+`);
+
+        return res.status(200).json({
+
+            success: true,
+
+            data: result.recordset
 
         });
 

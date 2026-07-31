@@ -66,8 +66,6 @@ function StatusBadge({
 
                 status-${getClassName()}
 
-                status-${size}
-
             `}
 
         >

@@ -1,278 +1,210 @@
-/* ==========================================================
-   Room Calendar
-========================================================== */
+/* =====================================================
+   Room Availability Calendar
+===================================================== */
 
-.calendar-container{
+.room-calendar{
 
-    background:var(--surface);
+    display:flex;
 
-    border:1px solid var(--border);
+    flex-direction:column;
 
-    border-radius:18px;
-
-    padding:24px;
-
-    box-shadow:var(--shadow);
-
-    overflow:auto;
+    gap:22px;
 
 }
 
+/* =====================================================
+   Header
+===================================================== */
 
-/* ==========================================================
-   Calendar Table
-========================================================== */
+.calendar-header{
 
-.calendar-table{
+    display:flex;
 
-    width:100%;
+    justify-content:space-between;
 
-    border-collapse:collapse;
+    align-items:center;
 
-    min-width:900px;
+    flex-wrap:wrap;
 
-}
-
-.calendar-table th{
-
-    background:linear-gradient(
-        135deg,
-        var(--primary-dark),
-        var(--primary)
-    );
-
-    color:#fff;
-
-    padding:12px;
-
-    font-size:13px;
-
-    font-weight:600;
-
-    border:1px solid rgba(255,255,255,.12);
-
-    white-space:nowrap;
+    gap:20px;
 
 }
 
-.calendar-table td{
+.calendar-header h2{
 
-    width:44px;
+    margin:0;
 
-    height:44px;
+    color:var(--primary-dark);
 
-    text-align:center;
+    font-size:24px;
 
-    vertical-align:middle;
+}
 
-    border:1px solid var(--border);
+.calendar-header p{
+
+    margin-top:6px;
+
+    color:#64748b;
+
+    font-size:14px;
+
+}
+
+/* =====================================================
+   Navigation
+===================================================== */
+
+.calendar-navigation{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+}
+
+.calendar-navigation button{
+
+    width:38px;
+
+    height:38px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#f1f5f9;
+
+    cursor:pointer;
 
     transition:.2s;
 
 }
 
+.calendar-navigation button:hover{
 
-/* ==========================================================
-   Room Name
-========================================================== */
-
-.room-name{
-
-    font-weight:600;
-
-    color:var(--primary-dark);
-
-    background:#faf5ff;
-
-    cursor:pointer;
-
-    white-space:nowrap;
+    background:#e2e8f0;
 
 }
 
-.room-name:hover{
+.calendar-navigation button:disabled{
 
-    background:var(--primary-light);
+    opacity:.35;
 
-}
-
-
-/* ==========================================================
-   Calendar Cell
-========================================================== */
-
-.calendar-cell{
-
-    width:42px;
-
-    height:42px;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    border-radius:10px;
-
-    transition:.25s;
+    cursor:not-allowed;
 
 }
 
-.calendar-cell:hover{
+.calendar-navigation span{
 
-    transform:scale(1.08);
+    min-width:180px;
 
-    box-shadow:var(--shadow-sm);
-
-    cursor:pointer;
-
-}
-
-
-/* ==========================================================
-   Selected Cell
-========================================================== */
-
-.selected{
-
-    background:var(--primary-light);
-
-    border:2px solid var(--primary);
-
-}
-
-
-/* ==========================================================
-   Availability
-========================================================== */
-
-.available{
-
-    background:#f9fafb;
-
-}
-
-.occupied{
-
-    background:#fee2e2;
-
-    color:var(--danger);
+    text-align:center;
 
     font-weight:700;
 
+    color:#334155;
+
 }
 
+/* =====================================================
+   Summary
+===================================================== */
 
-/* ==========================================================
-   Booking Status
-========================================================== */
+.calendar-summary{
 
-.status-available{
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:18px;
+
+}
+
+.summary-card{
 
     background:#ffffff;
 
-}
+    border:1px solid #e2e8f0;
 
-.status-submitted{
+    border-radius:14px;
 
-    background:#fef3c7;
+    padding:18px;
 
-    color:#92400e;
-
-}
-
-.status-verified{
-
-    background:#dbeafe;
-
-    color:#1d4ed8;
+    text-align:center;
 
 }
 
-.status-approved{
+.summary-card span{
 
-    background:#dcfce7;
+    display:block;
 
-    color:#15803d;
+    color:#64748b;
 
-}
-
-.status-allocated{
-
-    background:#ede9fe;
-
-    color:#7c3aed;
+    font-size:13px;
 
 }
 
-.status-checkedin{
+.summary-card h3{
 
-    background:#16a34a;
+    margin-top:8px;
 
-    color:white;
+    margin-bottom:0;
 
-}
+    font-size:28px;
 
-.status-checkedout{
-
-    background:#94a3b8;
-
-    color:white;
+    color:#1e293b;
 
 }
 
-.status-cancelled{
+/* =====================================================
+   Toolbar
+===================================================== */
 
-    background:#fee2e2;
+.calendar-toolbar{
 
-    color:#b91c1c;
+    display:flex;
 
-}
+    gap:15px;
 
-.status-rejected{
-
-    background:#fecaca;
-
-    color:#991b1b;
+    flex-wrap:wrap;
 
 }
 
-.status-maintenance{
+.calendar-toolbar input,
 
-    background:#475569;
+.calendar-toolbar select{
 
-    color:white;
+    padding:10px 14px;
 
-}
+    border:1px solid #d1d5db;
 
+    border-radius:10px;
 
-/* ==========================================================
-   Room Calendar Wrapper
-========================================================== */
+    font-size:14px;
 
-.room-calendar{
-
-    width:100%;
-
-    overflow-x:auto;
+    background:white;
 
 }
 
+.calendar-toolbar input{
 
-/* ==========================================================
+    min-width:250px;
+
+}
+
+/* =====================================================
    Legend
-========================================================== */
+===================================================== */
 
 .calendar-legend{
 
     display:flex;
 
-    flex-wrap:wrap;
+    gap:25px;
 
-    gap:16px;
-
-    margin-bottom:20px;
+    align-items:center;
 
 }
 
@@ -284,62 +216,318 @@
 
     gap:8px;
 
-    font-size:13px;
+    color:#475569;
 
-    color:var(--text-light);
-
-}
-
-.legend-color{
-
-    width:18px;
-
-    height:18px;
-
-    border-radius:5px;
-
-    border:1px solid var(--border);
+    font-size:14px;
 
 }
 
+.legend-box{
 
-/* ==========================================================
+    width:16px;
+
+    height:16px;
+
+    border-radius:4px;
+
+}
+
+.available-box{
+
+    background:#f8fafc;
+
+    border:1px solid #cbd5e1;
+
+}
+
+.occupied-box{
+
+    background:#dbeafe;
+
+    border:1px solid #93c5fd;
+
+}
+
+/* =====================================================
+   Month Tabs
+===================================================== */
+
+.month-tabs{
+
+    display:flex;
+
+    gap:10px;
+
+    flex-wrap:wrap;
+
+}
+
+.month-tabs button{
+
+    border:none;
+
+    padding:8px 16px;
+
+    border-radius:999px;
+
+    background:#f8fafc;
+
+    color:#475569;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.month-tabs button:hover{
+
+    background:#eef2ff;
+
+}
+
+.month-tabs button.active{
+
+    background:var(--primary);
+
+    color:white;
+
+}
+
+/* =====================================================
+   Calendar Table
+===================================================== */
+
+.calendar-table-wrapper{
+
+    overflow:auto;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:16px;
+
+}
+
+.calendar-table{
+
+    width:max-content;
+
+    border-collapse:collapse;
+
+    background:white;
+
+}
+
+.calendar-table th{
+
+    position:sticky;
+
+    top:0;
+
+    background:#f8fafc;
+
+    color:#334155;
+
+    font-size:12px;
+
+    font-weight:700;
+
+    text-align:center;
+
+    border-bottom:1px solid #e2e8f0;
+
+    border-right:1px solid #e2e8f0;
+
+    padding:10px;
+
+    min-width:42px;
+
+    z-index:10;
+
+}
+
+.calendar-table td{
+
+    width:42px;
+
+    height:42px;
+
+    border-right:1px solid #f1f5f9;
+
+    border-bottom:1px solid #f1f5f9;
+
+    text-align:center;
+
+    transition:.2s;
+
+}
+
+.calendar-table tbody tr:hover{
+
+    background:#fafafa;
+
+}
+
+/* =====================================================
+   Sticky Columns
+===================================================== */
+
+.sticky-column{
+
+    position:sticky;
+
+    left:0;
+
+    background:white !important;
+
+    z-index:20;
+
+    min-width:90px !important;
+
+    text-align:left !important;
+
+}
+
+.sticky-type{
+
+    position:sticky;
+
+    left:90px;
+
+    background:white !important;
+
+    z-index:20;
+
+    min-width:110px !important;
+
+    text-align:left !important;
+
+}
+
+.room-number{
+
+    font-weight:700;
+
+    color:#1e293b;
+
+}
+
+.room-type{
+
+    color:#64748b;
+
+}
+
+/* =====================================================
+   Booking Cells
+===================================================== */
+
+.available{
+
+    background:#ffffff;
+
+}
+
+.available:hover{
+
+    background:#f8fafc;
+
+}
+
+.occupied{
+
+    background:#eef6ff;
+
+    cursor:pointer;
+
+}
+
+.occupied:hover{
+
+    background:#dbeafe;
+
+}
+
+.booking-dot{
+
+    width:10px;
+
+    height:10px;
+
+    background:#3b82f6;
+
+    border-radius:50%;
+
+    margin:auto;
+
+}
+
+/* =====================================================
+   Weekends
+===================================================== */
+
+.calendar-table th:nth-child(8),
+.calendar-table th:nth-child(9){
+
+    background:#f1f5f9;
+
+}
+
+/* =====================================================
+   Scrollbar
+===================================================== */
+
+.calendar-table-wrapper::-webkit-scrollbar{
+
+    height:10px;
+
+}
+
+.calendar-table-wrapper::-webkit-scrollbar-thumb{
+
+    background:#cbd5e1;
+
+    border-radius:999px;
+
+}
+
+.calendar-table-wrapper::-webkit-scrollbar-track{
+
+    background:#f8fafc;
+
+}
+
+/* =====================================================
    Responsive
-========================================================== */
+===================================================== */
 
-@media(max-width:992px){
+@media(max-width:900px){
 
-    .calendar-container{
+    .calendar-summary{
 
-        padding:16px;
-
-    }
-
-}
-
-@media(max-width:768px){
-
-    .calendar-table{
-
-        min-width:700px;
+        grid-template-columns:1fr;
 
     }
 
-    .calendar-cell{
+    .calendar-header{
 
-        width:36px;
+        flex-direction:column;
 
-        height:36px;
-
-        font-size:12px;
+        align-items:flex-start;
 
     }
 
-    .calendar-table td{
+    .calendar-toolbar{
 
-        width:38px;
+        flex-direction:column;
 
-        height:38px;
+    }
+
+    .calendar-toolbar input{
+
+        width:100%;
+
+        min-width:unset;
 
     }
 

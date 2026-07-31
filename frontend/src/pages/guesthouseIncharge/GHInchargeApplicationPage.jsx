@@ -26,10 +26,10 @@ function GHInchargeApplicationPage() {
         try {
 
             const res = await axios.get(
-                `${API_URL}/api/guesthouse-incharge/applications/${bookingId}`
+                `${API_URL}/api/gh-incharge/applications/${bookingId}`
             );
 
-            setApplication(res.data);
+            setApplication(res.data.data);
 
         }
 
@@ -46,19 +46,9 @@ function GHInchargeApplicationPage() {
         return <h2>Loading...</h2>;
 
     return (
-
-        <div className="workflow-layout">
-
-            <div className="workflow-left">
-
                 <ApplicationView
                     application={application}
                 />
-
-            </div>
-
-        </div>
-
     );
 
 }

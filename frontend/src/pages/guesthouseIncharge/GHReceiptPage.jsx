@@ -26,7 +26,7 @@ function GHReceiptPage() {
 
             const response = await axios.get(
 
-                `${API_URL}/api/guesthouse-incharge/receipt/${bookingId}`
+                `${API_URL}/api/gh-incharge/receipt/${bookingId}`
 
             );
 

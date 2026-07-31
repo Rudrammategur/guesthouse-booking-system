@@ -244,65 +244,35 @@
 }
 
 .workflow-status{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
 
-    padding:5px 12px;
+    min-width:100px;
+    padding:6px 14px;
 
-    border-radius:20px;
+    border-radius:999px;
 
-    color:white;
+    background:#f8f9fa;
+    border:1px solid #dee2e6;
+
+    color:#495057;
 
     font-size:13px;
-
     font-weight:600;
-
 }
 
-.status-submitted{
-
-    background:#f9dc98;
-
-}
-
-.status-verified{
-
-    background:#a5daf3;
-
-}
-
-.status-approved{
-
-    background:#aaf5ad;
-
-}
-
-.status-allocated{
-
-    background:#dfd2f5;
-
-}
-
-.status-checkedin{
-
-    background:#bcefea;
-
-}
-
-.status-checkedout{
-
-    background:#a6cadb;
-
-}
-
-.status-rejected{
-
-    background:#ee7674;
-
-}
-
+.status-submitted,
+.status-verified,
+.status-approved,
+.status-allocated,
+.status-checkedin,
+.status-checkedout,
+.status-rejected,
 .status-cancelled{
-
-    background:#8f7870;
-
+    background:inherit;
+    color:inherit;
+    border:inherit;
 }
 
 .timeline-btn{

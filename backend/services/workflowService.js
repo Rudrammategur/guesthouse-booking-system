@@ -260,16 +260,21 @@ AND
 
 `);
 
+
+
     const nextSequenceNo =
         sequenceResult.recordset[0].NextSequenceNo;
+
+    const workflowHistoryId =
+        await generateWorkflowHistoryId(transaction);
 
     await new sql.Request(transaction)
 
         .input(
-            "WorkflowHistoryID",
-            sql.VarChar,
-            generateWorkflowHistoryId()
-        )
+    "WorkflowHistoryID",
+    sql.VarChar(20),
+    workflowHistoryId
+)
 
         .input(
             "ModuleName",

@@ -11,6 +11,9 @@ import { toast } from "react-toastify";
 import ERPSelectField from "../../components/Common/Form/ERPSelectField";
 import ERPFormField from "../../components/Common/Form/ERPFormField";
 import ERPTextArea from "../../components/Common/Form/ERPTextArea";
+import ERPPage from "../../components/Common/ERPPage";
+import ERPFormModal from "../../components/Common/Form/ERPFormModal";
+import CheckInPanel from "./CheckInPanel";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
 
@@ -20,6 +23,7 @@ function GHCheckInPage() {
     const navigate = useNavigate();
 
     const { bookingId } = useParams();
+    const [showCheckIn, setShowCheckIn] = useState(false);
 
     const addOccupant = () => {
 
@@ -79,11 +83,11 @@ function GHCheckInPage() {
 
         const res = await axios.get(
 
-            `${API_URL}/api/guesthouse-incharge/checkin/${bookingId}`
+            `${API_URL}/api/gh-incharge/checkin/${bookingId}`
 
         );
 
-        setApplication(res.data);
+        setApplication(res.data.data);
 
     };
 
@@ -150,7 +154,7 @@ function GHCheckInPage() {
 
             await axios.post(
 
-                `${API_URL}/api/guesthouse-incharge/checkin/${bookingId}`,
+                `${API_URL}/api/gh-incharge/checkin/${bookingId}`,
 
                 formData,
 
@@ -240,346 +244,40 @@ function GHCheckInPage() {
 
 
     return (
-        <div className="checkin-container">
 
-            <PageHeader
-                title="Guest Check-In"
-                subtitle={`Booking No : ${application.GHRBookingNo}`}
-                actions={
-                    <Button
-                        variant="outline"
-                        onClick={() => navigate(-1)}
-                    >
-                        ← Back
-                    </Button>
-                }
-            />
-
-            {/* Summary Cards */}
-            <ApplicationSummary application={application} />
-
-            {/* Workspace */}
-
-            <div className="workflow-layout">
-
-                {/* LEFT PANEL */}
-
-                <div className="workflow-left">
+                <ERPPage>
 
                     <ApplicationView
                         application={application}
-                        hideHeader
-                        hideSummary
+                        extraActions={
+                            <Button
+                                onClick={() => setShowCheckIn(true)}
+                            >
+                                Check-In
+                            </Button>
+                        }
                     />
-                </div>
 
-                {/* RIGHT PANEL */}
-
-                <div className="workflow-right">
-
-                    <InfoCard title="Guest Check-In">
-
-                        {/* Primary Guest */}
-
-                        <div className="section-block">
-
-                            <h4>Primary Guest Verification</h4>
-
-                            <ERPSelectField
-                                label="Proof Type"
-                                value={primaryGuest.proofType}
-                                onChange={(e) =>
-                                    setPrimaryGuest({
-                                        ...primaryGuest,
-                                        proofType: e.target.value
-                                    })
-                                }
-                                options={proofTypes}
-                            />
-
-                            <ERPFormField
-                                label="Proof Number"
-                                value={primaryGuest.proofNumber}
-                                onChange={(e) =>
-                                    setPrimaryGuest({
-                                        ...primaryGuest,
-                                        proofNumber: e.target.value
-                                    })
-                                }
-                            />
-
-                            <div className="full-width">
-
-                                <label>Upload Proof</label>
-
-                                <input
-
-                                    type="file"
-
-                                    onChange={(e) =>
-
-                                        handleOccupantChange(
-
-                                            index,
-
-                                            "proofFile",
-
-                                            e.target.files[0]
-
-                                        )
-
-                                    }
-
-                                />
-
-                            </div>
-
-                        </div>
-
-                        <hr />
-
-                        {/* Occupants */}
-
-                        <div className="section-block">
-
-                            <div className="section-header">
-
-                                <h4>Additional Occupants</h4>
-
-                                <Button onClick={addOccupant}>
-
-                                    + Add Occupant
-
-                                </Button>
-
-                            </div>
-
-                            {
-
-                                occupants.map((occupant, index) => (
-
-                                    <div
-                                        className="occupant-card"
-                                        key={index}
-                                    >
-
-                                        <h5>
-
-                                            Occupant {index + 1}
-
-                                        </h5>
-
-                                        <div className="occupant-grid">
-
-                                            <ERPFormField
-
-                                                label="Name"
-
-                                                value={occupant.name}
-
-                                                onChange={(e) =>
-
-                                                    handleOccupantChange(
-
-                                                        index,
-
-                                                        "name",
-
-                                                        e.target.value
-
-                                                    )
-
-                                                }
-
-                                            />
-
-                                            <ERPSelectField
-
-                                                label="Gender"
-
-                                                value={occupant.gender}
-
-                                                onChange={(e) =>
-
-                                                    handleOccupantChange(
-
-                                                        index,
-
-                                                        "gender",
-
-                                                        e.target.value
-
-                                                    )
-
-                                                }
-
-                                            />
-
-                                            <ERPFormField
-
-                                                label="Age"
-
-                                                value={occupant.age}
-
-                                                onChange={(e) =>
-
-                                                    handleOccupantChange(
-
-                                                        index,
-
-                                                        "age",
-
-                                                        e.target.value
-
-                                                    )
-
-                                                }
-
-                                            />
-
-                                            <ERPFormField
-
-                                                label="Relationship"
-
-                                                value={occupant.relationship}
-
-                                                onChange={(e) =>
-
-                                                    handleOccupantChange(
-
-                                                        index,
-
-                                                        "relationship",
-
-                                                        e.target.value
-
-                                                    )
-
-                                                }
-
-                                            />
-
-                                            <ERPSelectField
-                                                label="Proof Type"
-                                                value={occupant.proofType}
-                                                options={proofTypes}
-                                                onChange={(e) =>
-                                                    handleOccupantChange(index, "proofType", e.target.value)
-                                                }
-                                            />
-
-                                            <ERPFormField
-
-                                                label="Proof Number"
-
-                                                value={occupant.proofNumber}
-
-                                                onChange={(e) =>
-
-                                                    handleOccupantChange(
-
-                                                        index,
-
-                                                        "proofNumber",
-
-                                                        e.target.value
-
-                                                    )
-
-                                                }
-
-                                            />
-
-                                            <div className="full-width">
-
-                                                <label>Upload Proof</label>
-
-                                                <input
-
-                                                    type="file"
-
-                                                    onChange={(e) =>
-
-                                                        handleOccupantChange(
-
-                                                            index,
-
-                                                            "proofFile",
-
-                                                            e.target.files[0]
-
-                                                        )
-
-                                                    }
-
-                                                />
-
-                                            </div>
-
-                                        </div>
-
-                                        <Button
-
-                                            variant="danger"
-
-                                            onClick={() => removeOccupant(index)}
-
-                                        >
-
-                                            Remove Occupant
-
-                                        </Button>
-
-                                    </div>
-
-                                ))
-
-                            }
-
-                        </div>
-
-                        <hr />
-
-                        <ERPTextArea
-
-                            label="Remarks"
-
-                            rows={4}
-
-                            value={remarks}
-
-                            onChange={(e) =>
-                                setRemarks(e.target.value)
-                            }
-
+                    <ERPFormModal
+                        open={showCheckIn}
+                        title="Guest Check-In"
+                        onClose={() => setShowCheckIn(false)}
+                        showFooter={false}
+                        size="lg"
+                    >
+                        <CheckInPanel
+                            primaryGuest={primaryGuest}
+                            setPrimaryGuest={setPrimaryGuest}
+                            occupants={occupants}
+                            setOccupants={setOccupants}
+                            remarks={remarks}
+                            setRemarks={setRemarks}
+                            proofTypes={proofTypes}
+                            onSubmit={handleCheckIn}
                         />
+                    </ERPFormModal>
 
-                        {/* Footer */}
-
-                        <div className="action-footer">
-
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate(-1)}
-                            >
-                                Cancel
-                            </Button>
-
-                            <Button
-                                onClick={handleCheckIn}
-                            >
-                                Confirm Check-In
-                            </Button>
-
-                        </div>
-
-                    </InfoCard>
-
-                </div>
-
-            </div>
-
-        </div>
+                </ERPPage>
     );
 }
 

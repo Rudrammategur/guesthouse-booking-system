@@ -91,3 +91,8 @@
     margin-top:8px;
 
 }
+
+:focus-visible{
+    outline:3px solid rgba(123,31,162,.25);
+    outline-offset:2px;
+}

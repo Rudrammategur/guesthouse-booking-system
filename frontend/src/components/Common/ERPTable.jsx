@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import StatusBadge from "./StatusBadge";
+import "./erpTable.css";
 
 function ERPTable({
 
@@ -58,7 +59,9 @@ function ERPTable({
 
     if (loading) {
 
-        return <p>Loading...</p>;
+        return <div className="erp-loading">
+    Loading data...
+</div>;
 
     }
 
@@ -71,7 +74,8 @@ function ERPTable({
                 searchable &&
 
                 <input
-
+                    type="search"
+                    aria-label="Search table"
                     className="erp-table-search"
 
                     placeholder="Search..."
@@ -152,7 +156,7 @@ function ERPTable({
 
                             >
 
-                                No Records Found
+                                No records found.
 
                             </td>
 

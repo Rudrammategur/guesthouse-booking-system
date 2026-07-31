@@ -8,14 +8,19 @@ import ApplicationDetails from "./ApplicationDetails";
 
 import "./ApplicationView.css";
 
-function ApplicationView({ application }) {
+function ApplicationView({ application, extraActions }) {
 
     const [activeTab, setActiveTab] = useState("application");
 
+    console.log(application);
+
     if (!application) {
-
-        return <h3>No Application Found</h3>;
-
+        return (
+            <div className="application-empty">
+                <h3>No Application Found</h3>
+                <p>The requested guest house application could not be loaded.</p>
+            </div>
+        );
     }
 
     return (
@@ -24,6 +29,7 @@ function ApplicationView({ application }) {
 
             <ApplicationHeader
                 application={application}
+                extraActions={extraActions}
             />
 
             <ApplicationSummary
@@ -37,6 +43,8 @@ function ApplicationView({ application }) {
                     <button
                         className={activeTab === "application" ? "active" : ""}
                         onClick={() => setActiveTab("application")}
+                        aria-selected={activeTab === "application"}
+                        role="tab"
                     >
                         Application Details
                     </button>
@@ -44,6 +52,8 @@ function ApplicationView({ application }) {
                     <button
                         className={activeTab === "logs" ? "active" : ""}
                         onClick={() => setActiveTab("logs")}
+                        aria-selected={activeTab === "logs"}
+                        role="tab"
                     >
                         Workflow Logs
                     </button>

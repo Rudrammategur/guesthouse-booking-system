@@ -4,8 +4,13 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import ApplicationView from "../../components/Dashboard/ApplicationView/ApplicationView";
 import RoomAllocationPanel from "./RoomAllocationPanel";
-import "../../styles/ghIncharge.css";
 import RoomAvailabilityCalendar from "../../components/Common/RoomAvailabilityCalendar";
+import ERPPage from "../../components/Common/ERPPage";
+import PageHeader from "../../components/Common/PageHeader";
+import Button from "../../components/Common/Button/Button";
+import ERPFormModal from "../../components/Common/Form/ERPFormModal";
+
+import "../../styles/workflowLayout.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
 
@@ -25,6 +30,7 @@ function GHAllocationPage() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [roomAvailability, setRoomAvailability] = useState([]);
   const [occupancy, setOccupancy] = useState({});
+  const [showAllocationModal, setShowAllocationModal] = useState(false);
 
 
 
@@ -35,31 +41,31 @@ function GHAllocationPage() {
       const [applicationResponse, roomResponse, occupancyResponse] = await Promise.all([
 
         axios.get(
-          `${API_URL}/api/guesthouse-incharge/applications/${selectedBookingId}`
+          `${API_URL}/api/gh-incharge/applications/${selectedBookingId}`
         ),
 
         axios.get(
-          `${API_URL}/api/guesthouse-incharge/room-availability`
+          `${API_URL}/api/gh-incharge/room-availability`
         ),
 
         axios.get(
-          `${API_URL}/api/guesthouse-incharge/occupancy-summary`
+          `${API_URL}/api/gh-incharge/occupancy-summary`
         )
 
       ]);
 
-      setApplication(applicationResponse.data);
+      setApplication(applicationResponse.data.data);
 
-      setRoomAvailability(roomResponse.data);
+      setRoomAvailability(roomResponse.data.data);
 
-      setOccupancy(occupancyResponse.data);
+      setOccupancy(occupancyResponse.data.data);
 
-      if (applicationResponse.data.BookingStatus === "Approved") {
+      if (applicationResponse.data.data.BookingStatus === "Approved") {
         const roomsResponse = await axios.get(
-          `${API_URL}/api/guesthouse-incharge/applications/${selectedBookingId}/available-rooms`
+          `${API_URL}/api/gh-incharge/applications/${selectedBookingId}/available-rooms`
         );
 
-        setRooms(roomsResponse.data);
+        setRooms(roomsResponse.data.data);
       }
 
       const guestHouseResponse = await axios.get(
@@ -117,7 +123,7 @@ function GHAllocationPage() {
 
       await axios.post(
 
-        `${API_URL}/api/guesthouse-incharge/applications/${selectedBookingId}/allocations`,
+        `${API_URL}/api/gh-incharge/applications/${selectedBookingId}/allocations`,
 
         {
 
@@ -162,91 +168,69 @@ function GHAllocationPage() {
   if (!application) return <div className="allocation-loading">Application not found.</div>;
 
   return (
-    <main className="allocation-page">
-      <header className="allocation-page-header">
-        <button type="button" className="back-btn" onClick={() => navigate("/gh-incharge")}>← Back to Dashboard</button>
-        <div>
-          <h1>Booking GH{String(application.BookingID).padStart(5, "0")}</h1>
-          <p>{application.GuestName} · {application.GuestHouseName || "Guest House"}</p>
-        </div>
-      </header>
-      <div className="allocation-layout">
-        <section className="application-pane">
-          <ApplicationView application={application} />
-        </section>
-        <div className="allocation-actions">
 
-          <button
-            type="button"
-            className="view-calendar-btn"
-            onClick={() => setShowCalendar(true)}
-          >
-            View Room Availability
-          </button>
+    <ERPPage>
 
-        </div>
-        <RoomAllocationPanel
-          application={application}
-          rooms={rooms}
-          selectedRooms={selectedRooms}
-          onSelectionChange={setSelectedRooms}
-          onAllocate={allocateRooms}
-          saving={saving}
-
-          selectedGuestHouse={selectedGuestHouse}
-          setSelectedGuestHouse={setSelectedGuestHouse}
-
-          accommodationAmount={accommodationAmount}
-
-          remarks={remarks}
-          setRemarks={setRemarks}
-        />
-      </div>
-
-      {
-        showCalendar && (
-
-          <div
-            className="calendar-modal-overlay"
-            onClick={() => setShowCalendar(false)}
-          >
-
-            <div
-              className="calendar-modal"
-              onClick={(e) => e.stopPropagation()}
+      <ApplicationView
+        application={application}
+        extraActions={
+          <>
+            <Button
+              onClick={() => setShowCalendar(true)}
             >
+              Room Availability
+            </Button>
 
-              <div className="calendar-modal-header">
+            <Button
+              onClick={() => setShowAllocationModal(true)}
+            >
+              Allocate Rooms
+            </Button>
+          </>
+        }
+      />
 
-                <h2>Room Availability</h2>
+      <>
+        <ERPFormModal
+          open={showAllocationModal}
+          title="Allocate Rooms"
+          onClose={() => setShowAllocationModal(false)}
+          showFooter={false}
+        >
+          <RoomAllocationPanel
+            application={application}
+            rooms={rooms}
+            selectedRooms={selectedRooms}
+            onSelectionChange={setSelectedRooms}
+            onAllocate={allocateRooms}
+            saving={saving}
+            selectedGuestHouse={selectedGuestHouse}
+            setSelectedGuestHouse={setSelectedGuestHouse}
+            accommodationAmount={accommodationAmount}
+            remarks={remarks}
+            setRemarks={setRemarks}
+            onSuccess={() => {
+              setShowAllocationModal(false);
+              navigate("/gh-incharge");
+            }}
+          />
+        </ERPFormModal>
 
-                <button
-                  onClick={() => setShowCalendar(false)}
-                >
-                  ✕
-                </button>
+        <ERPFormModal
+          open={showCalendar}
+          title="Room Availability"
+          onClose={() => setShowCalendar(false)}
+          showFooter={false}
+          size="xl"
+        >
+          <RoomAvailabilityCalendar
+            rooms={roomAvailability}
+            occupancy={occupancy}
+          />
+        </ERPFormModal>
+      </>
+    </ERPPage>
 
-              </div>
-
-              <RoomAvailabilityCalendar
-
-                rooms={rooms}
-
-                occupancy={occupancy}
-
-                title="Guest House Room Availability"
-
-                numberOfDays={15}
-
-              />
-
-            </div>
-
-          </div>
-
-        )
-      }
-    </main>
   );
 }
 

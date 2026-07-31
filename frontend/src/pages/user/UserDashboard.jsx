@@ -20,6 +20,8 @@ function UserDashboard() {
     navigate("/");
   };
 
+  const [loading, setLoading] = useState(true);
+
   const [stats, setStats] = useState({
     pendingCount: 0,
     approvedCount: 0,
@@ -44,6 +46,14 @@ function UserDashboard() {
 
     fetchStats();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        Loading dashboard...
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-container">
@@ -86,7 +96,8 @@ function UserDashboard() {
       <div className="dashboard-cards">
 
         {/* Guest House */}
-        <div
+        <button
+          type="button"
           className="dashboard-card"
           onClick={() => navigate("/guesthouse")}
         >
@@ -98,10 +109,11 @@ function UserDashboard() {
             Submit guest house accommodation
             requests for institute visitors.
           </p>
-        </div>
+        </button>
 
         {/* Transport */}
-        <div
+        <button
+          type="button"
           className="dashboard-card"
           onClick={() => navigate("/transport")}
         >
@@ -113,10 +125,11 @@ function UserDashboard() {
             Create transport requests for
             official travel and guests.
           </p>
-        </div>
+        </button>
 
         {/* My Requests */}
-        <div
+        <button
+          type="button"
           className="dashboard-card"
           onClick={() => navigate("/my-requests")}
         >
@@ -128,7 +141,7 @@ function UserDashboard() {
             Track all Guest House and
             Transport requests.
           </p>
-        </div>
+        </button>
 
       </div>
 

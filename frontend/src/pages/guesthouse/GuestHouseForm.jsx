@@ -18,9 +18,11 @@ import MobileNumberInput from "../../components/Common/MobileNumberInput";
 import EmailInput from "../../components/Common/EmailInput";
 import NationalityInput from "../../components/Common/NationalityInput";
 import TariffModal from "../../components/TariffModal";
+import Button from "../../components/Common/Button/Button.jsx";
+import PageHeader from "../../components/Common/PageHeader";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../styles/guestHouseForm.css";
-import iitLogo from "../../assets/iit-dharwad-logo.png";
+import logo from "../../assets/iit-dharwad-logo.png";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
 
@@ -415,19 +417,144 @@ function GuestHouseForm() {
 
   const validate = () => {
     if (!formData.guestType) return "Select the guest type";
-    if (!formData.guestName.trim()) return "Enter the guest name";
-    if (!formData.guestAddress.trim()) return "Enter the guest address";
+
+    //**************guestName*****************
+    const guestName = formData.guestName.trim();
+
+    if (!guestName)
+      return "Guest Name is required.";
+
+    if (guestName.length < 3)
+      return "Guest Name must contain at least 3 characters.";
+
+    if (guestName.length > 100)
+      return "Guest Name cannot exceed 100 characters.";
+
+    if (!/^[A-Za-z.' -]+$/.test(guestName))
+      return "Guest Name can contain only letters, spaces, apostrophe ('), hyphen (-) and period (.).";
+
+    //**************guestAddress*****************
+    const guestAddress = formData.guestAddress.trim();
+
+    if (!guestAddress)
+      return "Guest Address is required.";
+
+    if (guestAddress.length < 10)
+      return "Guest Address must contain at least 10 characters.";
+
+    if (guestAddress.length > 250)
+      return "Guest Address cannot exceed 250 characters.";
+
+    if (!/^[A-Za-z0-9\s.,#/-]+$/.test(guestAddress))
+      return "Guest Address contains invalid special characters.";
+
+    //**************guestMobile*****************
     if (mobile.length < 10) return "Enter a valid 10-digit contact number";
-    if (!/^\S+@\S+\.\S+$/.test(guestEmail)) return "Enter a valid guest email";
+
+    if (/^(\d)\1{9}$/.test(mobile))
+      return "Guest Contact Number cannot contain the same digit repeated 10 times.";
+
+    //**************guestEmail*****************
+    const email = guestEmail.trim();
+
+    if (!email)
+      return "Guest Email is required.";
+
+    if (email.length > 100)
+      return "Guest Email cannot exceed 100 characters.";
+
+    if (/\s/.test(email))
+      return "Guest Email cannot contain spaces.";
+
+    if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email))
+      return "Enter a valid Guest Email address.";
+
+    //**************guestNationality*****************
     if (!nationality || (nationality === "Other" && !countryName.trim())) return "Enter the guest nationality";
+
+    //**************Purpose*****************
+    const purpose = formData.purpose.trim();
     if (!formData.purpose.trim()) return "Enter the purpose of visit";
+
+    if (purpose.length > 250)
+      return "Purpose of visit cannot exceed 250 characters.";
+
+    //**********Arrival & Departure**********/
     if (!arrivalDate || !departureDate) return "Select arrival and departure date/time";
     if (departureDate <= arrivalDate) return "Departure must be after arrival";
+
+    /**********GuestHouse************/
     if (!formData.GuestHouseID) return "Select a guest house";
-    if (!formData.occupancy || Number(formData.occupancy) < 1) return "Enter the number of occupants";
-    if (roomRequirements.some((room) => !room.roomTypeId || Number(room.noOfRooms) < 1)) return "Complete all room requirements";
+
+
+    /******No. of occupants********/
+    const occupants = String(formData.occupancy).trim();
+
+    if (!occupants)
+      return "Number of Occupants is required.";
+
+    if (!/^\d+$/.test(occupants))
+      return "Number of Occupants must contain only digits.";
+
+    if (Number(occupants) < 1)
+      return "Number of Occupants must be at least 1.";
+
+    if (Number(occupants) > 20)
+      return "Number of Occupants cannot exceed 20.";
+
+    /****No. of rooms required********/
+    if (!roomRequirements.length)
+      return "Please add at least one room requirement.";
+
+    for (const room of roomRequirements) {
+
+      if (!room.roomTypeId)
+        return "Please select a Room Type.";
+
+      const noOfRooms = String(room.noOfRooms).trim();
+
+      if (!noOfRooms)
+        return "Number of Rooms is required.";
+
+      if (!/^\d+$/.test(noOfRooms))
+        return "Number of Rooms must contain only digits.";
+
+      if (Number(noOfRooms) < 1)
+        return "Number of Rooms must be at least 1.";
+
+      if (Number(noOfRooms) > 10)
+        return "Number of Rooms cannot exceed 10 per Room Type.";
+    }
+
+    /**********Expenditure Head****************/
     if (!formData.expenditureHeadType) return "Select an expenditure head";
-    if (formData.expenditureHeadType === "Project Fund" && !formData.projectDetails) return "Select a project";
+
+    /************Project selection**********/
+    // if (formData.expenditureHeadType === "Project Fund" && !formData.projectDetails) return "Select a project";
+
+    /******CountryName************/
+    if (!nationality)
+      return "Please select the Guest Nationality.";
+
+    if (nationality === "Other") {
+
+      const country = countryName.trim().toLowerCase();
+
+      if (!country)
+        return "Country Name is required.";
+
+      if (country.length < 3)
+        return "Country Name must contain at least 3 characters.";
+
+      if (country.length > 50)
+        return "Country Name cannot exceed 50 characters.";
+
+      if (!/^[A-Za-z.' -]+$/.test(country))
+        return "Country Name can contain only letters, spaces, apostrophe ('), hyphen (-) and period (.).";
+
+      if (country.startsWith("india") || country.startsWith("indian"))
+        return "Please enter a country name other than India.";
+    }
     return "";
   };
 
@@ -447,7 +574,7 @@ function GuestHouseForm() {
     }
     const previewData = buildPreviewData();
     localStorage.setItem("guestHouseDraft", JSON.stringify({ ...previewData, uploadedFileUrl: "" }));
-    navigate("/guesthouse/preview", {
+    navigate("/preview", {
       state: previewData
     });
   };
@@ -464,61 +591,23 @@ function GuestHouseForm() {
 
   return (
     <main className="booking-form-page">
-      <header className="booking-form-hero">
-
-        <button
-          type="button"
-          className="form-back-button"
-          onClick={() => navigate("/dashboard")}
-        >
-          <FaArrowLeft />
-          Back
-        </button>
-
-        <div className="hero-main">
-
-          <div className="hero-logo">
-
-            <img
-              src={iitLogo}
-              alt="IIT Dharwad"
-            />
-
+      <PageHeader
+        hero
+        logo={logo}
+        title="Guest House Management System"
+        subtitle="Transit Facility Accommodation"
+        description="Book accommodation for institute guests, track applications, and manage requests through a streamlined workflow."
+        actions={
+          <div className="hero-actions">
+            <Button
+              variant="outline"
+              onClick={() => navigate(-1)}
+            >
+              ← Back
+            </Button>
           </div>
-
-          <div className="hero-center">
-
-            <h2>
-              INDIAN INSTITUTE OF TECHNOLOGY DHARWAD
-            </h2>
-
-            <div className="hero-line"></div>
-
-            <h3>
-              Guest House Management System
-            </h3>
-
-            <p className="hero-kicker">
-              GUEST HOUSE APPLICATION
-            </p>
-
-            <h1>
-              Transit Request
-            </h1>
-
-          </div>
-
-          <div className="hero-status">
-
-            <span>Status</span>
-
-            <strong>Draft</strong>
-
-          </div>
-
-        </div>
-
-      </header>
+        }
+      />
 
       <div className="booking-form-layout">
         <aside className="booking-form-sidebar">
@@ -618,7 +707,7 @@ function GuestHouseForm() {
                 <Field label="Departure date and time" required>
                   <DatePicker selected={departureDate} onChange={changeDepartureDate} showTimeSelect timeIntervals={15} dateFormat="dd MMM yyyy, h:mm aa" placeholderText="Select departure" className="datepicker-input" minDate={arrivalDate || new Date()} filterTime={isDepartureTimeAllowed} disabled={!arrivalDate} />
                 </Field>
-                {stayDuration && <div className="stay-summary span-2"><FaCalendarAlt /><span>Estimated stay</span><strong>{stayDuration.nights} night{stayDuration.nights !== 1 ? "s" : ""} · {stayDuration.hours} hours</strong></div>}
+                {stayDuration && <div className="stay-summary span-2"><FaCalendarAlt /><span>Estimated stay</span><strong>{stayDuration.nights} night{stayDuration.nights !== 1 ? "s" : ""} ({stayDuration.hours} hours)</strong></div>}
               </div>
             </FormSection>
           </div>

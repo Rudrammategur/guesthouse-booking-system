@@ -5,13 +5,10 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/takeAction.css";
 
 function TakeAction({
-
     application,
-
-    refreshApplications,
-
-    actionType = "Verifier"
-
+    actionType,
+    onSuccess,
+    showHeader = true
 }) {
 
     const navigate = useNavigate();
@@ -70,7 +67,7 @@ function TakeAction({
 
             toast.success(response.data.message);
 
-            refreshApplications?.();
+            onSuccess?.();
 
             setTimeout(() => {
 
@@ -108,7 +105,7 @@ function TakeAction({
 
         <div className="action-card">
 
-            <h3>Take Action</h3>
+            {showHeader && <h3>Take Action</h3>}
 
             <div className="decision-section">
 

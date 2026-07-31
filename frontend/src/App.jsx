@@ -21,15 +21,16 @@ import GHCheckInPage from "./pages/guesthouseIncharge/GHCheckInPage";
 import GHCheckOutPage from "./pages/guesthouseIncharge/GHCheckOutPage";
 import GHCheckOutDashboard from "./pages/guesthouseIncharge/GHCheckOutDashboard";
 import ApproverApplicationPage from "./pages/Approver/ApproverApplicationPage";
-import EmployeeDashboard from "./pages/GuestHouse/EmployeeDashboard";
-import GuestHouseForm from "./pages/GuestHouse/GuestHouseForm";
-import GuestHousePreview from "./pages/GuestHouse/GuestHousePreview";
+import EmployeeDashboard from "./pages/guestHouse/EmployeeDashboard";
+import GuestHouseForm from "./pages/guestHouse/GuestHouseForm";
+import GuestHousePreview from "./pages/guestHouse/GuestHousePreview";
 import ApplicantApplicationPage from "./pages/guesthouse/ApplicantApplicationPage";
 import MyGuestHouseBookings from "./pages/guesthouse/MyGuestHouseBookings";
 import ReportViewer from "./pages/Admin/Reports/ReportViewer";
 import WorkflowManagement from "./pages/Admin/WorkflowManagement";
 import GHInchargeApplicationPage from "./pages/guesthouseIncharge/GHInchargeApplicationPage";
 import AdminApplicationPage from "./pages/Admin/AdminApplicationPage";
+import GHProcessedApplicationsPage from "./pages/guesthouseIncharge/GHProcessedApplicationsPage";
 
 
 
@@ -63,7 +64,7 @@ function App() {
         <Route path="/verifier" element={<VerifierDashboard />} />
         <Route path="/verifier/application/:bookingId" element={<VerifierApplicationPage />} />
         <Route path="/print/:id" element={<GuestHousePrintPage />} />
-        <Route path="/guesthouse/receipt/:bookingId" element={<GHReceiptPage />} />
+        <Route path="/gh-incharge/receipt/:bookingId" element={<GHReceiptPage />} />
         <Route path="/gh-incharge/checkins" element={<GHCheckInDashboard />} />
         <Route path="/gh-incharge/checkin/:bookingId" element={<GHCheckInPage />} />
         <Route path="/gh-incharge/checkout/:bookingId" element={<GHCheckOutPage />} />
@@ -71,6 +72,7 @@ function App() {
         <Route path="/admin/guesthouses" element={<GuestHouseMaster />} />
         <Route path="/admin/guest-types" element={<GuestTypeMaster />} />
         <Route path="/admin/room-charges" element={<RoomChargesMaster />} />
+        <Route path="/gh-incharge/processed-applications"element={<GHProcessedApplicationsPage />}/>
         <Route
     path="/ghincharge/application/:bookingId"
     element={<GHInchargeApplicationPage />}

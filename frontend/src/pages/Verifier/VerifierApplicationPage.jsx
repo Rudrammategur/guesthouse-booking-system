@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
+import ERPPage from "../../components/Common/ERPPage";
+import PageHeader from "../../components/Common/PageHeader";
+import Button from "../../components/Common/Button/Button";
 import ApplicationView from "../../components/Dashboard/ApplicationView/ApplicationView";
 import TakeAction from "../../components/Workflow/TakeAction";
-import "../../styles/workflowLayout.css";
+import ERPFormModal from "../../components/Common/Form/ERPFormModal";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
@@ -14,7 +17,12 @@ function VerifierApplicationPage() {
 
     const { bookingId } = useParams();
 
+    const navigate = useNavigate();
+
     const [application, setApplication] = useState(null);
+
+    const [showActionModal, setShowActionModal] =
+        useState(false);
 
     useEffect(() => {
 
@@ -22,21 +30,39 @@ function VerifierApplicationPage() {
 
     }, [bookingId]);
 
+    useEffect(() => {
+
+        if (showCalendar || showAllocationModal) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+
+    }, [showCalendar, showAllocationModal]);
+
     const fetchApplication = async () => {
 
         try {
 
             const res = await axios.get(
+
                 `${API_URL}/api/verifier/application/${bookingId}`
+
             );
 
-            setApplication(res.data);
+            console.log(res.data);
+
+            setApplication(res.data.data);
 
         }
 
         catch (err) {
 
-            console.log(err);
+            console.error(err);
 
         }
 
@@ -44,32 +70,41 @@ function VerifierApplicationPage() {
 
     if (!application)
 
-        return <h2>Loading...</h2>;
-
+        return <h3>Loading...</h3>;
 
     return (
 
-        <div className="workflow-layout">
+        <ERPPage>
 
-            <div className="workflow-left">
+            <ApplicationView
+                application={application}
+                extraActions={
+                    <Button
+                        onClick={() => setShowActionModal(true)}
+                    >
+                        Take Action
+                    </Button>
+                }
+            />
 
-                <ApplicationView
-                    application={application}
-                />
-
-            </div>
-
-            <div className="workflow-right">
-
+            <ERPFormModal
+                open={showActionModal}
+                title="Take Action"
+                showFooter={false}
+                onClose={() => setShowActionModal(false)}
+            >
                 <TakeAction
                     application={application}
                     actionType="Verifier"
-                    onSuccess={fetchApplication}
+                    showHeader={false}
+                    onSuccess={() => {
+                        setShowActionModal(false);
+                        fetchApplication();
+                    }}
                 />
+            </ERPFormModal>
 
-            </div>
-
-        </div>
+        </ERPPage>
 
     );
 

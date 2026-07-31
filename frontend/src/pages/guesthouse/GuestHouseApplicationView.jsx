@@ -292,12 +292,6 @@ function GuestHouseApplicationView() {
 
                 <InfoCard title="Guest Information">
 
-                    <h3>
-
-                        Guest Information
-
-                    </h3>
-
                     <div className="application-grid">
 
                         <InfoRow
@@ -354,7 +348,7 @@ function GuestHouseApplicationView() {
 
                 {/* Visit Information */}
 
-                <InfoCard title="Guest Information">
+                <InfoCard title="Visit Information">
 
                     <h3>
 
@@ -412,13 +406,8 @@ function GuestHouseApplicationView() {
 
                 {/* Accommodation */}
 
-                <InfoCard title="Guest Information">
+                <InfoCard title="Accommodation Details">
 
-                    <h3>
-
-                        Accommodation Details
-
-                    </h3>
 
                     <div className="application-grid">
 
@@ -514,13 +503,7 @@ function GuestHouseApplicationView() {
 
                 {/* Financial */}
 
-                <InfoCard title="Guest Information">
-
-                    <h3>
-
-                        Financial Details
-
-                    </h3>
+                <InfoCard title="Financial Details">
 
                     <div className="application-grid">
 
@@ -548,13 +531,8 @@ function GuestHouseApplicationView() {
 
                 {/* Special Requirements */}
 
-                <InfoCard className="full-width" title="Guest Information">
+                <InfoCard className="full-width" title="Supporting Documents">
 
-                    <h3>
-
-                        Special Requirements
-
-                    </h3>
 
                     <p className="remarks-box">
 

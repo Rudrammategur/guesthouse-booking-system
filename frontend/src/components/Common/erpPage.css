@@ -1,0 +1,65 @@
+.erp-page{
+
+    width:100%;
+
+    min-height:100%;
+
+    padding:24px;
+
+    background:var(--background);
+
+}
+
+.erp-container{
+
+    max-width:1440px;
+
+    margin:0 auto;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:24px;
+
+}
+
+.erp-container-fluid{
+
+    width:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:24px;
+
+}
+
+@media (max-width:992px){
+
+.erp-page{
+
+padding:20px;
+
+}
+
+}
+
+@media (max-width:768px){
+
+.erp-page{
+
+padding:16px;
+
+}
+
+.erp-container,
+
+.erp-container-fluid{
+
+gap:18px;
+
+}
+
+}
