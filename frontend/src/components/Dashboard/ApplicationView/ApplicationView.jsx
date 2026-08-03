@@ -76,7 +76,7 @@ function ApplicationView({ application, extraActions }) {
                         :
 
                         <WorkflowLogs
-                            moduleName="GuestHouse"
+                            moduleName="GuestHouseBooking"
                             referenceId={application.GHBookingID}
                         />
                 }

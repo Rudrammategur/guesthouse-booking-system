@@ -280,6 +280,8 @@ useEffect(() => {
 
     ];
 
+    // console.log(application);
+
 
   const filteredApplications =
     Array.isArray(applications)

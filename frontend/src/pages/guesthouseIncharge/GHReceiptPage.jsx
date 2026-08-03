@@ -1,70 +1,149 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
+
+import ERPPage from "../../components/Common/ERPPage";
+import PageHeader from "../../components/Common/PageHeader";
+import InfoCard from "../../components/Common/InfoCard/InfoCard";
+import Button from "../../components/Common/Button/Button";
+
+import logo from "../../assets/iit-dharwad-logo.png";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
     "http://localhost:9009";
 
+const formatDate = (date) =>
+    date
+        ? new Date(date).toLocaleDateString("en-IN")
+        : "-";
+
 function GHReceiptPage() {
 
     const { bookingId } = useParams();
-
-    const navigate = useNavigate();
 
     const [receipt, setReceipt] = useState(null);
 
     useEffect(() => {
 
-        loadReceipt();
+        axios
+            .get(`${API_URL}/api/gh-incharge/receipt/${bookingId}`)
+            .then(res => setReceipt(res.data));
 
-    }, []);
+    }, [bookingId]);
 
-    const loadReceipt = async () => {
-
-        try {
-
-            const response = await axios.get(
-
-                `${API_URL}/api/gh-incharge/receipt/${bookingId}`
-
-            );
-
-            setReceipt(response.data);
-
-        }
-
-        catch (err) {
-
-            console.log(err);
-
-        }
-
-    };
-
-    if (!receipt) {
-
-        return <h2>Loading...</h2>;
-
-    }
+    if (!receipt) return <h3>Loading...</h3>;
 
     return (
 
-        <div>
+        <ERPPage>
 
-            <h2>
+            {/* <PageHeader
+                hero
+                logo={logo}
+                title="Guest House Management System"
+                subtitle="Receipt"
+            /> */}
 
-                Receipt Loaded Successfully
+            <InfoCard className="print-area">
 
-            </h2>
+                <div className="receipt">
 
-            <pre>
+                    <h2>IIT Dharwad Guest House Receipt</h2>
 
-                {JSON.stringify(receipt, null, 2)}
+                    <div className="receipt-row">
+                        <span>Booking No</span>
+                        <strong>{receipt.GHRBookingNo}</strong>
+                    </div>
 
-            </pre>
+                    <div className="receipt-row">
+                        <span>Guest</span>
+                        <strong>{receipt.GuestName}</strong>
+                    </div>
 
-        </div>
+                    <div className="receipt-row">
+                        <span>Guest House</span>
+                        <strong>{receipt.GuestHouseName}</strong>
+                    </div>
+
+                    <div className="receipt-row">
+                        <span>Arrival</span>
+                        <strong>{formatDate(receipt.ArrivalDateTime)}</strong>
+                    </div>
+
+                    <div className="receipt-row">
+                        <span>Departure</span>
+                        <strong>{formatDate(receipt.DepartureDateTime)}</strong>
+                    </div>
+
+                    <div className="receipt-row">
+                        <span>Room</span>
+                        <strong>{receipt.RoomNumbers || "-"}</strong>
+                    </div>
+
+                    <hr />
+
+                    <div className="receipt-row">
+                        <span>Accommodation</span>
+                        <strong>₹ {receipt.AccommodationAmount}</strong>
+                    </div>
+
+                    <div className="receipt-row">
+                        <span>Meal Charges</span>
+                        <strong>₹ {receipt.MealCharges}</strong>
+                    </div>
+
+                    <div className="receipt-row">
+                        <span>Additional Charges</span>
+                        <strong>₹ {receipt.AdditionalCharges}</strong>
+                    </div>
+
+                    <div className="receipt-row">
+                        <span>Discount</span>
+                        <strong>₹ {receipt.DiscountAmount}</strong>
+                    </div>
+
+                    <div className="receipt-total">
+
+                        <span>Total Payable</span>
+
+                        <strong>
+
+                            ₹ {receipt.TotalPayableAmount}
+
+                        </strong>
+
+                    </div>
+
+                    <hr />
+
+                    <div className="receipt-row">
+                        <span>Payment Mode</span>
+                        <strong>{receipt.PaymentMode || "-"}</strong>
+                    </div>
+
+                    <div className="receipt-row">
+                        <span>Transaction Ref.</span>
+                        <strong>{receipt.TransactionReference || "-"}</strong>
+                    </div>
+
+                    <p className="receipt-footer">
+
+                        Thank you for staying at IIT Dharwad Guest House.
+
+                    </p>
+
+                    <Button
+                        onClick={() => window.print()}
+                    >
+                        Print Receipt
+                    </Button>
+
+                </div>
+
+            </InfoCard>
+
+        </ERPPage>
 
     );
 

@@ -3279,7 +3279,7 @@ ISNULL(
 
         WHERE
 
-        ModuleName='GuestHouse'
+        ModuleName='GuestHouseBooking'
 
         AND
 

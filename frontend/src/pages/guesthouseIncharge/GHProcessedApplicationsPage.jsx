@@ -1,57 +1,67 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 
+import ERPPage from "../../components/Common/ERPPage";
 import PageHeader from "../../components/Common/PageHeader";
-import InfoCard from "../../components/Common/InfoCard/InfoCard";
+import ERPSection from "../../components/Common/ERPSection";
 import ERPTable from "../../components/Common/ERPTable";
+import StatusBadge from "../../components/Common/StatusBadge";
 import Button from "../../components/Common/Button/Button";
+import logo from "../../assets/iit-dharwad-logo.png";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
     "http://localhost:9009";
+
+const formatDate = (value) =>
+    value
+        ? new Date(value).toLocaleString("en-IN", {
+              dateStyle: "medium",
+              timeStyle: "short"
+          })
+        : "-";
 
 function GHProcessedApplicationsPage() {
 
     const navigate = useNavigate();
 
     const [applications, setApplications] = useState([]);
-
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+    const loadApplications = useCallback(async () => {
 
-        loadApplications();
-
-    }, []);
-
-    const loadApplications = async () => {
+        setLoading(true);
 
         try {
 
-            const res = await axios.get(
-
+            const response = await axios.get(
                 `${API_URL}/api/gh-incharge/processed-applications`
-
             );
 
-            setApplications(res.data.data);
+            setApplications(response.data.data);
 
-        }
+        } catch (error) {
 
-        catch (err) {
+            toast.error(
+                error.response?.data?.message ||
+                "Unable to load processed applications."
+            );
 
-            console.error(err);
-
-        }
-
-        finally {
+        } finally {
 
             setLoading(false);
 
         }
 
-    };
+    }, []);
+
+    useEffect(() => {
+
+        loadApplications();
+
+    }, [loadApplications]);
 
     const columns = [
 
@@ -78,44 +88,50 @@ function GHProcessedApplicationsPage() {
         {
             key: "ArrivalDateTime",
             label: "Arrival",
-            render: (row) =>
-                new Date(row.ArrivalDateTime).toLocaleDateString("en-IN")
+            render: row => formatDate(row.ArrivalDateTime)
         },
 
         {
             key: "DepartureDateTime",
             label: "Departure",
-            render: (row) =>
-                new Date(row.DepartureDateTime).toLocaleDateString("en-IN")
+            render: row => formatDate(row.DepartureDateTime)
         },
 
         {
             key: "TotalPayableAmount",
             label: "Amount",
-            render: (row) =>
-                `₹ ${Number(row.TotalPayableAmount || 0).toLocaleString("en-IN")}`
+            render: row =>
+                `₹ ${Number(
+                    row.TotalPayableAmount || 0
+                ).toLocaleString("en-IN")}`
         },
 
         {
             key: "BookingStatus",
-            label: "Status"
+            label: "Status",
+            render: row => (
+                <StatusBadge status={row.BookingStatus} />
+            )
         }
 
     ];
 
     return (
 
-        <div className="dashboard-page">
+        <ERPPage>
 
             <PageHeader
-
-                title="Processed Applications"
-
-                subtitle="Completed Guest House Bookings"
-
+                hero
+                logo={logo}
+                title="Guest House Management System"
+                subtitle="Processed Applications"
+                description="View completed guest house bookings and booking history."
             />
 
-            <InfoCard>
+            <ERPSection
+                title="Processed Applications"
+                subtitle="Completed bookings"
+            >
 
                 <ERPTable
                     columns={columns}
@@ -124,30 +140,22 @@ function GHProcessedApplicationsPage() {
                     actions={(row) => (
                         <>
                             <Button
-                                size="sm"
+                                className="view-btn"
                                 onClick={() =>
-                                    navigate(`/ghincharge/application/${row.GHBookingID}`)
+                                    navigate(
+                                        `/ghincharge/application/${row.GHBookingID}`
+                                    )
                                 }
                             >
                                 View
-                            </Button>
-
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() =>
-                                    navigate(`/gh-incharge/receipt/${row.GHBookingID}`)
-                                }
-                            >
-                                Receipt
                             </Button>
                         </>
                     )}
                 />
 
-            </InfoCard>
+            </ERPSection>
 
-        </div>
+        </ERPPage>
 
     );
 
