@@ -395,7 +395,7 @@ function GuestHouseForm() {
     countryCode,
     mobile,
     contact: `${countryCode}${mobile}`,
-    email: guestEmail,
+    GuestEmailID: guestEmail,
     nationality: nationality === "Indian" ? "Indian" : countryName,
     arrivalDate,
     departureDate,

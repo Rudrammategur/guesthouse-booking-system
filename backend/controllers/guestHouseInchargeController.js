@@ -2649,11 +2649,16 @@ SELECT
     B.DepartureDateTime,
 
     B.TotalPayableAmount,
+B.BookingStatus,
 
-    B.BookingStatus,
+B.AccommodationAmount,
+B.MealCharges,
+B.AdditionalCharges,
+B.DiscountAmount,
+B.PaymentMode,
+B.TransactionReference,
 
-    MAX(A.CheckOutDateTime) AS CheckOutDateTime
-
+MAX(A.CheckOutDateTime) AS CheckOutDateTime
 FROM GuestHouseRoomBookings B
 
 LEFT JOIN GuestHouseMaster GH
@@ -2685,22 +2690,21 @@ WHERE
 GROUP BY
 
     B.GHBookingID,
-
     B.GHRBookingNo,
-
     B.GuestName,
-
     GT.GuestTypeName,
-
     GH.GuestHouseName,
-
     B.ArrivalDateTime,
-
     B.DepartureDateTime,
+    B.BookingStatus,
 
+    B.AccommodationAmount,
+    B.MealCharges,
+    B.AdditionalCharges,
+    B.DiscountAmount,
     B.TotalPayableAmount,
-
-    B.BookingStatus
+    B.PaymentMode,
+    B.TransactionReference
 
 ORDER BY
 

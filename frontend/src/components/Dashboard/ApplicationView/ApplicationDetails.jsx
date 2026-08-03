@@ -30,7 +30,7 @@ function ApplicationDetails({ application }) {
 
                     <InfoRow label="Contact Number" value={application.GuestContactNo} />
 
-                    <InfoRow label="Email" value={application.GuestEmailID} />
+                    <InfoRow label="Guest Email" value={application.GuestEmailID} />
 
                     <InfoRow label="Address" value={application.GuestAddress} />
 
@@ -141,6 +141,50 @@ function ApplicationDetails({ application }) {
                         ]}
                         data={application.RoomRequirements ?? []}
                     />
+
+                </InfoCard>
+
+
+                <InfoCard title="Payment Summary">
+
+                    <div className="summary-row">
+                        <span>Accommodation</span>
+                        <strong>₹ {application.AccommodationAmount}</strong>
+                    </div>
+
+                    <div className="summary-row">
+                        <span>Meal Charges</span>
+                        <strong>₹ {application.MealCharges}</strong>
+                    </div>
+
+                    <div className="summary-row">
+                        <span>Additional Charges</span>
+                        <strong>₹ {application.AdditionalCharges}</strong>
+                    </div>
+
+                    <div className="summary-row">
+                        <span>Discount</span>
+                        <strong>₹ {application.DiscountAmount}</strong>
+                    </div>
+
+                    <hr />
+
+                    <div className="summary-total">
+                        <span>Total Payable</span>
+                        <strong>
+                            ₹ {application.TotalPayableAmount}
+                        </strong>
+                    </div>
+
+                    <div className="summary-row">
+                        <span>Payment Mode</span>
+                        <strong>{application.PaymentMode || "-"}</strong>
+                    </div>
+
+                    <div className="summary-row">
+                        <span>Transaction Ref.</span>
+                        <strong>{application.TransactionReference || "-"}</strong>
+                    </div>
 
                 </InfoCard>
 

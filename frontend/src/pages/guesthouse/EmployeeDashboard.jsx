@@ -256,6 +256,8 @@ function EmployeeDashboard() {
 
     ];
 
+    // console.log(application);
+
 
     const filteredApplications =
         applications.filter(app => {

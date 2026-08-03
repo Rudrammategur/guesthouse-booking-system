@@ -95,7 +95,7 @@ function GuestHousePreview() {
 
     formData.append(
         "GuestEmailID",
-        data.emails
+        data.GuestEmailID
     );
 
     formData.append(
@@ -263,7 +263,7 @@ function GuestHousePreview() {
 
                     <div className="preview-item">
                         <label>Email</label>
-                        <span>{data.email}</span>
+                        <span>{data.GuestEmailID}</span>
                     </div>
 
                     <div className="preview-item">
