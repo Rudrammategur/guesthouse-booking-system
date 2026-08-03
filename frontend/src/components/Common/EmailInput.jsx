@@ -5,7 +5,8 @@ function EmailInput({
   label = "Email Address",
   value,
   setValue,
-  placeholder = "Enter Email Address"
+  placeholder = "Enter Email Address",
+  required = false
 }) {
 
   const [error, setError] = useState("");
@@ -38,7 +39,12 @@ function EmailInput({
   return (
     <div className="form-group">
 
-      <label>{label}</label>
+      <label>
+        {label}
+        {required && (
+          <span className="required">*</span>
+        )}
+      </label>
 
       <input
         type="email"

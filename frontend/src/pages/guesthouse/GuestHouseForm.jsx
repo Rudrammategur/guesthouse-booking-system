@@ -113,44 +113,44 @@ function GuestHouseForm() {
   const [filePreview, setFilePreview] = useState(draft.uploadedFileUrl || "");
   const [activeSection, setActiveSection] = useState("guest-details");
 
-useEffect(() => {
-  let active = true;
+  useEffect(() => {
+    let active = true;
 
-  let el = null;
+    let el = null;
 
-  try {
-    el = window.top.document.querySelector("#spnUserName");
-  } catch (e) {}
+    try {
+      el = window.top.document.querySelector("#spnUserName");
+    } catch (e) { }
 
-  const employeeRequest = el?.innerText
-    ? axios.get(`${API_URL}/api/user/me`, {
+    const employeeRequest = el?.innerText
+      ? axios.get(`${API_URL}/api/user/me`, {
         params: { name: el.innerText.trim() },
       })
-    : Promise.resolve({ data: { success: false } });
+      : Promise.resolve({ data: { success: false } });
 
-  Promise.allSettled([
-    employeeRequest,
-    axios.get(`${API_URL}/api/master/guest-types`),
-    axios.get(`${API_URL}/api/master/guesthouse-types`),
-    axios.get(`${API_URL}/api/expenditure-heads`),
-  ]).then(([user, guests, houses, heads]) => {
-    if (!active) return;
+    Promise.allSettled([
+      employeeRequest,
+      axios.get(`${API_URL}/api/master/guest-types`),
+      axios.get(`${API_URL}/api/master/guesthouse-types`),
+      axios.get(`${API_URL}/api/expenditure-heads`),
+    ]).then(([user, guests, houses, heads]) => {
+      if (!active) return;
 
-    if (user.status === "fulfilled" && user.value.data.success) {
-      setEmployee(user.value.data.data);
-    }
+      if (user.status === "fulfilled" && user.value.data.success) {
+        setEmployee(user.value.data.data);
+      }
 
-    if (guests.status === "fulfilled") setGuestTypes(guests.value.data);
-    if (houses.status === "fulfilled") setGuestHouses(houses.value.data);
-    if (heads.status === "fulfilled") setExpenditureHeads(heads.value.data);
+      if (guests.status === "fulfilled") setGuestTypes(guests.value.data);
+      if (houses.status === "fulfilled") setGuestHouses(houses.value.data);
+      if (heads.status === "fulfilled") setExpenditureHeads(heads.value.data);
 
-    setLoadingMasters(false);
-  });
+      setLoadingMasters(false);
+    });
 
-  return () => {
-    active = false;
-  };
-}, []);
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
 
@@ -431,9 +431,9 @@ useEffect(() => {
     uploadedFile,
     uploadedFileName: uploadedFile?.name || draft.uploadedFileName || "",
     uploadedFileUrl: filePreview,
- userId: employee.EmployeeId,
-EmployeeName: employee.DisplayName,
-DepartmentName: "",
+    userId: employee.EmployeeId,
+    EmployeeName: employee.DisplayName,
+    DepartmentName: "",
   });
 
   const validate = () => {
@@ -455,7 +455,7 @@ DepartmentName: "",
       return "Guest Name can contain only letters, spaces, apostrophe ('), hyphen (-) and period (.).";
 
     //**************guestAddress*****************
-    const guestAddress = formData.guestAddress.trim();
+    const guestAddress = formData.guestAddress.replace(/\s+/g, " ").trim();
 
     if (!guestAddress)
       return "Guest Address is required.";
@@ -495,10 +495,18 @@ DepartmentName: "",
 
     //**************Purpose*****************
     const purpose = formData.purpose.trim();
-    if (!formData.purpose.trim()) return "Enter the purpose of visit";
+
+    if (!purpose)
+      return "Purpose of visit is required.";
+
+    if (purpose.length < 5)
+      return "Purpose of visit must contain at least 5 characters.";
 
     if (purpose.length > 250)
       return "Purpose of visit cannot exceed 250 characters.";
+
+    if (!/^[A-Za-z0-9.,()'&\/ -]+$/.test(purpose))
+      return "Purpose of visit contains invalid characters.";
 
     //**********Arrival & Departure**********/
     if (!arrivalDate || !departureDate) return "Select arrival and departure date/time";
@@ -635,14 +643,14 @@ DepartmentName: "",
           <div className="applicant-card">
             <span className="sidebar-label">Requesting employee</span>
             <div className="employee-avatar">
-  {employee.DisplayName?.charAt(0) || "E"}
-</div>
+              {employee.DisplayName?.charAt(0) || "E"}
+            </div>
 
-<h3>
-  {employee.DisplayName || (loadingMasters ? "Loading..." : "Institute Employee")}
-</h3>
+            <h3>
+              {employee.DisplayName || (loadingMasters ? "Loading..." : "Institute Employee")}
+            </h3>
 
-<p>{employee.EmployeeId || "Employee ID"}</p>
+            <p>{employee.EmployeeId || "Employee ID"}</p>
           </div>
           <nav className="form-outline" aria-label="Form sections">
             <a
@@ -714,9 +722,9 @@ DepartmentName: "",
                 <Field label="Guest address" required className="span-2">
                   <textarea name="guestAddress" value={formData.guestAddress} onChange={updateField} rows="3" placeholder="Complete postal address" />
                 </Field>
-                <div className="component-field"><MobileNumberInput countryCode={countryCode} setCountryCode={setCountryCode} mobile={mobile} setMobile={setMobile} label="Contact number *" /></div>
-                <div className="component-field"><EmailInput label="Guest email *" value={guestEmail} setValue={setGuestEmail} /></div>
-                <div className="component-field span-2"><NationalityInput nationality={nationality} setNationality={setNationality} countryName={countryName} setCountryName={setCountryName} /></div>
+                <div className="component-field"><MobileNumberInput countryCode={countryCode} setCountryCode={setCountryCode} mobile={mobile} setMobile={setMobile} label="Contact number" required /></div>
+                <div className="component-field"><EmailInput label="Guest email" required value={guestEmail} setValue={setGuestEmail} /></div>
+                <div className="component-field span-2"><NationalityInput nationality={nationality} setNationality={setNationality} countryName={countryName} setCountryName={setCountryName} required /></div>
               </div>
             </FormSection>
           </div>
@@ -765,8 +773,14 @@ DepartmentName: "",
                     <button type="button" className="add-room-button" onClick={addRoom}><FaPlus /> Add room type</button>
                   </div>
                   <div className="room-requirements-columns">
-                    <span>Room Type</span>
-                    <span>No. of Rooms</span>
+                    <span>
+                      Room Type <span className="required-mark">*</span>
+                    </span>
+
+                    <span>
+                      No. of Rooms <span className="required-mark">*</span>
+                    </span>
+
                     <span aria-hidden="true"></span>
                   </div>
                   {roomRequirements.map((room, index) => (
@@ -881,7 +895,7 @@ DepartmentName: "",
                 <Field label="Special requirements" className="span-2" hint="Accessibility, food preferences, late arrival, pickup coordination, or other instructions.">
                   <textarea name="special" value={formData.special} onChange={updateField} rows="4" placeholder="Tell the guest house team anything they should prepare in advance" />
                 </Field>
-                <Field label="Supporting document" className="span-2" hint="PDF, JPG, PNG, DOC or DOCX · Maximum 5 MB">
+                <Field label="Supporting document" className="span-2" hint="PDF, JPG, PNG, DOC or DOCX · Maximum 200 KB">
                   <label className="file-drop-zone">
                     <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onChange={handleFile} />
                     <FaFileAlt />
@@ -896,13 +910,13 @@ DepartmentName: "",
             <div><strong>Ready to review?</strong><span>Your request will not be submitted until the next screen.</span></div>
             <button type="button" className="cancel-form-button" onClick={() => navigate("/guesthouse/dashboard")}>Cancel</button>
             <button type="button" className="save-draft-button" onClick={saveDraft}>Save draft</button>
-          <button
-  type="button"
-  className="preview-button"
-  onClick={() => navigate("/preview")}
->
-  Review application <span>→</span>
-</button>
+            <button
+              type="button"
+              className="preview-button"
+              onClick={() => navigate("/preview")}
+            >
+              Review application <span>→</span>
+            </button>
           </footer>
         </form>
       </div>

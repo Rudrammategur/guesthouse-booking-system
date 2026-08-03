@@ -12,3 +12,8 @@
   font-weight: 480;
 }
 
+.form-group label .required {
+    color: red !important;
+    margin-left: 2px;
+}
+

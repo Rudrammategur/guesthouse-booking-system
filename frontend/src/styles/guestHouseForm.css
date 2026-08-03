@@ -323,7 +323,9 @@
 }
 
 .required-mark {
-  color: #dc2626;
+    color: #dc2626;
+    margin-left: 2px;
+    font-weight: 600;
 }
 
 .booking-field input,

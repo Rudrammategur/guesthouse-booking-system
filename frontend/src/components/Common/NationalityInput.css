@@ -11,3 +11,9 @@
     flex: 1;
 
 }
+
+.form-group label .required {
+    color: #dc2626;
+    margin-left: 2px;
+    font-weight: 600;
+}

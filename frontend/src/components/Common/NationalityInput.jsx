@@ -5,7 +5,8 @@ function NationalityInput({
   nationality,
   setNationality,
   countryName,
-  setCountryName
+  setCountryName,
+  required = false
 }) {
 
   const handleNationalityChange = (e) => {
@@ -26,7 +27,12 @@ function NationalityInput({
 
       <div className="form-group">
 
-        <label>Nationality</label>
+        <label>
+          Nationality
+          {required && (
+            <span className="required">*</span>
+          )}
+        </label>
 
         <select
           value={nationality}
@@ -53,7 +59,12 @@ function NationalityInput({
 
           <div className="form-group">
 
-            <label>Country Name</label>
+            <label>
+              Country Name
+              {required && nationality === "Other" && (
+                <span className="required">*</span>
+              )}
+            </label>
 
             <input
               type="text"

@@ -6,7 +6,8 @@ function MobileNumberInput({
   setCountryCode,
   mobile,
   setMobile,
-  label = "Mobile Number"
+  label = "Mobile Number",
+  required = false
 }) {
 
   const handleMobileChange = (e) => {
@@ -24,7 +25,13 @@ function MobileNumberInput({
   return (
     <div className="form-group">
 
-      <label>{label}</label>
+      <label>
+        {label}
+        {required && (
+                    <span className="required">*</span>
+                )}
+      </label>
+      
 
       <div className="mobile-input-container">
 
