@@ -186,7 +186,7 @@ function GuestHousePreview() {
 
             await axios.post(
 
-                "http://localhost:9009/api/guesthouse",
+                "/guesthouse-api/api/guesthouse",
 
                 formData,
 

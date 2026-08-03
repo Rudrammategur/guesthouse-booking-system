@@ -4,7 +4,7 @@ import "./workflowLogs.css";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
-    "http://localhost:9009";
+    "/guesthouse-api";
 
 function WorkflowLogs({ moduleName, referenceId }) {
 

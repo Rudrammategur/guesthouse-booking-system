@@ -24,7 +24,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../../styles/guestHouseForm.css";
 import logo from "../../assets/iit-dharwad-logo.png";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
+const API_URL = import.meta.env.VITE_API_URL || "/guesthouse-api";
 
 const isSameCalendarDay = (first, second) => Boolean(
   first && second &&

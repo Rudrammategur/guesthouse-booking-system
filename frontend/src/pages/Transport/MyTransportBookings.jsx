@@ -16,7 +16,7 @@ function MyTransportBookings() {
     );
 
     const res = await axios.get(
-      `http://localhost:9009/api/my-transport-bookings/${user.EmployeeId}`
+      `/guesthouse-api/api/my-transport-bookings/${user.EmployeeId}`
     );
 
     setRequests(res.data);

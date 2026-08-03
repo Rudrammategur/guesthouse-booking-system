@@ -21,7 +21,7 @@ function MyGuestHouseBookings() {
         }
 
         const res = await axios.get(
-          `http://localhost:9009/api/my-bookings/${user.EmployeeId}`
+          `/guesthouse-api/api/my-bookings/${user.EmployeeId}`
         );
 
         setBookings(res.data);

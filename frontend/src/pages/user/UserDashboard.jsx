@@ -34,7 +34,7 @@ function UserDashboard() {
         const user = JSON.parse(localStorage.getItem("user"));
 
         const res = await axios.get(
-          `http://localhost:9009/api/dashboard-stats/${user.EmployeeId}`
+          `/guesthouse-api/api/dashboard-stats/${user.EmployeeId}`
         );
 
         setStats(res.data);

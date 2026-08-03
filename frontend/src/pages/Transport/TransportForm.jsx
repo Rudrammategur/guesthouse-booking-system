@@ -75,7 +75,7 @@ function TransportForm() {
 
     try {
       await axios.post(
-        "http://localhost:9009/api/transport",
+        "/guesthouse-api/api/transport",
         data
       );
 

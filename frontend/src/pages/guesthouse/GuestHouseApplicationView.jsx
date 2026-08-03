@@ -16,7 +16,7 @@ import { ACTIONS, getAvailableActions } from "../../utils/applicationActions";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
-    "http://localhost:9009";
+    "/guesthouse-api";
 
 const formatDate = (value) => {
 

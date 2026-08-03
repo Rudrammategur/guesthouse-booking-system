@@ -15,7 +15,7 @@ import ERPPage from "../../components/Common/ERPPage";
 import ERPFormModal from "../../components/Common/Form/ERPFormModal";
 import CheckInPanel from "./CheckInPanel";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
+const API_URL = import.meta.env.VITE_API_URL || "/guesthouse-api";
 
 
 function GHCheckInPage() {

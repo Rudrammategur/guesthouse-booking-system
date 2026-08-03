@@ -16,7 +16,7 @@ function AdminDashboard() {
 
     const API_URL =
         import.meta.env.VITE_API_URL ||
-        "http://localhost:9009";
+        "/guesthouse-api";
 
     const [dashboard, setDashboard] = useState({
 

@@ -60,7 +60,7 @@ function GuestHousePrintPage() {
 
   const fetchData = async () => {
     const res = await axios.get(
-      `http://localhost:9009/api/master/application/${id}`
+      `/guesthouse-api/api/master/application/${id}`
     );
     setData(res.data);
   };

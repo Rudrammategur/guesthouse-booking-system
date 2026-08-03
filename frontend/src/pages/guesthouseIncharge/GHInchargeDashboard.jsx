@@ -16,7 +16,7 @@ import StatusBadge from "../../components/Common/StatusBadge";
 import logo from "../../assets/iit-dharwad-logo.png";
 import GHInchargeSidebar from "./GHInchargeSidebar";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
+const API_URL = import.meta.env.VITE_API_URL || "/guesthouse-api";
 
 const formatDate = (value) => value
   ? new Date(value).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })

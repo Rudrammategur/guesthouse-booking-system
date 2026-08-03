@@ -5,7 +5,7 @@ import GenericDashboardPage from "../../components/Common/GenericDashboardPage";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
-    "http://localhost:9009";
+    "/guesthouse-api";
 
 function AdminApplications() {
 

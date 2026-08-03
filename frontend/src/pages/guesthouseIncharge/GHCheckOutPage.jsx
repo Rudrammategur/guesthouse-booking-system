@@ -13,7 +13,7 @@ import ApplicationView from "../../components/Dashboard/ApplicationView/Applicat
 
 import ERPFormField from "../../components/Common/Form/ERPFormField";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9009";
+const API_URL = import.meta.env.VITE_API_URL || "/guesthouse-api";
 
 function GHCheckOutPage() {
 
