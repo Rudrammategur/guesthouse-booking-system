@@ -22,10 +22,10 @@ exports.getApplications = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
-        // Authorization
-        await AuthorizationService.ensureAllocator(currentUser);
+        // // Authorization
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         const pool = await poolPromise;
 
@@ -154,10 +154,10 @@ exports.getDashboardCounts = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
         // Authorization
-        await AuthorizationService.ensureAllocator(currentUser);
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         const pool = await poolPromise;
 
@@ -260,10 +260,10 @@ exports.getApplication = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
-        // Authorization
-        await AuthorizationService.ensureAllocator(currentUser);
+        // // Authorization
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         const bookingId = req.params.bookingId;
 
@@ -479,10 +479,10 @@ exports.getAvailableRooms = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
-        // Authorization
-        await AuthorizationService.ensureAllocator(currentUser);
+        // // Authorization
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         const pool = await poolPromise;
 
@@ -867,10 +867,10 @@ exports.getCheckInApplication = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
-        // Authorization
-        await AuthorizationService.ensureAllocator(currentUser);
+        // // Authorization
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         const bookingId = req.params.bookingId;
 
@@ -1052,10 +1052,10 @@ exports.checkoutGuest = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
         // Authorization
-        await AuthorizationService.ensureAllocator(currentUser);
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         await transaction.begin();
 
@@ -1358,10 +1358,10 @@ exports.getCheckoutApplications = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
-        // Authorization
-        await AuthorizationService.ensureAllocator(currentUser);
+        // // Authorization
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         const pool = await poolPromise;
 
@@ -1461,10 +1461,10 @@ exports.getCheckoutDetails = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
-        // Authorization
-        await AuthorizationService.ensureAllocator(currentUser);
+        // // Authorization
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         const bookingId = req.params.bookingId;
 
@@ -1680,10 +1680,10 @@ exports.allocateRooms = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
-        // Authorization
-        await AuthorizationService.ensureAllocator(currentUser);
+        // // Authorization
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         await transaction.begin();
 
@@ -2023,9 +2023,9 @@ exports.checkInGuest = async (req, res) => {
 
         const currentUser = req.user;
 
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
-        await AuthorizationService.ensureAllocator(currentUser);
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         await transaction.begin();
 
@@ -2263,10 +2263,10 @@ exports.getOccupancySummary = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
-        // Authorization
-        await AuthorizationService.ensureAllocator(currentUser);
+        // // Authorization
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         const pool = await poolPromise;
 
@@ -2402,10 +2402,10 @@ exports.getRoomAvailability = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
-        // Authorization
-        await AuthorizationService.ensureAllocator(currentUser);
+        // // Authorization
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         const pool = await poolPromise;
 
@@ -2571,10 +2571,10 @@ exports.getProcessedApplications = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
-        // Authorization
-        await AuthorizationService.ensureAllocator(currentUser);
+        // // Authorization
+        // await AuthorizationService.ensureAllocator(currentUser);
 
         const pool = await poolPromise;
 

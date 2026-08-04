@@ -22,9 +22,9 @@ exports.getDashboardCounts = async (req, res) => {
 
         const currentUser = req.user;
 
-        // Authentication & Authorization
-        AuthorizationService.ensureAuthenticated(currentUser);
-        await AuthorizationService.ensureApprover(currentUser);
+        // // Authentication & Authorization
+        // AuthorizationService.ensureAuthenticated(currentUser);
+        // await AuthorizationService.ensureApprover(currentUser);
 
         const pool = await poolPromise;
 
@@ -144,10 +144,10 @@ exports.rejectApplication = async (req, res) => {
 
     const remarks = req.body.remarks || "";
 
-    // Authentication & Authorization
-    AuthorizationService.ensureAuthenticated(currentUser);
+    // // Authentication & Authorization
+    // AuthorizationService.ensureAuthenticated(currentUser);
 
-    await AuthorizationService.ensureApprover(currentUser);
+    // await AuthorizationService.ensureApprover(currentUser);
 
     // Fetch Booking
     const booking =
@@ -306,9 +306,9 @@ exports.getApplications = async (req, res) => {
     const currentUser = req.user;
 
     // Authentication & Authorization
-    AuthorizationService.ensureAuthenticated(currentUser);
+    // AuthorizationService.ensureAuthenticated(currentUser);
 
-    await AuthorizationService.ensureApprover(currentUser);
+    // await AuthorizationService.ensureApprover(currentUser);
 
     const pool = await poolPromise;
 
@@ -438,9 +438,9 @@ exports.getApplication = async (req, res) => {
 
 
     // Authentication & Authorization
-    AuthorizationService.ensureAuthenticated(currentUser);
+    // AuthorizationService.ensureAuthenticated(currentUser);
 
-    await AuthorizationService.ensureApprover(currentUser);
+    // await AuthorizationService.ensureApprover(currentUser);
 
 
 
@@ -577,9 +577,9 @@ exports.getPendingApplications = async (req, res) => {
     const currentUser = req.user;
 
     // Authentication & Authorization
-    AuthorizationService.ensureAuthenticated(currentUser);
+    // AuthorizationService.ensureAuthenticated(currentUser);
 
-    await AuthorizationService.ensureApprover(currentUser);
+    // await AuthorizationService.ensureApprover(currentUser);
 
     const pool = await poolPromise;
 
@@ -684,9 +684,9 @@ exports.approveApplication = async (req, res) => {
     const remarks = req.body.remarks || "";
 
     // Authentication & Authorization
-    AuthorizationService.ensureAuthenticated(currentUser);
+    // AuthorizationService.ensureAuthenticated(currentUser);
 
-    await AuthorizationService.ensureApprover(currentUser);
+    // await AuthorizationService.ensureApprover(currentUser);
 
     // Fetch Booking
     const booking =

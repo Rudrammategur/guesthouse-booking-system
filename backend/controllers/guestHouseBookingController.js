@@ -5,7 +5,7 @@ const {
     getBookingDetails
 } = require("../services/bookingService");
 
-const AuthorizationService = require ("../services/AuthorizationService");
+const AuthorizationService = require("../services/AuthorizationService");
 
 const { generateGuestHouseBookingId, generateGuestHouseBookingNo } = require("../utils/idGenerator");
 
@@ -17,6 +17,8 @@ const { formatDate } = require("../utils/dateFormater");
 
 const WorkflowResolverService =
     require("../services/workflowResolverService");
+
+const { getWorkflowHistory } = require("../services/workflowService");
 
 
 exports.createBooking = async (req, res) => {
@@ -33,9 +35,9 @@ exports.createBooking = async (req, res) => {
 
         const employeeEmail = req.user.EmployeeEmail;
 
-        AuthorizationService.ensureAuthenticated(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
 
-        await AuthorizationService.ensureApplicant(currentUser);
+        // await AuthorizationService.ensureApplicant(currentUser);
 
         const workflow =
             await WorkflowResolverService.resolveWorkflow(
@@ -397,6 +399,8 @@ exports.getDashboardCounts = async (req, res) => {
 
     try {
 
+        const employeeId = req.user.EmployeeId;
+
         const pool = await poolPromise;
 
         const result = await pool.request()
@@ -445,11 +449,13 @@ WHERE
 
 IsActive = 1
 
+AND BookedBy = @EmployeeId
+
 `);
 
         res.status(200).json({
 
-            success:true,
+            success: true,
 
             data: result.recordset[0]
 
@@ -457,15 +463,15 @@ IsActive = 1
 
     }
 
-    catch(err){
+    catch (err) {
 
         console.error(err);
 
         res.status(500).json({
 
-            success:false,
+            success: false,
 
-            message:err.message
+            message: err.message
 
         });
 
@@ -477,6 +483,8 @@ exports.getMyApplications = async (req, res) => {
     try {
 
         const pool = await poolPromise;
+
+        const employeeId = req.user.EmployeeId;
 
         const result = await pool.request()
 
@@ -514,6 +522,8 @@ WHERE
 
     b.IsActive = 1
 
+    AND b.BookedBy = @EmployeeId
+
 ORDER BY
 
     b.BookingDateTime DESC
@@ -547,7 +557,6 @@ ORDER BY
     }
 
 };
-const { getWorkflowHistory } = require("../services/workflowService");
 
 exports.getApplicationDetails = async (req, res) => {
 
@@ -558,8 +567,8 @@ exports.getApplicationDetails = async (req, res) => {
         const currentUser = req.user;
 
         // Authentication & Authorization
-        AuthorizationService.ensureAuthenticated(currentUser);
-        await AuthorizationService.ensureApplicant(currentUser);
+        // AuthorizationService.ensureAuthenticated(currentUser);
+        // await AuthorizationService.ensureApplicant(currentUser);
 
         const bookingId = req.params.bookingId;
 
@@ -719,20 +728,20 @@ WHERE
                 },
 
                 application: {
-    ...booking,
+                    ...booking,
 
-    AssignedVerifier: {
-        RoleName: booking.VerifierRole
-    },
+                    AssignedVerifier: {
+                        RoleName: booking.VerifierRole
+                    },
 
-    AssignedApprover: {
-        RoleName: booking.ApproverRole
-    },
+                    AssignedApprover: {
+                        RoleName: booking.ApproverRole
+                    },
 
-    AssignedAllocator: {
-        RoleName: booking.AllocatorRole
-    }
-},
+                    AssignedAllocator: {
+                        RoleName: booking.AllocatorRole
+                    }
+                },
 
                 roomRequirements: roomResult.recordset,
 
@@ -745,17 +754,19 @@ WHERE
     }
 
     catch (err) {
+        if (
+            err.message === "Only the applicant can view his application."
+        ) {
+            return res.status(403).json({
+                success: false,
+                message: err.message
+            });
+        }
 
-        console.error(err);
-
-        res.status(500).json({
-
+        return res.status(500).json({
             success: false,
-
             message: err.message
-
         });
-
     }
 
 };
@@ -773,9 +784,9 @@ exports.cancelBooking = async (req, res) => {
 
         const currentUser = req.user;
 
-        // Authentication & Authorization
-        AuthorizationService.ensureAuthenticated(currentUser);
-        await AuthorizationService.ensureApplicant(currentUser);
+        // // Authentication & Authorization
+        // AuthorizationService.ensureAuthenticated(currentUser);
+        // await AuthorizationService.ensureApplicant(currentUser);
 
         // Fetch Booking
         const booking = await getBookingDetails(bookingId);
