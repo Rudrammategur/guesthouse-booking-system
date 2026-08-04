@@ -248,6 +248,17 @@ function VerifierDashboard() {
 
                 description="Verify guest house booking applications."
 
+                actions={
+        <div className="hero-actions">
+            <Button
+                variant="outline"
+                onClick={() => navigate(-1)}
+            >
+                ← Back
+            </Button>
+        </div>
+    }
+
             />
 
             <DashboardCards cards={cards} />

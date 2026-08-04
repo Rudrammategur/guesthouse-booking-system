@@ -284,6 +284,16 @@ function GHInchargeDashboard() {
         title="Guest House Management System"
         subtitle="Guest House Incharge Dashboard"
         description="Manage room allocation, check-in and check-out."
+        actions={
+        <div className="hero-actions">
+            <Button
+                variant="outline"
+                onClick={() => navigate(-1)}
+            >
+                ← Back
+            </Button>
+        </div>
+    }
       />
       <div className="gh-layout">
 

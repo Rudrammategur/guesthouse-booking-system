@@ -126,6 +126,16 @@ function GHProcessedApplicationsPage() {
                 title="Guest House Management System"
                 subtitle="Processed Applications"
                 description="View completed guest house bookings and booking history."
+                actions={
+        <div className="hero-actions">
+            <Button
+                variant="outline"
+                onClick={() => navigate(-1)}
+            >
+                ← Back
+            </Button>
+        </div>
+    }
             />
 
             <ERPSection

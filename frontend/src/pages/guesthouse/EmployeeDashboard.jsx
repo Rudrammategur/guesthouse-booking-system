@@ -45,83 +45,83 @@ function EmployeeDashboard() {
     const [cancelLoading, setCancelLoading] = useState(false);
 
     const [activeTab, setActiveTab] = useState("all");
-const [employeeName, setEmployeeName] = useState("");
-const [userInfo, setUserInfo] = useState(null);
+    const [employeeName, setEmployeeName] = useState("");
+    const [userInfo, setUserInfo] = useState(null);
 
-   const loadDashboard = useCallback(async () => {
+    const loadDashboard = useCallback(async () => {
 
-    if (!userInfo) return;
+        if (!userInfo) return;
 
-    setLoading(true);
+        setLoading(true);
 
-    try {
+        try {
 
-const [
-    applicationResponse,
-    countResponse
-] = await Promise.all([
+            const [
+                applicationResponse,
+                countResponse
+            ] = await Promise.all([
 
-    axios.get(
-        `${API_URL}/api/guesthouse/my-applications`
-    ),
+                axios.get(
+                    `${API_URL}/api/guesthouse/my-applications`
+                ),
 
-    axios.get(
-        `${API_URL}/api/guesthouse/dashboard-counts`
-    )
+                axios.get(
+                    `${API_URL}/api/guesthouse/dashboard-counts`
+                )
 
-]);
+            ]);
 
 
             setApplications(
                 applicationResponse.data.data
             );
 
-setCounts(
-    countResponse.data.data || {}
-);
+            setCounts(
+                countResponse.data.data || {}
+            );
 
-    } catch (err) {
+        } catch (err) {
 
-        toast.error(
-            err.response?.data?.message ||
-            "Unable to load dashboard"
-        );
+            toast.error(
+                err.response?.data?.message ||
+                "Unable to load dashboard"
+            );
 
-    } finally {
-        setLoading(false);
-    }
+        } finally {
+            setLoading(false);
+        }
 
-}, [userInfo]);
+    }, [userInfo]);
 
 
-useEffect(() => {
-    let el = null;
+    useEffect(() => {
+        let el = null;
 
-    try {
-        el = window.top.document.querySelector("#spnUserName");
-    } catch (e) {}
+        try {
+            el = window.top.document.querySelector("#spnUserName");
+        } catch (e) { }
 
-    if (!el?.innerText) {
-        toast.error("Unable to determine logged in user.");
-        return;
-    }
+        if (!el?.innerText) {
+            toast.error("Unable to determine logged in user.");
+            return;
+        }
 
-    const name = el.innerText.trim();
+        const name = el.innerText.trim();
 
-    setEmployeeName(name);
+        setEmployeeName(name);
 
-    axios
-        .get(`${API_URL}/api/user/me`, {
-            params: { name }
-        })
-        .then((res) => {
-            setUserInfo(res.data);
-        })
-        .catch((err) => {
-            console.error(err);
-            toast.error("Unable to fetch employee details.");
-        });
-}, []);
+        axios
+            .get(`${API_URL}/api/user/me`, {
+                params: { name }
+            })
+            .then((res) => {
+                setUserInfo(res.data);
+            })
+            .catch((err) => {
+                console.error(err);
+                toast.error("Unable to fetch employee details.");
+            });
+    }, []);
 
     const cancelBooking = async () => {
 
@@ -164,11 +164,11 @@ useEffect(() => {
         }
 
     };
-useEffect(() => {
-    if (userInfo) {
-        loadDashboard();
-    }
-}, [userInfo, loadDashboard]);
+    useEffect(() => {
+        if (userInfo) {
+            loadDashboard();
+        }
+    }, [userInfo, loadDashboard]);
     const cards = [
 
         {
@@ -283,47 +283,47 @@ useEffect(() => {
     // console.log(application);
 
 
-  const filteredApplications =
-    Array.isArray(applications)
-        ? applications.filter(app => {
+    const filteredApplications =
+        Array.isArray(applications)
+            ? applications.filter(app => {
 
-            if (activeTab === "pending") {
+                if (activeTab === "pending") {
 
-                return [
-                    "Submitted",
-                    "Verified",
-                    "Approved",
-                    "Allocated",
-                    "Checked In"
-                ].includes(app.BookingStatus);
+                    return [
+                        "Submitted",
+                        "Verified",
+                        "Approved",
+                        "Allocated",
+                        "Checked In"
+                    ].includes(app.BookingStatus);
 
-            }
+                }
 
-            if (activeTab === "approved") {
+                if (activeTab === "approved") {
 
-                return app.BookingStatus === "Approved";
+                    return app.BookingStatus === "Approved";
 
-            }
+                }
 
-            if (activeTab === "rejected") {
+                if (activeTab === "rejected") {
 
-                return app.BookingStatus === "Rejected";
+                    return app.BookingStatus === "Rejected";
 
-            }
+                }
 
-            if (activeTab === "completed") {
+                if (activeTab === "completed") {
 
-                return [
-                    "Checked Out",
-                    "Cancelled"
-                ].includes(app.BookingStatus);
+                    return [
+                        "Checked Out",
+                        "Cancelled"
+                    ].includes(app.BookingStatus);
 
-            }
+                }
 
-            return true;
+                return true;
 
-        })
-        : [];
+            })
+            : [];
 
 
     return (
@@ -343,12 +343,23 @@ useEffect(() => {
                 description="Book accommodation for institute guests, track applications and manage your requests."
 
                 actions={
+                    <>
 
-                    <Button
-                        onClick={() => navigate("/apply")}
-                    >
-                        + Apply for Guest House
-                    </Button>
+                        <Button
+                            onClick={() => navigate("/apply")}
+                        >
+                            + Apply for Guest House
+                        </Button>
+
+
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate(-1)}
+                        >
+                            ← Back
+                        </Button>
+                    </>
+
 
                 }
 

@@ -102,13 +102,18 @@ function GuestHouseForm() {
   const [guestEmail, setGuestEmail] = useState(draft.email || draft.guestEmail || "");
   const [nationality, setNationality] = useState(draft.nationality === "Indian" ? "Indian" : draft.nationality ? "Other" : "");
   const [countryName, setCountryName] = useState(draft.nationality && draft.nationality !== "Indian" ? draft.nationality : draft.countryName || "");
-  const [roomRequirements, setRoomRequirements] =
-    useState([
-      {
-        roomTypeId: "",
-        noOfRooms: 1
-      }
-    ]);
+  const [roomRequirements, setRoomRequirements] = useState(() => {
+  if (draft.roomRequirements?.length) {
+    return draft.roomRequirements;
+  }
+
+  return [
+    {
+      roomTypeId: "",
+      noOfRooms: 1
+    }
+  ];
+});
   const [uploadedFile, setUploadedFile] = useState(null);
   const [filePreview, setFilePreview] = useState(draft.uploadedFileUrl || "");
   const [activeSection, setActiveSection] = useState("guest-details");
