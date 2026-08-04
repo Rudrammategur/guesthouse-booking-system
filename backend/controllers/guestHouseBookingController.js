@@ -404,6 +404,11 @@ exports.getDashboardCounts = async (req, res) => {
         const pool = await poolPromise;
 
         const result = await pool.request()
+        .input(
+                "EmployeeId",
+                sql.VarChar,
+                employeeId
+            )
 
             .query(`
 
@@ -487,6 +492,11 @@ exports.getMyApplications = async (req, res) => {
         const employeeId = req.user.EmployeeId;
 
         const result = await pool.request()
+        .input(
+                "EmployeeId",
+                sql.VarChar,
+                employeeId
+            )
 
             .query(`
 
