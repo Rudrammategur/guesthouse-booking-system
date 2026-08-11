@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import { useNavigate, useParams } from "react-router-dom";
 import ApplicationView from "../../components/Dashboard/ApplicationView/ApplicationView";
 import "../../styles/ghCheckIn.css";
@@ -81,9 +81,9 @@ function GHCheckInPage() {
 
     const loadApplication = async () => {
 
-        const res = await axios.get(
+        const res = await api.get(
 
-            `${API_URL}/api/gh-incharge/checkin/${bookingId}`
+            `/api/gh-incharge/checkin/${bookingId}`
 
         );
 
@@ -152,9 +152,9 @@ function GHCheckInPage() {
                 JSON.stringify(occupants)
             );
 
-            await axios.post(
+            await api.post(
 
-                `${API_URL}/api/gh-incharge/checkin/${bookingId}`,
+                `/api/gh-incharge/checkin/${bookingId}`,
 
                 formData,
 

@@ -1,4 +1,4 @@
-const { sendEmail } = require("./EmailService");
+const { sendEmail } = require("./emailService");
 
 const bookingSubmitted =
 require("../templates/bookingSubmitted");
@@ -114,4 +114,17 @@ exports.sendBookingCancelledToAuthority = async (
 
     );
 
+};
+
+const bookingCancelled =
+    require("../templates/bookingCancelled");
+
+exports.sendBookingCancelled = async (email, data) => {
+    const template = bookingCancelled(data);
+
+    await sendEmail(
+        email,
+        template.subject,
+        template.html
+    );
 };

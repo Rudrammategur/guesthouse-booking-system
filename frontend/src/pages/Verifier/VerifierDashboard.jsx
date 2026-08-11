@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 
 import ERPPage from "../../components/Common/ERPPage";
 import PageHeader from "../../components/Common/PageHeader";
@@ -9,6 +9,7 @@ import ERPTable from "../../components/Common/ERPTable";
 import DashboardCards from "../../components/Dashboard/DashboardCards";
 import StatusBadge from "../../components/Common/StatusBadge";
 import Button from "../../components/Common/Button/Button";
+import { getUserHeader } from "../../utils/userHeader";
 
 import logo from "../../assets/iit-dharwad-logo.png";
 
@@ -50,19 +51,16 @@ function VerifierDashboard() {
 
             ] = await Promise.all([
 
-                axios.get(
-                    `${API_URL}/api/verifier/applications`
-                ),
+                api.get("/api/verifier/applications"),
 
-                axios.get(
-                    `${API_URL}/api/verifier/dashboard-counts`
-                )
-
+                api.get("/api/verifier/dashboard-counts")
             ]);
 
-            setApplications(applicationResponse.data.data);
+            console.log("Applications Response", applicationResponse.data);
+            console.log("Dashboard Counts Response", countResponse.data);
 
-            setCounts(countResponse.data.data);
+            setApplications(applicationResponse.data.data || []);
+            setCounts(countResponse.data.data || {});
 
         }
 
@@ -106,24 +104,6 @@ function VerifierDashboard() {
         },
 
         {
-            label: "Verified Applications",
-            count: counts.VerifiedApplications ?? 0,
-            color: "success",
-            active: activeFilter === "VerifiedApplications",
-            onClick: () =>
-                setActiveFilter("VerifiedApplications")
-        },
-
-        {
-            label: "Rejected Applications",
-            count: counts.RejectedApplications ?? 0,
-            color: "danger",
-            active: activeFilter === "RejectedApplications",
-            onClick: () =>
-                setActiveFilter("RejectedApplications")
-        },
-
-        {
             label: "Processed Applications",
             count: counts.AllProcessedApplications ?? 0,
             color: "info",
@@ -143,19 +123,16 @@ function VerifierDashboard() {
 
                     return app.BookingStatus === "Submitted";
 
-                case "VerifiedApplications":
-
-                    return app.BookingStatus === "Verified";
-
-                case "RejectedApplications":
-
-                    return app.BookingStatus === "Rejected";
-
                 case "ProcessedApplications":
 
                     return [
-                        "Verified",
-                        "Rejected"
+                        'Verified',
+                        "Approved",
+                        "Rejected",
+                        "Allocated",
+                        "Checked In",
+                        "Checked Out",
+                        "cancelled"
                     ].includes(app.BookingStatus);
 
                 default:
@@ -249,15 +226,18 @@ function VerifierDashboard() {
                 description="Verify guest house booking applications."
 
                 actions={
-        <div className="hero-actions">
-            <Button
-                variant="outline"
-                onClick={() => navigate(-1)}
-            >
-                ← Back
-            </Button>
-        </div>
-    }
+                    <div className="hero-actions">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                window.location.href =
+                                    `${window.location.origin}/Default/Pages/Portal/PortalInfrastructure.html`;
+                            }}
+                        >
+                            ← Back
+                        </Button>
+                    </div>
+                }
 
             />
 

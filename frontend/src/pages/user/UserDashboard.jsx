@@ -6,7 +6,7 @@ import {
   FaSignOutAlt
 } from "react-icons/fa";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 import "../../styles/userDashboard.css";
 
@@ -33,8 +33,8 @@ function UserDashboard() {
       try {
         const user = JSON.parse(localStorage.getItem("user"));
 
-        const res = await axios.get(
-          `/guesthouse-api/api/dashboard-stats/${user.EmployeeId}`
+        const res = await api.get(
+          `/api/dashboard-stats/${user.EmployeeId}`
         );
 
         setStats(res.data);

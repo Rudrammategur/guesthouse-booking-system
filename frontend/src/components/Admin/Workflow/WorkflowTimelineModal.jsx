@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../../api/axios";
 import "./workflow.css";
 
 const API_URL =
@@ -30,9 +30,9 @@ function WorkflowTimelineModal({
 
             setLoading(true);
 
-            const response = await axios.get(
+            const response = await api.get(
 
-                `${API_URL}/api/admin/workflow/${bookingId}`
+                `/api/admin/workflow/${bookingId}`
 
             );
 

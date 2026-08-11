@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useParams } from "react-router-dom";
 
-import axios from "axios";
+import api from "../../../api/axios";
 
 import { REPORT_CONFIG } from "../../../config/reportConfig";
 
@@ -44,15 +44,15 @@ function ReportViewer() {
 
             ] = await Promise.all([
 
-                axios.get(
+                api.get(
 
-                    `${API_URL}/api/master/guesthouse-types`
+                    "/api/master/guesthouse-types"
 
                 ),
 
-                axios.get(
+                api.get(
 
-                    `${API_URL}/api/master/guest-types`
+                    "/api/master/guest-types"
 
                 )
 
@@ -94,9 +94,9 @@ function ReportViewer() {
 
             setLoading(true);
 
-            const response = await axios.get(
+            const response = await api.get(
 
-                `${API_URL}/api/admin/reports/${reportType}`,
+              `/api/admin/reports/${reportType}`,
 
                 {
 

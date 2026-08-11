@@ -17,42 +17,27 @@ exports.ensureAuthenticated = (currentUser) => {
 /**
  * Generic Role Validation
  */
-exports.ensureRole = async (
-
-    currentUser,
-
-    roleName
-
-) => {
+exports.ensureRole = async (currentUser, roleName) => {
 
     const requiredRoleMapIds =
-        await RoleService.getRoleMapIdsByRoleName(
-            roleName
-        );
+        await RoleService.getRoleMapIdsByRoleName(roleName);
+
+    console.log("Required RoleMapIDs:", requiredRoleMapIds);
 
     const userRoleMapIds =
         currentUser.RoleMapIDs ||
-        await RoleService.getUserRoleMapIds(
-            currentUser.UserId
-        );
+        await RoleService.getUserRoleMapIds(currentUser.UserId);
+
+    console.log("User RoleMapIDs:", userRoleMapIds);
 
     const hasRole =
         userRoleMapIds.some(roleMapId =>
-            requiredRoleMapIds.includes(
-                Number(roleMapId)
-            )
+            requiredRoleMapIds.includes(Number(roleMapId))
         );
 
     if (!hasRole) {
-
-        throw new Error(
-
-            `You are not authorized as ${roleName}.`
-
-        );
-
+        throw new Error(`You are not authorized as ${roleName}.`);
     }
-
 };
 
 
@@ -61,14 +46,18 @@ exports.ensureRole = async (
  */
 exports.ensureApplicant = async (currentUser) => {
 
+    const requiredRoleMapIds =
+        await RoleService.getRoleMapIdsByRoleName(
+            "IITDH EMPLOYEES"
+        );
+
+    console.log("Required RoleMapIDs:", requiredRoleMapIds);
+    console.log("Current User RoleMapIDs:", currentUser.RoleMapIDs);
+
     await exports.ensureRole(
-
         currentUser,
-
         "IITDH EMPLOYEES"
-
     );
-
 };
 
 

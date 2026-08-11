@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
+import api from "../../api/axios";
 
-import axios from "axios";
 
 import SettingSection from "../../components/Admin/Settings/SettingSection";
 
@@ -32,9 +32,9 @@ function SystemSettings() {
 
         try {
 
-            const response = await axios.get(
+            const response = await api.get(
 
-                `${API_URL}/api/admin/settings/GuestHouse`
+               "/api/admin/settings/GuestHouse"
 
             );
 
@@ -97,9 +97,9 @@ function SystemSettings() {
 
             setSaving(true);
 
-            await axios.put(
+            await api.put(
 
-                `${API_URL}/api/admin/settings/GuestHouse`,
+                "/api/admin/settings/GuestHouse",
 
                 settings
 

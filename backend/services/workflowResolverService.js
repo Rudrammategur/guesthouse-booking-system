@@ -27,6 +27,10 @@ exports.resolveWorkflow = async (
     const projectFund =
         isProjectFund(expenditureHead);
 
+    console.log("ApplicantRoleMapID:", applicantRoleMapId);
+console.log("ExpenditureHead:", expenditureHead);
+console.log("IsProjectFund:", projectFund);
+
     const workflowResult =
         await pool.request()
 
@@ -65,6 +69,8 @@ AND IsActive = 1
         );
 
     }
+
+    console.log("Workflow Result:", workflowResult.recordset);
 
     const workflow =
         workflowResult.recordset[0];

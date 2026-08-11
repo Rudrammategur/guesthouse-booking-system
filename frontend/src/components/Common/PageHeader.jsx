@@ -127,7 +127,7 @@ function PageHeader({
 
                         description &&
 
-                        <p className=".erp-page-description">
+                        <p className="erp-page-description">
 
                             {description}
 

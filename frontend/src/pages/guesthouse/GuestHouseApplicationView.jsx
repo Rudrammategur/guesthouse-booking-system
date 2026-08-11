@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 import "../../styles/guestHouseApplicationView.css";
 
@@ -100,15 +100,15 @@ function GuestHouseApplicationView() {
 
             ] = await Promise.all([
 
-                axios.get(
+                api.get(
 
-                    `${API_URL}/api/application/${bookingId}`
+                    `/api/application/${bookingId}`
 
                 ),
 
-                axios.get(
+                api.get(
 
-                    `${API_URL}/api/user/current-user`
+                    "/api/user/current-user"
 
                 )
 
@@ -191,8 +191,7 @@ function GuestHouseApplicationView() {
 
         try {
 
-            await axios.post(
-
+            await api.post(
                 `${API_URL}/api/verifier/verify/${application.GHBookingID}`,
 
                 {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 
 
@@ -20,8 +20,8 @@ function MyGuestHouseBookings() {
           return;
         }
 
-        const res = await axios.get(
-          `/guesthouse-api/api/my-bookings/${user.EmployeeId}`
+        const res = await api.get(
+          `/api/my-bookings/${user.EmployeeId}`
         );
 
         setBookings(res.data);

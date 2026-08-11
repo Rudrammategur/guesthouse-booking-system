@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 
 import ApplicationView from "../../components/Dashboard/ApplicationView/ApplicationView";
 
@@ -25,8 +25,8 @@ function GHInchargeApplicationPage() {
 
         try {
 
-            const res = await axios.get(
-                `${API_URL}/api/gh-incharge/applications/${bookingId}`
+            const res = await api.get(
+                `/api/gh-incharge/applications/${bookingId}`
             );
 
             setApplication(res.data.data);

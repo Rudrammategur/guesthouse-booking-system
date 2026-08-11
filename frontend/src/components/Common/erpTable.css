@@ -31,3 +31,15 @@
     color:var(--text-light);
 
 }
+
+.erp-export-btn{
+    border:none;
+    border-radius:10px;
+    padding:10px 16px;
+    cursor:pointer;
+    transition:background .2s ease;
+}
+
+.erp-export-btn:hover{
+    background:rgb(137,40,143);
+}

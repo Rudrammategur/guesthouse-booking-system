@@ -3,8 +3,34 @@ import InfoRow from "../../Common/InfoRow/infoRow";
 import StatusBadge from "../../Common/StatusBadge";
 import ERPTable from "../../Common/ERPTable";
 import Button from "../../Common/Button/Button";
+import api from "../../../api/axios";
 
 function ApplicationDetails({ application }) {
+
+    const showPaymentSummary =
+        application?.BookingStatus === "Checked Out";
+
+    const handleViewDocument = async () => {
+        try {
+            const response = await api.get(
+                `/api/guesthouse/application/${application.GHBookingID}/document`,
+                {
+                    responseType: "blob"
+                }
+            );
+
+            const url = URL.createObjectURL(response.data);
+
+            window.open(url, "_blank");
+
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+            }, 60000);
+
+        } catch (error) {
+            console.error("Document loading failed:", error);
+        }
+    };
 
     return (
 
@@ -144,49 +170,54 @@ function ApplicationDetails({ application }) {
 
                 </InfoCard>
 
+                {
+                    showPaymentSummary && (
 
-                <InfoCard title="Payment Summary">
 
-                    <div className="summary-row">
-                        <span>Accommodation</span>
-                        <strong>₹ {application.AccommodationAmount}</strong>
-                    </div>
+                        <InfoCard title="Payment Summary">
 
-                    <div className="summary-row">
-                        <span>Meal Charges</span>
-                        <strong>₹ {application.MealCharges}</strong>
-                    </div>
+                            <div className="summary-row">
+                                <span>Accommodation</span>
+                                <strong>₹ {application.AccommodationAmount}</strong>
+                            </div>
 
-                    <div className="summary-row">
-                        <span>Additional Charges</span>
-                        <strong>₹ {application.AdditionalCharges}</strong>
-                    </div>
+                            {/* <div className="summary-row">
+                                <span>Meal Charges</span>
+                                <strong>₹ {application.MealCharges}</strong>
+                            </div> */}
 
-                    <div className="summary-row">
-                        <span>Discount</span>
-                        <strong>₹ {application.DiscountAmount}</strong>
-                    </div>
+                            <div className="summary-row">
+                                <span>Additional Charges</span>
+                                <strong>₹ {application.AdditionalCharges}</strong>
+                            </div>
 
-                    <hr />
+                            <div className="summary-row">
+                                <span>Discount</span>
+                                <strong>₹ {application.DiscountAmount}</strong>
+                            </div>
 
-                    <div className="summary-total">
-                        <span>Total Payable</span>
-                        <strong>
-                            ₹ {application.TotalPayableAmount}
-                        </strong>
-                    </div>
+                            <hr />
 
-                    <div className="summary-row">
-                        <span>Payment Mode</span>
-                        <strong>{application.PaymentMode || "-"}</strong>
-                    </div>
+                            <div className="summary-total">
+                                <span>Total Payable</span>
+                                <strong>
+                                    ₹ {application.TotalPayableAmount}
+                                </strong>
+                            </div>
 
-                    <div className="summary-row">
-                        <span>Transaction Ref.</span>
-                        <strong>{application.TransactionReference || "-"}</strong>
-                    </div>
+                            <div className="summary-row">
+                                <span>Payment Mode</span>
+                                <strong>{application.PaymentMode || "-"}</strong>
+                            </div>
 
-                </InfoCard>
+                            <div className="summary-row">
+                                <span>Transaction Ref.</span>
+                                <strong>{application.TransactionReference || "-"}</strong>
+                            </div>
+
+                        </InfoCard>
+                    )
+                }
 
 
                 {/* Documents */}
@@ -196,30 +227,23 @@ function ApplicationDetails({ application }) {
                     title="Supporting Documents"
                 >
 
-                    {
+                    <div className="supporting-document">
 
-                        application.SupportingDoc ?
+                        <span>
+                            📎 Supporting document
+                        </span>
 
-                            <Button
-                                onClick={() =>
-                                    window.open(
-                                        `${API_URL}/api/verifier/document/${application.GHBookingID}`,
-                                        "_blank"
-                                    )
-                                }
-                            >
-
+                        {application.HasSupportingDoc ? (
+                            <Button onClick={handleViewDocument}>
                                 View Document
-
                             </Button>
-
-                            :
-
+                        ) : (
                             <p className="text-muted">
                                 No supporting document available.
                             </p>
+                        )}
 
-                    }
+                    </div>
 
                 </InfoCard>
 

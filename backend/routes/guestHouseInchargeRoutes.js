@@ -34,6 +34,11 @@ router.get("/checkout/:bookingId", getCheckoutDetails);
 
 router.post("/checkout/:bookingId", checkoutGuest);
 
+// router.post(
+//     "/checkout/:bookingId/generate-receipt",
+//     generateReceipt
+// );
+
 router.put("/allocate/:bookingId", allocateRooms);
 
 router.get("/checkin/:bookingId",getCheckInApplication);

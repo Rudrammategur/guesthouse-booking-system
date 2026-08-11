@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import "./workflowLogs.css";
 
 const API_URL =
@@ -21,9 +21,9 @@ function WorkflowLogs({ moduleName, referenceId }) {
 
         try {
 
-            const response = await axios.get(
+            const response = await api.get(
 
-                `${API_URL}/api/workflow/${moduleName}/${referenceId}`
+                `/api/workflow/${moduleName}/${referenceId}`
 
             );
 

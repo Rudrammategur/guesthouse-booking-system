@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 
 import ERPPage from "../../components/Common/ERPPage";
 import Button from "../../components/Common/Button/Button";
 import ERPFormModal from "../../components/Common/Form/ERPFormModal";
 import ApplicationView from "../../components/Dashboard/ApplicationView/ApplicationView";
 import TakeAction from "../../components/Workflow/TakeAction";
+import { getUserHeader } from "../../utils/userHeader";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
@@ -31,8 +32,8 @@ function ApproverApplicationPage() {
 
         try {
 
-            const res = await axios.get(
-                `${API_URL}/api/approver/application/${bookingId}`
+            const res = await api.get(
+                `/api/approver/application/${bookingId}`
             );
 
             console.log(res.data);

@@ -1,3 +1,3 @@
-axios.get(
-  `/guesthouse-api/api/my-bookings/${user.EmployeeId}`
+api.get(
+  `/api/my-bookings/${user.EmployeeId}`
 );

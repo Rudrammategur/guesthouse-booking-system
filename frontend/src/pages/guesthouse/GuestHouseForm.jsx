@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 import DatePicker from "react-datepicker";
 import {
@@ -103,20 +103,21 @@ function GuestHouseForm() {
   const [nationality, setNationality] = useState(draft.nationality === "Indian" ? "Indian" : draft.nationality ? "Other" : "");
   const [countryName, setCountryName] = useState(draft.nationality && draft.nationality !== "Indian" ? draft.nationality : draft.countryName || "");
   const [roomRequirements, setRoomRequirements] = useState(() => {
-  if (draft.roomRequirements?.length) {
-    return draft.roomRequirements;
-  }
-
-  return [
-    {
-      roomTypeId: "",
-      noOfRooms: 1
+    if (draft.roomRequirements?.length) {
+      return draft.roomRequirements;
     }
-  ];
-});
+
+    return [
+      {
+        roomTypeId: "",
+        noOfRooms: 1
+      }
+    ];
+  });
   const [uploadedFile, setUploadedFile] = useState(null);
   const [filePreview, setFilePreview] = useState(draft.uploadedFileUrl || "");
   const [activeSection, setActiveSection] = useState("guest-details");
+  const uploadedFileRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -128,16 +129,16 @@ function GuestHouseForm() {
     } catch (e) { }
 
     const employeeRequest = el?.innerText
-      ? axios.get(`${API_URL}/api/user/me`, {
+      ? api.get("/api/user/me", {
         params: { name: el.innerText.trim() },
       })
       : Promise.resolve({ data: { success: false } });
 
     Promise.allSettled([
       employeeRequest,
-      axios.get(`${API_URL}/api/master/guest-types`),
-      axios.get(`${API_URL}/api/master/guesthouse-types`),
-      axios.get(`${API_URL}/api/expenditure-heads`),
+      api.get("/api/master/guest-types"),
+      api.get("/api/master/guesthouse-types"),
+      api.get("/api/expenditure-heads"),
     ]).then(([user, guests, houses, heads]) => {
       if (!active) return;
 
@@ -162,8 +163,8 @@ function GuestHouseForm() {
     if (!formData.GuestHouseID)
       return;
 
-    axios.get(
-      `${API_URL}/api/master/room-types/${formData.GuestHouseID}`
+    api.get(
+      `api/master/room-types/${formData.GuestHouseID}`
     )
       .then((response) => {
 
@@ -177,8 +178,8 @@ function GuestHouseForm() {
 
     const loadGuestTypes = async () => {
 
-      const response = await axios.get(
-        `${API_URL}/api/master/guest-types`
+      const response = await api.get(
+        "/api/master/guest-types"
       );
 
       setGuestTypes(response.data);
@@ -255,8 +256,8 @@ function GuestHouseForm() {
 
     try {
 
-      const response = await axios.get(
-        `${API_URL}/api/master/projects`
+      const response = await api.get(
+        "/api/master/projects"
       );
 
       setProjects(response.data);
@@ -402,16 +403,26 @@ function GuestHouseForm() {
   };
 
   const handleFile = (event) => {
+
     const selected = event.target.files?.[0];
+
     if (!selected) return;
-    if (selected.size > 5 * 1024 * 1024) {
-      toast.error("Document size must be 5 MB or less");
-      event.target.value = "";
-      return;
-    }
+
+
+    console.log("Selected File:", selected);
+
+
+    uploadedFileRef.current = selected;
+
     setUploadedFile(selected);
+
+
     const reader = new FileReader();
-    reader.onload = () => setFilePreview(reader.result);
+
+    reader.onload = () => {
+      setFilePreview(reader.result);
+    };
+
     reader.readAsDataURL(selected);
   };
 
@@ -433,12 +444,19 @@ function GuestHouseForm() {
     rooms: totalRooms,
     roomType: roomRequirements[0]?.roomTypeId || "",
     roomTypeName: roomTypes.find((type) => String(type.RoomTypeID) === String(roomRequirements[0]?.roomTypeId))?.RoomTypeName || "",
-    uploadedFile,
-    uploadedFileName: uploadedFile?.name || draft.uploadedFileName || "",
+    uploadedFile: uploadedFileRef.current,
+    uploadedFileName:
+      uploadedFileRef.current?.name || "",
     uploadedFileUrl: filePreview,
-    userId: employee.EmployeeId,
-    EmployeeName: employee.DisplayName,
-    DepartmentName: "",
+    userId: employee.UserId,
+    UserName: employee.UserName,
+    EmployeeId: employee.EmployeeId,
+    EmployeeName: employee.EmployeeName,
+    EmployeeEmail: employee.EmployeeEmail,
+    MobileNumber: employee.MobileNumber,
+    RoleMapIDs: employee.RoleMapIDs,
+    Roles: employee.Roles,
+    IsAuthenticated: employee.IsAuthenticated,
   });
 
   const validate = () => {
@@ -593,21 +611,59 @@ function GuestHouseForm() {
   };
 
   const saveDraft = () => {
+
     const previewData = buildPreviewData();
-    console.log(previewData.uploadedFile);
-    localStorage.setItem("guestHouseDraft", JSON.stringify({ ...previewData, uploadedFileUrl: "" }));
+
+    const { uploadedFile, ...draftData } = previewData;
+
+    localStorage.setItem(
+      "guestHouseDraft",
+      JSON.stringify({
+        ...draftData,
+        uploadedFileName: uploadedFile?.name || "",
+        uploadedFileUrl: ""
+      })
+    );
+
     toast.success("Draft saved on this device");
   };
 
   const continueToPreview = (event) => {
+
     event.preventDefault();
+
+    console.log("========== BEFORE VALIDATE ==========");
+    console.log("State File:", uploadedFile);
+    console.log("Ref File:", uploadedFileRef.current);
+
     const error = validate();
+
     if (error) {
       toast.error(error);
       return;
     }
+
+
     const previewData = buildPreviewData();
-    localStorage.setItem("guestHouseDraft", JSON.stringify({ ...previewData, uploadedFileUrl: "" }));
+
+    const {
+      uploadedFile: previewUploadedFile,
+      ...draftData
+    } = previewData;
+
+    console.log("========== AFTER BUILD ==========");
+    console.log("PreviewData File:", previewUploadedFile);
+    console.log("PreviewData File Name:", previewUploadedFile?.name);
+
+    localStorage.setItem(
+      "guestHouseDraft",
+      JSON.stringify({
+        ...draftData,
+        uploadedFileName: previewUploadedFile?.name || "",
+        uploadedFileUrl: ""
+      })
+    );
+
     navigate("/preview", {
       state: previewData
     });
@@ -615,7 +671,7 @@ function GuestHouseForm() {
 
   const openTariff = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/master/tariff-details`);
+      const response = await api.get("/api/master/tariff-details");
       setTariffDetails(response.data);
       setShowTariffModal(true);
     } catch {
@@ -630,7 +686,7 @@ function GuestHouseForm() {
         logo={logo}
         title="Guest House Management System"
         subtitle="Transit Facility Accommodation"
-        description="Book accommodation for institute guests, track applications, and manage requests through a streamlined workflow."
+        description="Book accommodation for institute guests, track and manage applications through a streamlined workflow."
         actions={
           <div className="hero-actions">
             <Button
@@ -648,11 +704,11 @@ function GuestHouseForm() {
           <div className="applicant-card">
             <span className="sidebar-label">Requesting employee</span>
             <div className="employee-avatar">
-              {employee.DisplayName?.charAt(0) || "E"}
+              {employee.EmployeeName?.charAt(0) || "E"}
             </div>
 
             <h3>
-              {employee.DisplayName || (loadingMasters ? "Loading..." : "Institute Employee")}
+              {employee.EmployeeName || (loadingMasters ? "Loading..." : "Institute Employee")}
             </h3>
 
             <p>{employee.EmployeeId || "Employee ID"}</p>
@@ -727,7 +783,7 @@ function GuestHouseForm() {
                 <Field label="Guest address" required className="span-2">
                   <textarea name="guestAddress" value={formData.guestAddress} onChange={updateField} rows="3" placeholder="Complete postal address" />
                 </Field>
-                <div className="component-field"><MobileNumberInput countryCode={countryCode} setCountryCode={setCountryCode} mobile={mobile} setMobile={setMobile} label="Contact number" required /></div>
+                <div className="component-field"><MobileNumberInput countryCode={countryCode} setCountryCode={setCountryCode} mobile={mobile} setMobile={setMobile} label="Guest Contact number" required /></div>
                 <div className="component-field"><EmailInput label="Guest email" required value={guestEmail} setValue={setGuestEmail} /></div>
                 <div className="component-field span-2"><NationalityInput nationality={nationality} setNationality={setNationality} countryName={countryName} setCountryName={setCountryName} required /></div>
               </div>
@@ -913,14 +969,14 @@ function GuestHouseForm() {
 
           <footer className="booking-form-actions">
             <div><strong>Ready to review?</strong><span>Your request will not be submitted until the next screen.</span></div>
-            <button type="button" className="cancel-form-button" onClick={() => navigate("/guesthouse/dashboard")}>Cancel</button>
+            <button type="button" className="cancel-form-button" onClick={() => navigate("/dashboard")}>Cancel</button>
             <button type="button" className="save-draft-button" onClick={saveDraft}>Save draft</button>
             <button
               type="button"
               className="preview-button"
-              onClick={() => navigate("/preview")}
+              onClick={continueToPreview}
             >
-              Review application <span>→</span>
+              Preview
             </button>
           </footer>
         </form>

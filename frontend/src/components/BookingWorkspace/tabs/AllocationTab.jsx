@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
@@ -21,9 +21,9 @@ function AllocationTab({ booking }) {
 
     const loadAllocation = async () => {
 
-        const response = await axios.get(
+        const response = await api.get(
 
-            `${API_URL}/api/admin/allocation/${booking.GHBookingID}`
+            `/api/admin/allocation/${booking.GHBookingID}`
 
         );
 

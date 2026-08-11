@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 import "../../styles/guestHousePreview.css";
 import { toast } from "react-toastify";
 
@@ -11,11 +11,22 @@ function GuestHousePreview() {
     const localData =
         JSON.parse(localStorage.getItem("guestHouseDraft")) || {};
 
-    const data = location.state || localData;
+    const data = {
+        ...localData,
+        ...(location.state || {})
+    };
+
+    console.log("===========Preview Data===========");
+
+    console.log("Preview Data:", data);
+
+    console.log("location.state =", location.state);
+    console.log("localData =", localData);
+    console.log("data =", data);
 
     const openDocument = async () => {
 
-        if (!data?.uploadedFileUrl) return;
+        if (!data?.uploadedFile) return;
 
         try {
 
@@ -45,6 +56,16 @@ function GuestHousePreview() {
     );
 
     console.log("Uploaded File:", data.uploadedFile);
+
+    const currentUser = {
+        EmployeeId: data.EmployeeId,
+        EmployeeName: data.EmployeeName,
+        EmployeeEmail: data.EmployeeEmail,
+        UserName: data.UserName,
+        RoleMapIDs: data.RoleMapIDs,
+        Roles: data.Roles,
+        IsAuthenticated: data.IsAuthenticated
+    };
 
     const formData = new FormData();
 
@@ -159,6 +180,10 @@ function GuestHousePreview() {
         );
 
     }
+    formData.append(
+        "currentUser",
+        JSON.stringify(currentUser)
+    );
 
     // const fileUrl = data.uploadedFile
     //     ? URL.createObjectURL(data.uploadedFile)
@@ -172,21 +197,23 @@ function GuestHousePreview() {
             data.uploadedFileUrl.includes(".png")
         );
 
+    console.log("Preview uploadedFile:", data.uploadedFile);
+    console.log("Preview uploadedFileUrl:", data.uploadedFileUrl);
+
     const handleSubmit = async () => {
 
         try {
 
-            console.log("Uploaded file size", data.uploadedFile?.size);
 
-            for (const pair of formData.entries()) {
+            console.log("===== FORM DATA =====");
 
-                console.log(pair[0], pair[1]);
-
+            for (const [key, value] of formData.entries()) {
+                console.log(key, value);
             }
 
-            await axios.post(
+            await api.post(
 
-                "/guesthouse-api/api/guesthouse",
+                "/api/guesthouse",
 
                 formData,
 

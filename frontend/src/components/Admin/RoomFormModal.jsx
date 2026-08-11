@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import "../../styles/formModal.css";
 
 const API_URL =
@@ -78,9 +78,9 @@ function RoomFormModal({
 
         const [gh, rt] = await Promise.all([
 
-            axios.get(`${API_URL}/api/admin/guesthouses`),
+            api.get("/api/admin/guesthouses"),
 
-            axios.get(`${API_URL}/api/admin/room-types`)
+            api.get("/api/admin/room-types")
 
         ]);
 
@@ -94,9 +94,9 @@ function RoomFormModal({
 
         if (selectedRoom) {
 
-            await axios.put(
+            await api.put(
 
-                `${API_URL}/api/admin/rooms/${selectedRoom.GuestHouseRoomID}`,
+                `/api/admin/rooms/${selectedRoom.GuestHouseRoomID}`,
 
                 form
 
@@ -106,9 +106,9 @@ function RoomFormModal({
 
         else {
 
-            await axios.post(
+            await api.post(
 
-                `${API_URL}/api/admin/rooms`,
+                "/api/admin/rooms",
 
                 form
 

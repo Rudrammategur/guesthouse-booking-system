@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 
 import ERPPage from "../../components/Common/ERPPage";
@@ -13,6 +13,7 @@ import StatusBadge from "../../components/Common/StatusBadge";
 import BookingActions from "../../components/Guesthouse/BookingActions.jsx";
 import ERPConfirmDialog from "../../components/Common/ERPConfirmDialog";
 import logo from "../../assets/iit-dharwad-logo.png";
+import { getUserHeader } from "../../utils/userHeader";
 
 
 
@@ -56,17 +57,25 @@ function EmployeeDashboard() {
 
         try {
 
+            const userHeader = getUserHeader();
+
             const [
                 applicationResponse,
                 countResponse
             ] = await Promise.all([
 
-                axios.get(
-                    `${API_URL}/api/guesthouse/my-applications`
+                api.get(
+                    "/api/guesthouse/my-applications",
+                    {
+                        headers: userHeader
+                    }
                 ),
 
-                axios.get(
-                    `${API_URL}/api/guesthouse/dashboard-counts`
+                api.get(
+                    "/api/guesthouse/dashboard-counts",
+                    {
+                        headers: userHeader
+                    }
                 )
 
             ]);
@@ -76,11 +85,15 @@ function EmployeeDashboard() {
                 applicationResponse.data.data
             );
 
+
             setCounts(
                 countResponse.data.data || {}
             );
 
+
         } catch (err) {
+
+            console.error(err);
 
             toast.error(
                 err.response?.data?.message ||
@@ -88,7 +101,9 @@ function EmployeeDashboard() {
             );
 
         } finally {
+
             setLoading(false);
+
         }
 
     }, [userInfo]);
@@ -110,12 +125,19 @@ function EmployeeDashboard() {
 
         setEmployeeName(name);
 
-        axios
-            .get(`${API_URL}/api/user/me`, {
+        api
+            .get("/api/user/me", {
                 params: { name }
             })
             .then((res) => {
+
                 setUserInfo(res.data);
+
+                localStorage.setItem(
+                    "currentUser",
+                    JSON.stringify(res.data)
+                );
+
             })
             .catch((err) => {
                 console.error(err);
@@ -129,9 +151,9 @@ function EmployeeDashboard() {
 
             setCancelLoading(true);
 
-            await axios.put(
+            await api.put(
 
-                `${API_URL}/api/guesthouse/${selectedBooking}/cancel`
+                `/api/guesthouse/${selectedBooking}/cancel`
 
             );
 
@@ -280,8 +302,6 @@ function EmployeeDashboard() {
 
     ];
 
-    // console.log(application);
-
 
     const filteredApplications =
         Array.isArray(applications)
@@ -354,7 +374,10 @@ function EmployeeDashboard() {
 
                         <Button
                             variant="outline"
-                            onClick={() => navigate(-1)}
+                            onClick={() => {
+                                window.location.href =
+                                    `${window.location.origin}/Default/Pages/Portal/PortalInfrastructure.html`;
+                            }}
                         >
                             ← Back
                         </Button>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 
 import ERPPage from "../../components/Common/ERPPage";
 import PageHeader from "../../components/Common/PageHeader";
@@ -8,6 +8,7 @@ import Button from "../../components/Common/Button/Button";
 import ApplicationView from "../../components/Dashboard/ApplicationView/ApplicationView";
 import TakeAction from "../../components/Workflow/TakeAction";
 import ERPFormModal from "../../components/Common/Form/ERPFormModal";
+import { getUserHeader } from "../../utils/userHeader";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
@@ -30,28 +31,26 @@ function VerifierApplicationPage() {
 
     }, [bookingId]);
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        if (showCalendar || showAllocationModal) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "auto";
-        }
+    //     if (showCalendar || showAllocationModal) {
+    //         document.body.style.overflow = "hidden";
+    //     } else {
+    //         document.body.style.overflow = "auto";
+    //     }
 
-        return () => {
-            document.body.style.overflow = "auto";
-        };
+    //     return () => {
+    //         document.body.style.overflow = "auto";
+    //     };
 
-    }, [showCalendar, showAllocationModal]);
+    // }, [showCalendar, showAllocationModal]);
 
     const fetchApplication = async () => {
 
         try {
 
-            const res = await axios.get(
-
-                `${API_URL}/api/verifier/application/${bookingId}`
-
+            const res = await api.get(
+                `/api/verifier/application/${bookingId}`
             );
 
             console.log(res.data);

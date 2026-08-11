@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import GenericDashboardPage from "../../components/Common/GenericDashboardPage";
 import RoomChargesFormModal from "../../components/Admin/RoomChargesFormModal";
 import ERPConfirmDialog from "../../components/Common/ERPConfirmDialog";
@@ -51,11 +51,11 @@ function RoomChargesMaster() {
 
         ] = await Promise.all([
 
-            axios.get(`${API_URL}/api/admin/room-charges`),
+            api.get("/api/admin/room-charges"),
 
-            axios.get(`${API_URL}/api/admin/guesthouses`),
+            api.get("/api/admin/guesthouses"),
 
-            axios.get(`${API_URL}/api/admin/room-types`)
+            api.get("/api/admin/room-types")
 
         ]);
 
@@ -481,9 +481,9 @@ function RoomChargesMaster() {
 
                 onConfirm={async () => {
 
-                    await axios.patch(
+                    await api.patch(
 
-                        `${API_URL}/api/admin/room-charges/${selectedCharge.GHRCID}/status`
+                        `/api/admin/room-charges/${selectedCharge.GHRCID}/status`
 
                     );
 

@@ -1,7 +1,7 @@
 const expenditureHeads = [
   {
     id: 1,
-    name: "Self"
+    name: "Self Payment"
   },
   {
     id: 2,

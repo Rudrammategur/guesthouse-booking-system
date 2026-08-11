@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 function MyTransportBookings() {
 
@@ -15,8 +15,8 @@ function MyTransportBookings() {
       localStorage.getItem("user")
     );
 
-    const res = await axios.get(
-      `/guesthouse-api/api/my-transport-bookings/${user.EmployeeId}`
+    const res = await api.get(
+      `/api/my-transport-bookings/${user.EmployeeId}`
     );
 
     setRequests(res.data);

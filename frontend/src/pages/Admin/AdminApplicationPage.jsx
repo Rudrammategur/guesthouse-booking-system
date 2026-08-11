@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 
 import ApplicationView from "../../components/Dashboard/ApplicationView/ApplicationView";
 
@@ -24,8 +24,8 @@ function AdminApplicationPage() {
 
         try {
 
-            const res = await axios.get(
-                `${API_URL}/api/application/${bookingId}`
+            const res = await api.get(
+                `/api/application/${bookingId}`
             );
 
             setApplication(res.data.application);

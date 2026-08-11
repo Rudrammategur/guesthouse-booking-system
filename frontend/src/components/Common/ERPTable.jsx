@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import * as XLSX from "xlsx";
 
 import StatusBadge from "./StatusBadge";
 import "./erpTable.css";
@@ -60,8 +61,8 @@ function ERPTable({
     if (loading) {
 
         return <div className="erp-loading">
-    Loading data...
-</div>;
+            Loading data...
+        </div>;
 
     }
 
@@ -69,30 +70,21 @@ function ERPTable({
 
         <div className="erp-table-wrapper">
 
-            {
+                {searchable && (
+                    <input
+                        type="search"
+                        aria-label="Search table"
+                        className="erp-table-search"
+                        placeholder="Search..."
+                        value={search}
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                            setPage(1);
+                        }}
+                    />
+                )}
 
-                searchable &&
-
-                <input
-                    type="search"
-                    aria-label="Search table"
-                    className="erp-table-search"
-
-                    placeholder="Search..."
-
-                    value={search}
-
-                    onChange={(e) => {
-
-                        setSearch(e.target.value);
-
-                        setPage(1);
-
-                    }}
-
-                />
-
-            }
+           
 
             <table className="erp-table">
 

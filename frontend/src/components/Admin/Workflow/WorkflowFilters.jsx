@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+
 import "./workflow.css";
 
 const API_URL =
@@ -28,9 +28,9 @@ function WorkflowFilters({
 
         try {
 
-            const response = await axios.get(
+            const response = await api.get(
 
-                `${API_URL}/api/user-access/workflow-users`
+                "/api/user-access/workflow-users"
 
             );
 

@@ -7,9 +7,6 @@ function CheckOutPanel({
 
     booking,
 
-    mealCharges,
-    setMealCharges,
-
     additionalCharges,
     setAdditionalCharges,
 
@@ -67,14 +64,14 @@ function CheckOutPanel({
                         disabled
                     />
 
-                    <ERPFormField
+                    {/* <ERPFormField
                         label="Meal Charges"
                         type="number"
                         value={mealCharges}
                         onChange={(e)=>
                             setMealCharges(e.target.value)
                         }
-                    />
+                    /> */}
 
                     <ERPFormField
                         label="Additional Charges"
@@ -107,7 +104,6 @@ function CheckOutPanel({
                         label="Payment Mode"
                         value={paymentMode}
                         options={[
-                            {label:"Cash",value:"Cash"},
                             {label:"UPI",value:"UPI"},
                             {label:"Card",value:"Card"},
                             {label:"Bank Transfer",value:"Bank Transfer"}
@@ -141,10 +137,10 @@ function CheckOutPanel({
                         <strong>₹ {booking?.AccommodationAmount || 0}</strong>
                     </div>
 
-                    <div className="summary-row">
+                    {/* <div className="summary-row">
                         <span>Meal Charges</span>
                         <strong>₹ {mealCharges}</strong>
-                    </div>
+                    </div> */}
 
                     <div className="summary-row">
                         <span>Additional Charges</span>

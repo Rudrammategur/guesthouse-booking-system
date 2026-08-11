@@ -6,13 +6,26 @@ const guestHouseBookingController = require("../controllers/guestHouseBookingCon
 
 const upload = require("../middleware/uploadMiddleware");
 
-router.post("/", upload.single("SupportingDoc"), guestHouseBookingController.createBooking);
+router.post(
+    "/",
+    (req, res, next) => {
+        console.log("POST /api/guesthouse HIT");
+        next();
+    },
+    upload.single("SupportingDoc"),
+    guestHouseBookingController.createBooking
+);
 
 router.get("/dashboard-counts", guestHouseBookingController.getDashboardCounts);
 
 router.get("/my-applications", guestHouseBookingController.getMyApplications);
 
 router.get("/application/:bookingId", guestHouseBookingController.getApplicationDetails);
+
+router.get(
+    "/application/:bookingId/document",
+    guestHouseBookingController.getSupportingDocument
+);
 
 router.put("/:bookingId/cancel", guestHouseBookingController.cancelBooking);
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 import ApplicationView from "../../components/Dashboard/ApplicationView/ApplicationView";
 import RoomAllocationPanel from "./RoomAllocationPanel";
@@ -40,16 +40,16 @@ function GHAllocationPage() {
 
       const [applicationResponse, roomResponse, occupancyResponse] = await Promise.all([
 
-        axios.get(
-          `${API_URL}/api/gh-incharge/applications/${selectedBookingId}`
+        api.get(
+          `/api/gh-incharge/applications/${selectedBookingId}`
         ),
 
-        axios.get(
-          `${API_URL}/api/gh-incharge/room-availability`
+        api.get(
+          "/api/gh-incharge/room-availability"
         ),
 
-        axios.get(
-          `${API_URL}/api/gh-incharge/occupancy-summary`
+        api.get(
+          "/api/gh-incharge/occupancy-summary"
         )
 
       ]);
@@ -61,15 +61,15 @@ function GHAllocationPage() {
       setOccupancy(occupancyResponse.data.data);
 
       if (applicationResponse.data.data.BookingStatus === "Approved") {
-        const roomsResponse = await axios.get(
-          `${API_URL}/api/gh-incharge/applications/${selectedBookingId}/available-rooms`
+        const roomsResponse = await api.get(
+          `/api/gh-incharge/applications/${selectedBookingId}/available-rooms`
         );
 
         setRooms(roomsResponse.data.data);
       }
 
-      const guestHouseResponse = await axios.get(
-        `${API_URL}/api/master/guesthouse-types`
+      const guestHouseResponse = await api.get(
+        "/api/master/guesthouse-types"
       );
 
       setGuestHouses(guestHouseResponse.data);
@@ -121,9 +121,9 @@ function GHAllocationPage() {
 
     try {
 
-      await axios.post(
+      await api.post(
 
-        `${API_URL}/api/gh-incharge/applications/${selectedBookingId}/allocations`,
+        `/api/gh-incharge/applications/${selectedBookingId}/allocations`,
 
         {
 

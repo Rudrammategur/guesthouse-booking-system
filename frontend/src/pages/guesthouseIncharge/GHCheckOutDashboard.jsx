@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 import DashboardPage from "../../components/dashboard/DashboardPage";
 
 const API_URL =
@@ -35,9 +35,9 @@ function GHCheckOutDashboard() {
 
         try{
 
-            const res = await axios.get(
+            const res = await api.get(
 
-                `${API_URL}/api/gh-incharge/checkout-applications`
+                "/api/gh-incharge/checkout-applications"
 
             );
 

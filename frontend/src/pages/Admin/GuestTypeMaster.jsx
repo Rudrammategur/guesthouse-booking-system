@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import GenericDashboardPage from "../../components/Common/GenericDashboardPage";
 import GuestTypeFormModal from "../../components/Admin/GuestTypeFormModal";
 import ERPConfirmDialog from "../../components/Common/ERPConfirmDialog";
@@ -32,9 +32,9 @@ function GuestTypeMaster() {
 
     const loadGuestTypes = async () => {
 
-        const response = await axios.get(
+        const response = await api.get(
 
-            `${API_URL}/api/admin/guest-types`
+            "/api/admin/guest-types"
 
         );
 
@@ -362,9 +362,9 @@ function GuestTypeMaster() {
 
                 onConfirm={async () => {
 
-                    await axios.patch(
+                    await api.patch(
 
-                        `${API_URL}/api/admin/guest-types/${selectedGuestType.GuestTypeID}/status`
+                        `/api/admin/guest-types/${selectedGuestType.GuestTypeID}/status`
 
                     );
 

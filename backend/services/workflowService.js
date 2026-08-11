@@ -229,117 +229,129 @@ Insert Workflow History
 */
 
 exports.insertWorkflowHistory = async (
+
     transaction,
-    history
+
+    {
+
+        moduleName,
+
+        referenceId,
+
+        previousStatus,
+
+        currentStatus,
+
+        actionName,
+
+        authorityRole,
+
+        authorityName,
+
+        actionBy,
+
+        remarks = "",
+
+        ipAddress = null,
+
+        deviceInfo = null
+
+    }
+
 ) => {
-
-    const sequenceResult =
-        await new sql.Request(transaction)
-
-            .input(
-                "ModuleName",
-                sql.VarChar,
-                history.moduleName
-            )
-
-            .input(
-                "ReferenceID",
-                sql.VarChar,
-                history.referenceId
-            )
-
-            .query(`
-
-SELECT
-    ISNULL(MAX(SequenceNo),0)+1 AS NextSequenceNo
-FROM WorkflowHistory
-WHERE
-    ModuleName=@ModuleName
-AND
-    ReferenceID=@ReferenceID
-
-`);
-
-
-
-    const nextSequenceNo =
-        sequenceResult.recordset[0].NextSequenceNo;
 
     const workflowHistoryId =
         await generateWorkflowHistoryId(transaction);
 
+    const sequenceNo =
+        await exports.getNextSequenceNo(
+
+            transaction,
+
+            moduleName,
+
+            referenceId
+
+        );
+
     await new sql.Request(transaction)
 
         .input(
-    "WorkflowHistoryID",
-    sql.VarChar(20),
-    workflowHistoryId
-)
+            "WorkflowHistoryID",
+            sql.VarChar,
+            workflowHistoryId
+        )
 
         .input(
             "ModuleName",
             sql.VarChar,
-            history.moduleName
+            moduleName
         )
 
         .input(
             "ReferenceID",
             sql.VarChar,
-            history.referenceId
+            referenceId
         )
 
         .input(
             "SequenceNo",
             sql.Int,
-            nextSequenceNo
+            sequenceNo
         )
 
         .input(
             "PreviousStatus",
             sql.VarChar,
-            history.previousStatus
+            previousStatus
         )
 
         .input(
             "CurrentStatus",
             sql.VarChar,
-            history.currentStatus
+            currentStatus
         )
 
         .input(
             "ActionName",
             sql.VarChar,
-            history.actionName
+            actionName
         )
 
         .input(
             "AuthorityRole",
             sql.VarChar,
-            history.authorityRole
+            authorityRole
         )
 
         .input(
             "AuthorityName",
-            sql.NVarChar,
-            history.authorityName
+            sql.VarChar,
+            authorityName
         )
 
         .input(
             "ActionBy",
             sql.VarChar,
-            history.actionBy
-        )
-
-        .input(
-            "ActionDateTime",
-            sql.DateTime,
-            new Date()
+            actionBy
         )
 
         .input(
             "Remarks",
             sql.NVarChar,
-            history.remarks || ""
+            remarks
+        )
+
+        .input(
+            "IPAddress",
+            sql.VarChar,
+            ipAddress
+        )
+
+        .input(
+            "DeviceInfo",
+            sql.NVarChar,
+            deviceInfo
         )
 
         .query(`
@@ -358,9 +370,12 @@ INSERT INTO WorkflowHistory
     ActionBy,
     ActionDateTime,
     Remarks,
+    IPAddress,
+    DeviceInfo,
     IsActive,
     CreatedDate
 )
+
 VALUES
 (
     @WorkflowHistoryID,
@@ -373,8 +388,10 @@ VALUES
     @AuthorityRole,
     @AuthorityName,
     @ActionBy,
-    @ActionDateTime,
+    GETDATE(),
     @Remarks,
+    @IPAddress,
+    @DeviceInfo,
     1,
     GETDATE()
 )
@@ -401,11 +418,13 @@ exports.changeWorkflowStatus = async (
         authorityRole,
         authorityName,
         actionBy,
-        remarks = ""
+        remarks = "",
+        ipAddress = null,
+        deviceInfo = null
     }
 ) => {
 
-    // Update Booking Status
+    // Update booking status
     await exports.updateBookingStatus(
         transaction,
         bookingId,
@@ -413,7 +432,7 @@ exports.changeWorkflowStatus = async (
         actionBy
     );
 
-    // Insert Workflow History
+    // Insert workflow history
     await exports.insertWorkflowHistory(
         transaction,
         {
@@ -425,7 +444,9 @@ exports.changeWorkflowStatus = async (
             authorityRole,
             authorityName,
             actionBy,
-            remarks
+            remarks,
+            ipAddress,
+            deviceInfo
         }
     );
 

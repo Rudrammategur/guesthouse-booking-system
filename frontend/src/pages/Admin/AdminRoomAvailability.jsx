@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+
 
 import RoomAvailabilityCalendar
     from "../../components/Common/RoomAvailabilityCalendar";
@@ -44,9 +44,9 @@ function AdminRoomAvailability() {
 
         try {
 
-            const response = await axios.get(
+            const response = await api.get(
 
-                `${API_URL}/api/master/guesthouse-types`
+                "/api/master/guesthouse-types"
 
             );
 
@@ -66,9 +66,9 @@ function AdminRoomAvailability() {
 
         try {
 
-            const response = await axios.get(
+            const response = await api.get(
 
-                `${API_URL}/api/admin/room-availability`,
+                "/api/admin/room-availability",
 
                 {
 

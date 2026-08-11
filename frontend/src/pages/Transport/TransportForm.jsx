@@ -1,12 +1,10 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../styles/transportForm.css";
 
 function TransportForm() {
-  const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null);
   const [formData, setFormData] = useState({
     vehicleType: "",
     bookingType: "",
@@ -19,13 +17,10 @@ function TransportForm() {
     contact: "",
     departurePlace: "",
     arrivalPlace: "",
-    localContactPerson: "", 
+    localContactPerson: "",
     reason: "",
     remarks: "",
   });
-
-  const [dateFrom, setDateFrom] = useState(null);
-  const [dateTo, setDateTo] = useState(null);
   const [file, setFile] = useState(null);
   const [totalHours, setTotalHours] = useState(0);
   const [arrival, setArrival] = useState(null);
@@ -74,7 +69,7 @@ function TransportForm() {
     }
 
     try {
-      await axios.post(
+      await api.post(
         "/guesthouse-api/api/transport",
         data
       );
@@ -371,10 +366,11 @@ function TransportForm() {
 
         <div className="button-row">
           <button
-            type="submit"
+            type="button"
             className="submit-btn"
+            onClick={handlePreview}
           >
-            Submit Request
+            Preview & Continue
           </button>
 
           <button

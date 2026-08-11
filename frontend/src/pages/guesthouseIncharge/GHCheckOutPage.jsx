@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/ghCheckOut.css";
 import ApplicationSummary from "../../components/Dashboard/ApplicationView/ApplicationSummary";
@@ -31,9 +31,9 @@ function GHCheckOutPage() {
         setAccommodationAmount] =
         useState(0);
 
-    const [mealCharges,
-        setMealCharges] =
-        useState(0);
+    // const [mealCharges,
+    //     setMealCharges] =
+    //     useState(0);
 
     const [additionalCharges,
         setAdditionalCharges] =
@@ -56,8 +56,6 @@ function GHCheckOutPage() {
     const totalPayableAmount =
         Number(accommodationAmount)
         +
-        Number(mealCharges)
-        +
         Number(additionalCharges)
         -
         Number(discount);
@@ -66,13 +64,11 @@ function GHCheckOutPage() {
 
         try {
 
-            await axios.post(
+            await api.post(
 
-                `${API_URL}/api/gh-incharge/checkout/${bookingId}`,
+                `/api/gh-incharge/checkout/${bookingId}`,
 
                 {
-
-                    mealCharges,
 
                     additionalCharges,
 
@@ -123,8 +119,8 @@ function GHCheckOutPage() {
     const loadBooking = async () => {
 
         const res =
-            await axios.get(
-                `${API_URL}/api/gh-incharge/checkout/${bookingId}`
+            await api.get(
+                `/api/gh-incharge/checkout/${bookingId}`
             );
 
         console.log(res.data.data);
@@ -141,10 +137,6 @@ function GHCheckOutPage() {
 
             setAccommodationAmount(
                 booking.AccommodationAmount || 0
-            );
-
-            setMealCharges(
-                booking.MealCharges || 0
             );
 
             setAdditionalCharges(
@@ -188,8 +180,6 @@ function GHCheckOutPage() {
                     >
                         <CheckOutPanel
                             booking={booking}
-                            mealCharges={mealCharges}
-                            setMealCharges={setMealCharges}
                             additionalCharges={additionalCharges}
                             setAdditionalCharges={setAdditionalCharges}
                             discount={discount}

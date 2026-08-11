@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import "../../styles/takeAction.css";
@@ -38,9 +38,9 @@ function TakeAction({
                 url =
                     status === "Verified"
 
-                        ? `/guesthouse-api/api/verifier/verify/${application.GHBookingID}`
+                        ? `/api/verifier/verify/${application.GHBookingID}`
 
-                        : `/guesthouse-api/api/verifier/reject/${application.GHBookingID}`;
+                        : `/api/verifier/reject/${application.GHBookingID}`;
 
             }
 
@@ -49,13 +49,13 @@ function TakeAction({
                 url =
                     status === "Approved"
 
-                        ? `/guesthouse-api/api/approver/approve/${application.GHBookingID}`
+                        ? `/api/approver/approve/${application.GHBookingID}`
 
-                        : `/guesthouse-api/api/approver/reject/${application.GHBookingID}`;
+                        : `/api/approver/reject/${application.GHBookingID}`;
 
             }
 
-            const response = await axios.put(
+            const response = await api.put(
 
                 url,
 

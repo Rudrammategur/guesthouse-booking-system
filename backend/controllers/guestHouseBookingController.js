@@ -6,6 +6,7 @@ const {
 } = require("../services/bookingService");
 
 const AuthorizationService = require("../services/AuthorizationService");
+const NotificationService = require("../notifications/notificationService");
 
 const { generateGuestHouseBookingId, generateGuestHouseBookingNo } = require("../utils/idGenerator");
 
@@ -20,6 +21,10 @@ const WorkflowResolverService =
 
 const { getWorkflowHistory } = require("../services/workflowService");
 
+const getCurrentUser = require("../utils/getCurrentUser");
+
+const testEmail = process.env.TEST_EMAIL || currentUser.EmployeeEmail;
+
 
 exports.createBooking = async (req, res) => {
 
@@ -31,21 +36,31 @@ exports.createBooking = async (req, res) => {
 
         const data = req.body;
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
-        const employeeEmail = req.user.EmployeeEmail;
+
+        if (!currentUser) {
+
+            throw new Error("User authentication failed");
+
+        }
 
         // AuthorizationService.ensureAuthenticated(currentUser);
 
         // await AuthorizationService.ensureApplicant(currentUser);
 
+        const applicantRole = currentUser.Roles.find(
+            role => role.RoleName === "IITDH EMPLOYEES"
+        );
+
+        if (!applicantRole) {
+            throw new Error("Applicant role not found.");
+        }
+
         const workflow =
             await WorkflowResolverService.resolveWorkflow(
-
-                currentUser.RoleMapIDs[0], // Temporary - default role for testing
-
+                Number(applicantRole.RoleMapId),
                 data.ExpenditureHead
-
             );
 
         // Parse Room Requirements
@@ -57,9 +72,6 @@ exports.createBooking = async (req, res) => {
 
         data.TotalRoomsReq = Number(data.TotalRoomsReq);
 
-        const documentBuffer = data.SupportingDoc
-            ? Buffer.from(data.SupportingDoc, "base64")
-            : null;
 
         // Step 3
         const totalRoomsReq = data.RoomRequirements.reduce(
@@ -77,8 +89,6 @@ exports.createBooking = async (req, res) => {
 
         // Step 5
         const request = transaction.request();
-
-        console.log("workflow", workflow);
 
         // INSERT INTO GuestHouseRoomBookings
         const bookingResult =
@@ -125,13 +135,13 @@ exports.createBooking = async (req, res) => {
 
                 .input("ProjectNo", sql.VarChar, data.ProjectNo)
 
-                .input("BookedBy", sql.VarChar, req.user?.EmployeeId)
+                .input("BookedBy", sql.VarChar, currentUser?.EmployeeId)
 
                 .input("BookingDateTime", sql.DateTime, new Date())
 
                 .input("BookingStatus", sql.VarChar, "Submitted")
 
-                .input("ActivityBy", sql.VarChar, req.user?.EmployeeId)
+                .input("ActivityBy", sql.VarChar, currentUser?.EmployeeId)
 
                 .input(
                     "AssignedVerifierID",
@@ -263,6 +273,19 @@ VALUES(
 
 )
 `);
+
+        const checkBooking = await new sql.Request(transaction)
+            .input("BookingID", sql.VarChar, bookingID)
+            .query(`
+        SELECT
+            GHBookingID,
+            GHRBookingNo,
+            GuestName,
+            BookingStatus,
+            BookedBy
+        FROM dbo.GuestHouseRoomBookings
+        WHERE GHBookingID = @BookingID
+    `);
         for (const room of data.RoomRequirements) {
 
             const detailID =
@@ -322,9 +345,9 @@ VALUES(
 
             authorityRole: "Applicant",
 
-            authorityName: req.user.EmployeeName,
+            authorityName: currentUser.EmployeeName,
 
-            actionBy: req.user.EmployeeId,
+            actionBy: currentUser.EmployeeId,
 
             remarks: ""
 
@@ -332,33 +355,24 @@ VALUES(
 
         await transaction.commit();
 
-        // try {
-        //     await NotificationService.sendBookingSubmitted(
+        try {
 
-        //         req.user.EmployeeEmail,
-
-        //         {
-
-        //             EmployeeName: req.user.EmployeeName,
-
-        //             BookingNo: bookingNo,
-
-        //             GuestName: data.GuestName,
-
-        //             Purpose: data.PurposeOfVisit,
-
-        //             ArrivalDate: formatDate(data.ArrivalDateTime),
-
-        //             DepartureDate: formatDate(data.DepartureDateTime),
-
-        //             SubmittedOn: formatDate(new Date())
-
-        //         }
-
-        //     );
-        // } catch (mailError) {
-        //     console.error("Email failed:", mailError);
-        // }
+            await NotificationService.sendBookingSubmitted(
+                //     currentUser.EmployeeEmail,
+                testEmail,
+                {
+                    EmployeeName: currentUser.EmployeeName,
+                    BookingNo: bookingNo,
+                    GuestName: data.GuestName,
+                    Purpose: data.PurposeOfVisit,
+                    ArrivalDate: formatDate(data.ArrivalDateTime),
+                    DepartureDate: formatDate(data.DepartureDateTime),
+                    SubmittedOn: formatDate(new Date())
+                }
+            );
+        } catch (mailError) {
+            console.error("Email failed:", mailError);
+        }
 
 
         res.status(201).json({
@@ -399,12 +413,21 @@ exports.getDashboardCounts = async (req, res) => {
 
     try {
 
-        const employeeId = req.user.EmployeeId;
+        const currentUser = getCurrentUser(req);
+
+
+        if (!currentUser) {
+
+            throw new Error("User authentication failed");
+
+        }
+
+        const employeeId = currentUser.EmployeeId;
 
         const pool = await poolPromise;
 
         const result = await pool.request()
-        .input(
+            .input(
                 "EmployeeId",
                 sql.VarChar,
                 employeeId
@@ -489,10 +512,19 @@ exports.getMyApplications = async (req, res) => {
 
         const pool = await poolPromise;
 
-        const employeeId = req.user.EmployeeId;
+        const currentUser = getCurrentUser(req);
+
+
+        if (!currentUser) {
+
+            throw new Error("User authentication failed");
+
+        }
+
+        const employeeId = currentUser.EmployeeId;
 
         const result = await pool.request()
-        .input(
+            .input(
                 "EmployeeId",
                 sql.VarChar,
                 employeeId
@@ -574,7 +606,16 @@ exports.getApplicationDetails = async (req, res) => {
 
         const pool = await poolPromise;
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
+
+
+        if (!currentUser) {
+
+            throw new Error("User authentication failed");
+
+        }
+
+        const employeeId = currentUser.EmployeeId;
 
         // Authentication & Authorization
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -625,6 +666,10 @@ SELECT
     b.ProjectNo,
     b.SplRequests,
     b.BookedBy,
+    CASE
+    WHEN b.SupportingDoc IS NOT NULL THEN 1
+    ELSE 0
+END AS HasSupportingDoc,
 
     b.AssignedVerifierID,
     rv.RoleName AS VerifierRole,
@@ -781,6 +826,78 @@ WHERE
 
 };
 
+const { fileTypeFromBuffer } = require("file-type");
+exports.getSupportingDocument = async (req, res) => {
+
+    try {
+
+        const pool = await poolPromise;
+
+        const result = await pool.request()
+            .input(
+                "BookingID",
+                sql.VarChar,
+                req.params.bookingId
+            )
+            .query(`
+                SELECT SupportingDoc
+                FROM GuestHouseRoomBookings
+                WHERE GHBookingID = @BookingID
+                  AND IsActive = 1
+            `);
+
+        if (result.recordset.length === 0) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Application not found"
+            });
+
+        }
+
+        const document = result.recordset[0].SupportingDoc;
+
+        if (!document) {
+
+            return res.status(404).json({
+                success: false,
+                message: "No supporting document found"
+            });
+
+        }
+
+        const buffer = Buffer.from(document);
+
+        const type = await fileTypeFromBuffer(buffer);
+
+        const mimeType = type?.mime || "application/octet-stream";
+
+        res.setHeader("Content-Type", mimeType);
+
+        res.setHeader(
+            "Content-Disposition",
+            "inline"
+        );
+
+        res.send(document);
+
+    }
+    catch (error) {
+
+        console.error(
+            "Supporting document retrieval error:",
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+};
+
 exports.cancelBooking = async (req, res) => {
 
     const transaction = new sql.Transaction(await poolPromise);
@@ -792,7 +909,16 @@ exports.cancelBooking = async (req, res) => {
         const bookingId = req.params.bookingId;
         const remarks = req.body?.remarks || "";
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
+
+
+        if (!currentUser) {
+
+            throw new Error("User authentication failed");
+
+        }
+
+        const employeeId = currentUser.EmployeeId;
 
         // // Authentication & Authorization
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -886,48 +1012,49 @@ WHERE
 
         await transaction.commit();
 
-        // Notify Applicant
-        // try {
+        //Notify Applicant
+        try {
 
-        //     await NotificationService.sendBookingCancelled(
+            await NotificationService.sendBookingCancelled(
 
-        //         currentUser.EmployeeEmail,
+                // currentUser.EmployeeEmail,
+                testEmail,
 
-        //         {
+                {
 
-        //             EmployeeName: currentUser.EmployeeName,
+                    EmployeeName: currentUser.EmployeeName,
 
-        //             BookingNo: booking.GHRBookingNo,
+                    BookingNo: booking.GHRBookingNo,
 
-        //             GuestName: booking.GuestName,
+                    GuestName: booking.GuestName,
 
-        //             GuestType: booking.GuestTypeName,
+                    GuestType: booking.GuestTypeName,
 
-        //             Purpose: booking.PurposeOfVisit,
+                    Purpose: booking.PurposeOfVisit,
 
-        //             ArrivalDate: formatDate(
-        //                 booking.ArrivalDateTime
-        //             ),
+                    ArrivalDate: formatDate(
+                        booking.ArrivalDateTime
+                    ),
 
-        //             DepartureDate: formatDate(
-        //                 booking.DepartureDateTime
-        //             ),
+                    DepartureDate: formatDate(
+                        booking.DepartureDateTime
+                    ),
 
-        //             CancelledOn: formatDate(new Date()),
+                    CancelledOn: formatDate(new Date()),
 
-        //             Remarks: remarks
+                    Remarks: remarks
 
-        //         }
+                }
 
-        //     );
+            );
 
-        // }
+        }
 
-        // catch (mailError) {
+        catch (mailError) {
 
-        //     console.error(mailError);
+            console.error(mailError);
 
-        // }
+        }
 
         return res.json({
 

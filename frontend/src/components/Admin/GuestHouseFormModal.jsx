@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import "../../styles/formModal.css";
 
 import ERPFormModal from "../Common/Form/ERPFormModal";
 import ERPFormField from "../Common/Form/ERPFormField";
 import ERPTextArea from "../Common/Form/ERPTextArea";
-import api from "../../services/api";
 
 function GuestHouseFormModal({
 

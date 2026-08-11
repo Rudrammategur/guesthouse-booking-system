@@ -15,11 +15,14 @@ const { generateAllocationId } = require("../utils/idGenerator");
 
 const { formatDate } = require("../utils/dateFormater");
 
+const getCurrentUser =
+    require("../utils/getCurrentUser");
+
 exports.getApplications = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -34,15 +37,8 @@ exports.getApplications = async (req, res) => {
 
         const request = pool.request()
 
-            .input(
-                "UserID",
-                sql.VarChar,
-                currentUser.UserId.toString()
-            )
+            .input("UserID", sql.BigInt, currentUser.UserId)
 
-        console.log("Action Required:", actionRequired);
-        console.log("Current User:", currentUser.UserId);
-        // console.log("Query:\n", query);
 
         let query = `
 
@@ -151,7 +147,7 @@ exports.getDashboardCounts = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -163,11 +159,7 @@ exports.getDashboardCounts = async (req, res) => {
 
         const result = await pool.request()
 
-            .input(
-                "UserID",
-                sql.BigInt,
-                Number(currentUser.UserId)
-            )
+            .input("UserID", sql.BigInt, currentUser.UserId)
 
             .query(`
 
@@ -257,7 +249,7 @@ exports.getApplication = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -281,11 +273,7 @@ exports.getApplication = async (req, res) => {
                 bookingId
             )
 
-            .input(
-                "UserID",
-                sql.BigInt,
-                Number(currentUser.UserId)
-            )
+            .input("UserID", sql.BigInt, currentUser.UserId)
 
             .query(`
 
@@ -476,7 +464,7 @@ exports.getAvailableRooms = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -500,11 +488,7 @@ exports.getAvailableRooms = async (req, res) => {
                 bookingId
             )
 
-            .input(
-                "UserID",
-                sql.BigInt,
-                Number(currentUser.UserId)
-            )
+            .input("UserID", sql.BigInt, currentUser.UserId)
 
             .query(`
 
@@ -756,8 +740,6 @@ b.DepartureDateTime,
 
 b.AccommodationAmount,
 
-b.MealCharges,
-
 b.AdditionalCharges,
 
 b.DiscountAmount,
@@ -812,8 +794,6 @@ b.DepartureDateTime,
 
 b.AccommodationAmount,
 
-b.MealCharges,
-
 b.AdditionalCharges,
 
 b.DiscountAmount,
@@ -864,7 +844,7 @@ exports.getCheckInApplication = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -888,11 +868,7 @@ exports.getCheckInApplication = async (req, res) => {
                 bookingId
             )
 
-            .input(
-                "UserID",
-                sql.BigInt,
-                Number(currentUser.UserId)
-            )
+            .input("UserID", sql.BigInt, currentUser.UserId)
 
             .query(`
 
@@ -1049,7 +1025,7 @@ exports.checkoutGuest = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -1062,8 +1038,6 @@ exports.checkoutGuest = async (req, res) => {
         const bookingId = req.params.bookingId;
 
         const {
-
-            mealCharges,
 
             additionalCharges,
 
@@ -1127,12 +1101,6 @@ exports.checkoutGuest = async (req, res) => {
             )
 
             .input(
-                "MealCharges",
-                sql.Decimal(18, 2),
-                mealCharges || 0
-            )
-
-            .input(
                 "AdditionalCharges",
                 sql.Decimal(18, 2),
                 additionalCharges || 0
@@ -1173,8 +1141,6 @@ exports.checkoutGuest = async (req, res) => {
 UPDATE GuestHouseRoomBookings
 
 SET
-
-    MealCharges = @MealCharges,
 
     AdditionalCharges = @AdditionalCharges,
 
@@ -1355,7 +1321,7 @@ exports.getCheckoutApplications = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -1367,11 +1333,7 @@ exports.getCheckoutApplications = async (req, res) => {
 
         const result = await pool.request()
 
-            .input(
-                "UserID",
-                sql.BigInt,
-                Number(currentUser.UserId)
-            )
+            .input("UserID", sql.BigInt, currentUser.UserId)
 
             .query(`
 
@@ -1458,7 +1420,7 @@ exports.getCheckoutDetails = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -1482,11 +1444,7 @@ exports.getCheckoutDetails = async (req, res) => {
                 bookingId
             )
 
-            .input(
-                "UserID",
-                sql.BigInt,
-                Number(currentUser.UserId)
-            )
+            .input("UserID", sql.BigInt, currentUser.UserId)
 
             .query(`
 
@@ -1677,7 +1635,7 @@ exports.allocateRooms = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -1713,6 +1671,11 @@ exports.allocateRooms = async (req, res) => {
             );
 
         }
+
+        console.log("========== ALLOCATE ROOMS ==========");
+        console.log("Booking ID:", req.params.bookingId);
+        console.log("Current User:", currentUser);
+        console.log("Request Body:", req.body);
 
         // Validate Assignment
         await AuthorizationService.ensureAssignedRole(
@@ -1986,29 +1949,21 @@ WHERE
     catch (err) {
 
         try {
-
             if (transaction._aborted !== true) {
-
                 await transaction.rollback();
-
             }
-
         }
-
         catch (rollbackError) {
-
-            console.error(rollbackError);
-
+            console.error("Rollback Error:", rollbackError);
         }
 
+        console.error("========== ALLOCATION ERROR ==========");
         console.error(err);
+        console.error(err.stack);
 
         return res.status(500).json({
-
             success: false,
-
             message: err.message
-
         });
 
     }
@@ -2021,7 +1976,7 @@ exports.checkInGuest = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // AuthorizationService.ensureAuthenticated(currentUser);
 
@@ -2260,7 +2215,7 @@ exports.getOccupancySummary = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -2272,11 +2227,7 @@ exports.getOccupancySummary = async (req, res) => {
 
         const result = await pool.request()
 
-            .input(
-                "UserID",
-                sql.BigInt,
-                Number(currentUser.UserId)
-            )
+            .input("UserID", sql.BigInt, currentUser.UserId)
 
             .query(`
 
@@ -2399,7 +2350,7 @@ exports.getRoomAvailability = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -2411,11 +2362,7 @@ exports.getRoomAvailability = async (req, res) => {
 
         const result = await pool.request()
 
-            .input(
-                "UserID",
-                sql.BigInt,
-                Number(currentUser.UserId)
-            )
+            .input("UserID", sql.BigInt, currentUser.UserId)
 
             .query(`
 
@@ -2568,7 +2515,7 @@ exports.getProcessedApplications = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -2580,11 +2527,7 @@ exports.getProcessedApplications = async (req, res) => {
 
         const result = await pool.request()
 
-            .input(
-                "UserID",
-                sql.BigInt,
-                Number(currentUser.UserId)
-            )
+            .input("UserID", sql.BigInt, currentUser.UserId)
 
             .query(`
 
@@ -2608,7 +2551,6 @@ SELECT
 B.BookingStatus,
 
 B.AccommodationAmount,
-B.MealCharges,
 B.AdditionalCharges,
 B.DiscountAmount,
 B.PaymentMode,
@@ -2655,7 +2597,134 @@ GROUP BY
     B.BookingStatus,
 
     B.AccommodationAmount,
-    B.MealCharges,
+    B.AdditionalCharges,
+    B.DiscountAmount,
+    B.TotalPayableAmount,
+    B.PaymentMode,
+    B.TransactionReference
+
+ORDER BY
+
+    MAX(A.CheckOutDateTime) DESC
+
+`);
+
+        return res.status(200).json({
+
+            success: true,
+
+            data: result.recordset
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        return res.status(500).json({
+
+            success: false,
+
+            message: err.message
+
+        });
+
+    }
+
+};
+
+exports.getProcessedApplications = async (req, res) => {
+
+    try {
+
+        const currentUser = getCurrentUser(req);
+
+        // Authentication
+        // AuthorizationService.ensureAuthenticated(currentUser);
+
+        // // Authorization
+        // await AuthorizationService.ensureAllocator(currentUser);
+
+        const pool = await poolPromise;
+
+        const result = await pool.request()
+
+            .input(
+                "UserID",
+                sql.BigInt,
+                Number(currentUser.UserId)
+            )
+
+            .query(`
+
+SELECT
+
+    B.GHBookingID,
+
+    B.GHRBookingNo,
+
+    B.GuestName,
+
+    GT.GuestTypeName,
+
+    GH.GuestHouseName,
+
+    B.ArrivalDateTime,
+
+    B.DepartureDateTime,
+
+    B.TotalPayableAmount,
+B.BookingStatus,
+
+B.AccommodationAmount,
+B.AdditionalCharges,
+B.DiscountAmount,
+B.PaymentMode,
+B.TransactionReference,
+
+MAX(A.CheckOutDateTime) AS CheckOutDateTime
+FROM GuestHouseRoomBookings B
+
+LEFT JOIN GuestHouseMaster GH
+ON LTRIM(RTRIM(B.GuestHouseID)) =
+   LTRIM(RTRIM(GH.GuestHouseID))
+
+LEFT JOIN GuestTypeMaster GT
+ON LTRIM(RTRIM(B.GuestTypeID)) =
+   LTRIM(RTRIM(GT.GuestTypeID))
+
+LEFT JOIN GuestHouseRoomAllocation A
+ON A.GHBookingID = B.GHBookingID
+
+WHERE
+
+    B.IsActive = 1
+
+    AND B.BookingStatus = 'Checked Out'
+
+    AND B.AssignedAllocatorID IN
+    (
+        SELECT CAST(RoleMapId AS VARCHAR(20))
+        FROM Proof..OrgUnitUserMapping
+        WHERE
+            UserId = @UserID
+            AND IsActive = 1
+    )
+
+GROUP BY
+
+    B.GHBookingID,
+    B.GHRBookingNo,
+    B.GuestName,
+    GT.GuestTypeName,
+    GH.GuestHouseName,
+    B.ArrivalDateTime,
+    B.DepartureDateTime,
+    B.BookingStatus,
+
+    B.AccommodationAmount,
     B.AdditionalCharges,
     B.DiscountAmount,
     B.TotalPayableAmount,

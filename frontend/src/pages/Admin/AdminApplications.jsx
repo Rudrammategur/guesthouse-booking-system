@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 import GenericDashboardPage from "../../components/Common/GenericDashboardPage";
 
 const API_URL =
@@ -29,9 +29,9 @@ function AdminApplications() {
 
         try {
 
-            const response = await axios.get(
+            const response = await api.get(
 
-                `${API_URL}/api/admin/applications`
+                "/api/admin/applications"
 
             );
 

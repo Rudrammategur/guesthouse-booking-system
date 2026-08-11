@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 
 import ERPPage from "../../components/Common/ERPPage";
 import PageHeader from "../../components/Common/PageHeader";
@@ -9,6 +9,7 @@ import ERPTable from "../../components/Common/ERPTable";
 import DashboardCards from "../../components/Dashboard/DashboardCards";
 import StatusBadge from "../../components/Common/StatusBadge";
 import Button from "../../components/Common/Button/Button";
+import { getUserHeader } from "../../utils/userHeader";
 
 import logo from "../../assets/iit-dharwad-logo.png";
 
@@ -50,19 +51,22 @@ function ApproverDashboard() {
 
             ] = await Promise.all([
 
-                axios.get(
-                    `${API_URL}/api/approver/applications`
+                api.get(
+                    "/api/approver/applications"
                 ),
 
-                axios.get(
-                    `${API_URL}/api/approver/dashboard-counts`
+                api.get(
+                    "/api/approver/dashboard-counts"
                 )
 
             ]);
 
-            setApplications(applicationResponse.data.data);
+            setApplications(applicationResponse.data.data || []);
 
-            setCounts(countResponse.data.data);
+            setCounts(countResponse.data.data || {});
+
+            console.log("Applications Response:", applicationResponse.data);
+            console.log("Counts Response:", countResponse.data);
 
         }
 
@@ -106,24 +110,6 @@ function ApproverDashboard() {
         },
 
         {
-            label: "Approved Applications",
-            count: counts.ApprovedApplications ?? 0,
-            color: "success",
-            active: activeFilter === "ApprovedApplications",
-            onClick: () =>
-                setActiveFilter("ApprovedApplications")
-        },
-
-        {
-            label: "Rejected Applications",
-            count: counts.RejectedApplications ?? 0,
-            color: "danger",
-            active: activeFilter === "RejectedApplications",
-            onClick: () =>
-                setActiveFilter("RejectedApplications")
-        },
-
-        {
             label: "Processed Applications",
             count: counts.AllProcessedApplications ?? 0,
             color: "info",
@@ -135,36 +121,30 @@ function ApproverDashboard() {
     ];
 
     const filteredApplications =
-        applications.filter(app => {
+        Array.isArray(applications)
+            ? applications.filter(app => {
 
-            switch (activeFilter) {
+                switch (activeFilter) {
 
-                case "PendingApplications":
+                    case "PendingApplications":
+                        return app.BookingStatus === "Verified";
 
-                    return app.BookingStatus === "Verified";
+                    case "ProcessedApplications":
+                        return [
+                            "Approved",
+                            "Allocated",
+                            "CheckedIn",
+                            "Checked Out",
+                            "Rejected",
+                            "Cancelled"
+                        ].includes(app.BookingStatus);
 
-                case "ApprovedApplications":
+                    default:
+                        return true;
+                }
 
-                    return app.BookingStatus === "Approved";
-
-                case "RejectedApplications":
-
-                    return app.BookingStatus === "Rejected";
-
-                case "ProcessedApplications":
-
-                    return [
-                        "Approved",
-                        "Rejected"
-                    ].includes(app.BookingStatus);
-
-                default:
-
-                    return true;
-
-            }
-
-        });
+            })
+            : [];
 
     const columns = [
 
@@ -214,6 +194,8 @@ function ApproverDashboard() {
 
     ];
 
+   
+
     return (
 
         <ERPPage>
@@ -234,7 +216,10 @@ function ApproverDashboard() {
                     <div className="hero-actions">
                         <Button
                             variant="outline"
-                            onClick={() => navigate(-1)}
+                            onClick={() => {
+                                window.location.href =
+                                    `${window.location.origin}/Default/Pages/Portal/PortalInfrastructure.html`;
+                            }}
                         >
                             ← Back
                         </Button>

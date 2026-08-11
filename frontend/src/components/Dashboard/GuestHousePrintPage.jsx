@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 // import ApplicationView from "./ApplicationView/ApplicationView";
@@ -59,9 +59,9 @@ function GuestHousePrintPage() {
   }, []);
 
   const fetchData = async () => {
-    const res = await axios.get(
-      `/guesthouse-api/api/master/application/${id}`
-    );
+    const res = await api.get(
+    `/api/master/application/${id}`
+);
     setData(res.data);
   };
 

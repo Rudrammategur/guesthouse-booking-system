@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import GenericDashboardPage from "../../components/Common/GenericDashboardPage";
 import RoomFormModal from "../../components/Admin/RoomFormModal";
 import ERPConfirmDialog from "../../components/Common/ERPConfirmDialog";
@@ -44,11 +44,11 @@ function RoomMaster() {
         const [roomsResponse, guestHouseResponse, roomTypeResponse] =
             await Promise.all([
 
-                axios.get(`${API_URL}/api/admin/rooms`),
+                api.get("/api/admin/rooms"),
 
-                axios.get(`${API_URL}/api/admin/guesthouses`),
+                api.get("/api/admin/guesthouses"),
 
-                axios.get(`${API_URL}/api/admin/room-types`)
+                api.get("/api/admin/room-types")
 
             ]);
 
@@ -68,8 +68,8 @@ function RoomMaster() {
 
         try {
 
-            await axios.patch(
-                `${API_URL}/api/admin/rooms/${selectedRoom.GuestHouseRoomID}/status`
+            await api.patch(
+                `/api/admin/rooms/${selectedRoom.GuestHouseRoomID}/status`
             );
 
             setConfirmOpen(false);

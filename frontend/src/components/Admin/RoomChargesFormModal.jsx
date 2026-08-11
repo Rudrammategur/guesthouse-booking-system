@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 import ERPFormModal from "../Common/Form/ERPFormModal";
 import ERPFormField from "../Common/Form/ERPFormField";
 import ERPSelectField from "../Common/Form/ERPSelectField";
-import api from "../../services/api";
+
 
 function RoomChargesFormModal({
 

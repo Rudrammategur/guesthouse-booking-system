@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 import GenericDashboardPage from "../../components/Common/GenericDashboardPage";
 import ERPConfirmDialog from "../../components/Common/ERPConfirmDialog";
@@ -36,8 +36,8 @@ function RoleMaster() {
     const loadRoles = async () => {
 
         const response =
-            await axios.get(
-                `${API_URL}/api/admin/roles`
+            await api.get(
+                "/api/admin/roles"
             );
 
         setRoles(response.data);
@@ -322,9 +322,9 @@ function RoleMaster() {
 
                 onConfirm={async () => {
 
-                    await axios.patch(
+                    await api.patch(
 
-                        `${API_URL}/api/admin/roles/${selectedRole.RoleID}/status`
+                        `/api/admin/roles/${selectedRole.RoleID}/status`
 
                     );
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 
 import ERPPage from "../../components/Common/ERPPage";
 import PageHeader from "../../components/Common/PageHeader";
@@ -26,8 +26,8 @@ function GHReceiptPage() {
 
     useEffect(() => {
 
-        axios
-            .get(`${API_URL}/api/gh-incharge/receipt/${bookingId}`)
+        api
+            .get(`/api/gh-incharge/receipt/${bookingId}`)
             .then(res => setReceipt(res.data));
 
     }, [bookingId]);
@@ -86,11 +86,6 @@ function GHReceiptPage() {
                     <div className="receipt-row">
                         <span>Accommodation</span>
                         <strong>₹ {receipt.AccommodationAmount}</strong>
-                    </div>
-
-                    <div className="receipt-row">
-                        <span>Meal Charges</span>
-                        <strong>₹ {receipt.MealCharges}</strong>
                     </div>
 
                     <div className="receipt-row">

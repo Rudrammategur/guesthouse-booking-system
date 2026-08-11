@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 
 import ApplicationView from "../../components/Dashboard/ApplicationView/ApplicationView";
+import { getUserHeader } from "../../utils/userHeader";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
@@ -24,10 +25,9 @@ function ApplicantApplicationPage() {
 
         try {
 
-            const res = await axios.get(
-                `${API_URL}/api/guesthouse/application/${bookingId}`
-            );
-
+            const res = await api.get(
+                `/api/guesthouse/application/${bookingId}`
+            )
             const response = res.data.data;
 
             setApplication({

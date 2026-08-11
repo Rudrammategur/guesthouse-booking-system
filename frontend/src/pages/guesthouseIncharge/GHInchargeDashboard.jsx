@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 import DashboardCards from "../../components/Dashboard/DashboardCards";
 import "../../components/Dashboard/dashboard.css";
@@ -48,15 +48,15 @@ function GHInchargeDashboard() {
         roomAvailabilityResponse
       ] = await Promise.all([
 
-        axios.get(`${API_URL}/api/gh-incharge/applications`, {
+        api.get("/api/gh-incharge/applications", {
           params: { actionRequired }
         }),
 
-        axios.get(`${API_URL}/api/gh-incharge/dashboard-counts`),
+        api.get("/api/gh-incharge/dashboard-counts"),
 
-        axios.get(`${API_URL}/api/gh-incharge/occupancy-summary`),
+        api.get("/api/gh-incharge/occupancy-summary"),
 
-        axios.get(`${API_URL}/api/gh-incharge/room-availability`)
+        api.get("/api/gh-incharge/room-availability")
 
       ]);
       setApplications(applicationsResponse.data.data);
@@ -287,11 +287,14 @@ function GHInchargeDashboard() {
         actions={
         <div className="hero-actions">
             <Button
-                variant="outline"
-                onClick={() => navigate(-1)}
-            >
-                ← Back
-            </Button>
+                            variant="outline"
+                            onClick={() => {
+                                window.location.href =
+                                    `${window.location.origin}/Default/Pages/Portal/PortalInfrastructure.html`;
+                            }}
+                        >
+                            ← Back
+                        </Button>
         </div>
     }
       />

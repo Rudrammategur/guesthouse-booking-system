@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 import { toast } from "react-toastify";
 
 import ERPPage from "../../components/Common/ERPPage";
@@ -36,8 +36,8 @@ function GHProcessedApplicationsPage() {
 
         try {
 
-            const response = await axios.get(
-                `${API_URL}/api/gh-incharge/processed-applications`
+            const response = await api.get(
+                "/api/gh-incharge/processed-applications"
             );
 
             setApplications(response.data.data);

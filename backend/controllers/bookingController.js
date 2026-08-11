@@ -1,222 +1,222 @@
-const sql = require("mssql");
-const { poolPromise } = require("../config/db");
+// const sql = require("mssql");
+// const { poolPromise } = require("../config/db");
 
-exports.getBookingDetails = async (req, res) => {
+// exports.getBookingDetails = async (req, res) => {
 
-    try {
+//     try {
 
-        const bookingId = req.params.bookingId;
+//         const bookingId = req.params.bookingId;
 
-        const pool = await poolPromise;
+//         const pool = await poolPromise;
 
-        //-----------------------------------------
-        // Booking
-        //-----------------------------------------
+//         //-----------------------------------------
+//         // Booking
+//         //-----------------------------------------
 
-        const booking =
-            await pool.request()
+//         const booking =
+//             await pool.request()
 
-                .input(
-                    "BookingID",
-                    sql.VarChar,
-                    bookingId
-                )
+//                 .input(
+//                     "BookingID",
+//                     sql.VarChar,
+//                     bookingId
+//                 )
 
-                .query(`
+//                 .query(`
 
-SELECT *
+// SELECT *
 
-FROM GuestHouseRoomBookings
+// FROM GuestHouseRoomBookings
 
-WHERE GHBookingID=@BookingID
+// WHERE GHBookingID=@BookingID
 
-`);
+// `);
 
-        if (
-            booking.recordset.length === 0
-        ) {
+//         if (
+//             booking.recordset.length === 0
+//         ) {
 
-            return res.status(404).json({
+//             return res.status(404).json({
 
-                success: false,
+//                 success: false,
 
-                message: "Booking not found"
+//                 message: "Booking not found"
 
-            });
+//             });
 
-        }
+//         }
 
-        //-----------------------------------------
-        // Room Requirements
-        //-----------------------------------------
+//         //-----------------------------------------
+//         // Room Requirements
+//         //-----------------------------------------
 
-        const roomRequirements =
-            await pool.request()
+//         const roomRequirements =
+//             await pool.request()
 
-                .input(
-                    "BookingID",
-                    sql.VarChar,
-                    bookingId
-                )
+//                 .input(
+//                     "BookingID",
+//                     sql.VarChar,
+//                     bookingId
+//                 )
 
-                .query(`
+//                 .query(`
 
-SELECT
+// SELECT
 
-d.*,
+// d.*,
 
-r.RoomTypeName
+// r.RoomTypeName
 
-FROM GuestHouseBookingRoomDetails d
+// FROM GuestHouseBookingRoomDetails d
 
-INNER JOIN RoomTypeMaster r
+// INNER JOIN RoomTypeMaster r
 
-ON d.RoomTypeID=r.RoomTypeID
+// ON d.RoomTypeID=r.RoomTypeID
 
-WHERE
+// WHERE
 
-d.GHBookingID=@BookingID
+// d.GHBookingID=@BookingID
 
-`);
+// `);
 
-        //-----------------------------------------
-        // Allocated Rooms
-        //-----------------------------------------
+//         //-----------------------------------------
+//         // Allocated Rooms
+//         //-----------------------------------------
 
-        const allocatedRooms =
-            await pool.request()
+//         const allocatedRooms =
+//             await pool.request()
 
-                .input(
-                    "BookingID",
-                    sql.VarChar,
-                    bookingId
-                )
+//                 .input(
+//                     "BookingID",
+//                     sql.VarChar,
+//                     bookingId
+//                 )
 
-                .query(`
+//                 .query(`
 
-SELECT
+// SELECT
 
-a.*,
+// a.*,
 
-g.GHRoomNo,
+// g.GHRoomNo,
 
-rt.RoomTypeName
+// rt.RoomTypeName
 
-FROM GuestHouseRoomAllocation a
+// FROM GuestHouseRoomAllocation a
 
-INNER JOIN GuestHouseRooms g
+// INNER JOIN GuestHouseRooms g
 
-ON a.GuestHouseRoomID=g.GHRMID
+// ON a.GuestHouseRoomID=g.GHRMID
 
-INNER JOIN RoomTypeMaster rt
+// INNER JOIN RoomTypeMaster rt
 
-ON g.RoomTypeID=rt.RoomTypeID
+// ON g.RoomTypeID=rt.RoomTypeID
 
-WHERE
+// WHERE
 
-a.GHBookingID=@BookingID
+// a.GHBookingID=@BookingID
 
-`);
+// `);
 
-        //-----------------------------------------
-        // Workflow History
-        //-----------------------------------------
+//         //-----------------------------------------
+//         // Workflow History
+//         //-----------------------------------------
 
-        const workflow =
-            await pool.request()
+//         const workflow =
+//             await pool.request()
 
-                .input(
-                    "BookingID",
-                    sql.VarChar,
-                    bookingId
-                )
+//                 .input(
+//                     "BookingID",
+//                     sql.VarChar,
+//                     bookingId
+//                 )
 
-                .query(`
+//                 .query(`
 
-SELECT
+// SELECT
 
-CurrentStatus,
+// CurrentStatus,
 
-ActionBy,
+// ActionBy,
 
-Remarks,
+// Remarks,
 
-ActionDate
+// ActionDate
 
-FROM GuestHouseBookingWorkflowHistory
+// FROM GuestHouseBookingWorkflowHistory
 
-WHERE
+// WHERE
 
-GHBookingID=@BookingID
+// GHBookingID=@BookingID
 
-ORDER BY
+// ORDER BY
 
-ActionDate
+// ActionDate
 
-`);
+// `);
 
-        //-----------------------------------------
-        // Other Occupants
-        //-----------------------------------------
+//         //-----------------------------------------
+//         // Other Occupants
+//         //-----------------------------------------
 
-        const occupants =
-            await pool.request()
+//         const occupants =
+//             await pool.request()
 
-                .input(
-                    "BookingID",
-                    sql.VarChar,
-                    bookingId
-                )
+//                 .input(
+//                     "BookingID",
+//                     sql.VarChar,
+//                     bookingId
+//                 )
 
-                .query(`
+//                 .query(`
 
-SELECT *
+// SELECT *
 
-FROM GuestHouseOccupants
+// FROM GuestHouseOccupants
 
-WHERE
+// WHERE
 
-GHBookingID=@BookingID
+// GHBookingID=@BookingID
 
-`);
+// `);
 
-        //-----------------------------------------
+//         //-----------------------------------------
 
-        res.json({
+//         res.json({
 
-            success: true,
+//             success: true,
 
-            booking:
-                booking.recordset[0],
+//             booking:
+//                 booking.recordset[0],
 
-            roomRequirements:
-                roomRequirements.recordset,
+//             roomRequirements:
+//                 roomRequirements.recordset,
 
-            allocatedRooms:
-                allocatedRooms.recordset,
+//             allocatedRooms:
+//                 allocatedRooms.recordset,
 
-            workflowHistory:
-                workflow.recordset,
+//             workflowHistory:
+//                 workflow.recordset,
 
-            occupants:
-                occupants.recordset
+//             occupants:
+//                 occupants.recordset
 
-        });
+//         });
 
-    }
+//     }
 
-    catch (err) {
+//     catch (err) {
 
-        console.log(err);
+//         console.log(err);
 
-        res.status(500).json({
+//         res.status(500).json({
 
-            success: false,
+//             success: false,
 
-            message: err.message
+//             message: err.message
 
-        });
+//         });
 
-    }
+//     }
 
-};
+// };

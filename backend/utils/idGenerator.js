@@ -1,6 +1,4 @@
 const sql = require("mssql");
-const { poolPromise } = require("../config/db");
-
 
 // Private helper
 async function generateId(
@@ -16,13 +14,7 @@ async function generateId(
 
     const finalPrefix = `${prefix}${year}`;
 
-    const pool = await poolPromise;
-
-    const request = transaction
-        ? transaction.request()
-        : pool.request();
-
-    const result = await request
+    const result = await new sql.Request(transaction)
         .input("Prefix", sql.VarChar, `${finalPrefix}%`)
         .query(`
             SELECT TOP 1 ${column}
@@ -115,3 +107,4 @@ exports.generateUserAccessId = (transaction) =>
         prefix: "UA"
     });
 
+    

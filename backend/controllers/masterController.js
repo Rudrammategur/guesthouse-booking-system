@@ -1,5 +1,6 @@
 const sql = require("mssql");
 const { poolPromise } = require("../config/db");
+const getCurrentUser = require("../utils/getCurrentUser");
 
 exports.getGuestHouseTypes = async (req, res) => {
 
@@ -15,6 +16,7 @@ exports.getGuestHouseTypes = async (req, res) => {
                     GuestHouseName
                 FROM GuestHouseMaster
                 WHERE IsActive = 1
+                and GuestHouseID <> 'GH3'
                 ORDER BY GuestHouseName
             `);
 
@@ -213,13 +215,21 @@ exports.getProjects = async (req, res) => {
 
         const pool = await poolPromise;
 
-        const result = await pool.request().query(`
+        const currentUser = getCurrentUser(req);
 
-            SELECT ProjectRefNo,ProjectName 
-FROM Projects.dbo.CreateProjectDetails
-Where ActiveStatus = 'Active' ORDER BY ProjectName
-
-        `);
+        const result = await pool.request()
+            .input("EmployeeId", sql.VarChar, currentUser.EmployeeId)
+            .query(`
+        SELECT
+            CPD.ProjectRefNo,
+            CPD.ProjectName
+        FROM Projects.dbo.CreateProjectDetails CPD
+        INNER JOIN HR..EmployeeBasicInfo EBI
+            ON CPD.EmployeeBasicInfoId = EBI.EmployeeBasicInfoId
+        WHERE
+            EBI.EmployeeId = @EmployeeId
+        ORDER BY CPD.ProjectName
+    `);
 
         res.status(200).json(result.recordset);
 

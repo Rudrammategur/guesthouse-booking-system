@@ -3,7 +3,7 @@ const { poolPromise } = require("../config/db");
 const {
     getWorkflowHistory,
     changeWorkflowStatus
-} = require("../services/WorkflowService");
+} = require("../services/workflowService");
 
 const {
     getBookingDetails
@@ -13,12 +13,25 @@ const {
 const { getEmployeeById } = require("../services/employeeService");
 const { formatDate } = require("../utils/dateFormater");
 
+const getCurrentUser = require("../utils/getCurrentUser");
+
 
 exports.getDashboardCounts = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        console.log("========== VERIFIER DASHBOARD ==========");
+
+        const currentUser = getCurrentUser(req);
+
+        console.log("Current User:", currentUser);
+
+        if (!currentUser) {
+            return res.status(401).json({
+                success: false,
+                message: "User authentication failed"
+            });
+        }
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -27,66 +40,53 @@ exports.getDashboardCounts = async (req, res) => {
         // await AuthorizationService.ensureVerifier(currentUser);
 
         const pool = await poolPromise;
-
         const result = await pool.request()
 
+            .input("UserID", sql.BigInt, currentUser.UserId)
+
             .query(`
+        SELECT
 
-SELECT
+            COUNT(*) AS TotalApplications,
 
-COUNT(*) AS TotalApplications,
+            ISNULL(SUM(
+                CASE
+                    WHEN BookingStatus = 'Submitted'
+                    THEN 1
+                    ELSE 0
+                END
+            ), 0) AS PendingApplications,
 
-ISNULL(SUM(
-CASE
-WHEN BookingStatus='Submitted'
-THEN 1
-ELSE 0
-END
-),0) AS PendingApplications,
+            ISNULL(SUM(
+                CASE
+                    WHEN BookingStatus IN (
+                        'Verified',
+                        'Approved',
+                        'Rejected',
+                        'Allocated',
+                        'Checked In',
+                        'Checked Out'
+                    )
+                    THEN 1
+                    ELSE 0
+                END
+            ), 0) AS AllProcessedApplications
 
-ISNULL(SUM(
-CASE
-WHEN BookingStatus='Verified'
-THEN 1
-ELSE 0
-END
-),0) AS VerifiedApplications,
+        FROM GuestHouseRoomBookings
 
-ISNULL(SUM(
-CASE
-WHEN BookingStatus='Rejected'
-THEN 1
-ELSE 0
-END
-),0) AS RejectedApplications,
+        WHERE IsActive = 1
 
-ISNULL(SUM(
-CASE
-WHEN BookingStatus IN
-(
-'Verified',
-'Rejected'
-)
-THEN 1
-ELSE 0
-END
-),0) AS AllProcessedApplications
+        AND BookingStatus <> 'Cancelled'
 
-FROM GuestHouseRoomBookings
+        AND AssignedVerifierID IN (
+            SELECT RoleMapId
+            FROM Proof..OrgUnitUserMapping
+            WHERE UserId = @UserID
+              AND IsActive = 1
+        )
+    `);
 
-WHERE 
-
-IsActive = 1
-
-AND BookingStatus IN
-(
-'Submitted',
-'Verified',
-'Rejected'
-)
-
-`);
-
+        console.log("Dashboard Result:", result.recordset);
         res.json({
 
             success: true,
@@ -117,7 +117,14 @@ exports.getPendingApplications = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
+
+        if (!currentUser) {
+            return res.status(401).json({
+                success: false,
+                message: "User authentication failed"
+            });
+        }
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -128,6 +135,12 @@ exports.getPendingApplications = async (req, res) => {
         const pool = await poolPromise;
 
         const result = await pool.request()
+
+            .input(
+                "UserID",
+                sql.BigInt,
+                currentUser.UserId
+            )
 
             .query(`
 
@@ -201,7 +214,19 @@ exports.getApplications = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        console.log("========== VERIFIER APPLICATIONS ==========");
+
+        const currentUser = getCurrentUser(req);
+
+        console.log("Current User:", currentUser);
+
+
+        if (!currentUser) {
+            return res.status(401).json({
+                success: false,
+                message: "User authentication failed"
+            });
+        }
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -212,6 +237,12 @@ exports.getApplications = async (req, res) => {
         const pool = await poolPromise;
 
         const result = await pool.request()
+
+            .input(
+                "UserID",
+                sql.BigInt,
+                currentUser.UserId
+            )
 
             .query(`
 
@@ -242,10 +273,9 @@ FROM GuestHouseRoomBookings b
 LEFT JOIN GuestTypeMaster gt
 ON gt.GuestTypeID = b.GuestTypeID
 
-WHERE 
-
+WHERE
     b.IsActive = 1
-WHERE b.AssignedVerifierID IN (
+AND b.AssignedVerifierID IN (
 
 SELECT RoleMapId
 
@@ -261,7 +291,11 @@ AND b.BookingStatus IN
 (
     'Submitted',
     'Verified',
-    'Rejected'
+    'Rejected',
+'Approved',
+'Allocated',
+'Checked In',
+'Checked Out'
 )
 
 ORDER BY
@@ -269,6 +303,8 @@ ORDER BY
     b.BookingDateTime DESC
 
 `);
+
+        console.log(result.recordset);
 
         res.status(200).json({
 
@@ -304,7 +340,14 @@ exports.getApplication = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
+
+        if (!currentUser) {
+            return res.status(401).json({
+                success: false,
+                message: "User authentication failed"
+            });
+        }
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -373,7 +416,6 @@ ON og.RoleMapID = b.AssignedAllocatorID
 
 LEFT JOIN Proof..RoleMaster gr
 ON gr.RoleID = og.RoleID
-ON gh.GuestHouseID=b.GuestHouseID
 
 WHERE
 
@@ -535,32 +577,18 @@ exports.verifyApplication = async (req, res) => {
 
 
 
-        await changeWorkflowStatus(
+        const currentUser = getCurrentUser(req);
 
-            transaction,
-
-            {
-
-                bookingId,
-
-                previousStatus: booking.BookingStatus,
-
-                currentStatus: "Verified",
-
-                actionName: "Verify",
-
-                authorityRole: "Verifier",
-
-                authorityName: "SYSTEM",
-
-                actionBy: "SYSTEM",
-
-                remarks
-
-            }
-
-
-        );
+        await changeWorkflowStatus(transaction, {
+            bookingId,
+            previousStatus: booking.BookingStatus,
+            currentStatus: "Verified",
+            actionName: "Verify",
+            authorityRole: "Verifier",
+            authorityName: currentUser.EmployeeName,
+            actionBy: currentUser.EmployeeId,
+            remarks
+        });
 
 
 
@@ -610,7 +638,14 @@ exports.viewDocument = async (req, res) => {
 
     try {
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
+
+        if (!currentUser) {
+            return res.status(401).json({
+                success: false,
+                message: "User authentication failed"
+            });
+        }
 
         // Authentication
         // AuthorizationService.ensureAuthenticated(currentUser);
@@ -769,7 +804,14 @@ exports.rejectApplication = async (req, res) => {
 
         await transaction.begin();
 
-        const currentUser = req.user;
+        const currentUser = getCurrentUser(req);
+
+        if (!currentUser) {
+            return res.status(401).json({
+                success: false,
+                message: "User authentication failed"
+            });
+        }
 
         const bookingId = req.params.bookingId;
 

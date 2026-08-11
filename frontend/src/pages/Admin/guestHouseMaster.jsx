@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import GenericDashboardPage from "../../components/Common/GenericDashboardPage";
 import GuestHouseFormModal from "../../components/Admin/GuestHouseFormModal";
 import "../../styles/adminDashboard.css";
@@ -30,9 +30,9 @@ function GuestHouseMaster() {
 
     const loadGuestHouses = async () => {
 
-        const response = await axios.get(
+        const response = await api.get(
 
-            `${API_URL}/api/admin/guesthouses`
+            "/api/admin/guesthouses"
 
         );
 
@@ -130,9 +130,9 @@ function GuestHouseMaster() {
 
                         onClick={async () => {
 
-                            await axios.patch(
+                            await api.patch(
 
-                                `${API_URL}/api/admin/guesthouses/${row.GuestHouseID}/status`
+                                `/api/admin/guesthouses/${row.GuestHouseID}/status`
 
                             );
 

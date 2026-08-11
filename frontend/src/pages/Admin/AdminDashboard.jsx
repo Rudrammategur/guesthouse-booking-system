@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import DashboardCards from "../../components/Dashboard/DashboardCards";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
+
 
 import QuickActions from "../../components/Admin/QuickActions";
 import TodayGuests from "../../components/Admin/TodayGuests";
@@ -56,9 +57,9 @@ function AdminDashboard() {
 
             setLoading(true);
 
-            const response = await axios.get(
+            const response = await api.get(
 
-                `${API_URL}/api/admin/dashboard`
+                "/api/admin/dashboard"
 
             );
 

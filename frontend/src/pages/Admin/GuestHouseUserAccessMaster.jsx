@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 import GenericDashboardPage from "../../components/Common/GenericDashboardPage";
 import GuestHouseUserAccessFormModal from "../../components/Admin/GuestHouseUserAccessFormModal";
@@ -57,13 +57,13 @@ function GuestHouseUserAccessMaster() {
 
         ] = await Promise.all([
 
-            axios.get(`${API_URL}/api/admin/user-access`),
+            api.get("/api/admin/user-access"),
 
-            axios.get(`${API_URL}/api/admin/guesthouses`),
+            api.get("/api/admin/guesthouses"),
 
-            axios.get(`${API_URL}/api/admin/roles`),
+            api.get("/api/admin/roles"),
 
-            axios.get(`${API_URL}/api/admin/employees`)
+            api.get("/api/admin/employees")
 
         ]);
 
@@ -408,9 +408,9 @@ function GuestHouseUserAccessMaster() {
 
                 onConfirm={async () => {
 
-                    await axios.patch(
+                    await api.patch(
 
-                        `${API_URL}/api/admin/user-access/${selectedUserAccess.UserAccessID}/status`
+                        `/api/admin/user-access/${selectedUserAccess.UserAccessID}/status`
 
                     );
 
