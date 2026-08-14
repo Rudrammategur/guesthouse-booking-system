@@ -1,5 +1,6 @@
 const express = require("express");
 require("dotenv").config();
+const { sql, poolPromise } = require("./config/db");
 const db = require("./config/db");
 const app = express();
 const cors = require("cors");
@@ -13,7 +14,10 @@ const guestHouseInchargeRoutes = require("./routes/guestHouseInchargeRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const workflowRoutes = require("./routes/workflowRoutes");
-const uploadTest = require("./routes/uploadTest");
+const transportRoutes = require("./routes/transportRoutes");
+const transportVerifierRoutes = require("./routes/transportVerifierRoutes");
+const transportApproverRoutes = require("./routes/transportApproverRoutes");
+const transportAllocatorRoutes = require("./routes/transportAllocatorRoutes");
 
 app.use(express.json());
 app.use(cors());
@@ -28,10 +32,13 @@ app.use("/api/gh-incharge", guestHouseInchargeRoutes);
 app.use("/api/admin",adminRoutes);
 app.use("/api/workflow",workflowRoutes);
 app.use("/api/test/workflow", require("./routes/testWorkflowRoutes"));
-app.use("/api/upload-test", uploadTest);
+app.use("/api/transport", transportRoutes);
+app.use("/api/transport-verifier", transportVerifierRoutes);
+app.use("/api/transport-approver", transportApproverRoutes);
+app.use("/api/transport-allocator",transportAllocatorRoutes);
 
 
-const { sql, poolPromise } = require("./config/db");
+
 
 const PORT = process.env.PORT || 5000;
 
@@ -49,6 +56,13 @@ app.use((err, req, res, next) => {
     res.status(500).json({
         success: false,
         message: err.message
+    });
+});
+
+app.get("/api/transport/test", (req, res) => {
+    res.json({
+        success: true,
+        message: "Transport route is working"
     });
 });
 app.listen(PORT, "0.0.0.0", () => {

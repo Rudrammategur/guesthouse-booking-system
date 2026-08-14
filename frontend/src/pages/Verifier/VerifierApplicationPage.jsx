@@ -78,11 +78,19 @@ function VerifierApplicationPage() {
             <ApplicationView
                 application={application}
                 extraActions={
-                    <Button
-                        onClick={() => setShowActionModal(true)}
-                    >
-                        Take Action
-                    </Button>
+
+                    application.BookingStatus === "Submitted" && (
+
+                        <Button
+                            onClick={() =>
+                                setShowActionModal(true)
+                            }
+                        >
+                            Take Action
+                        </Button>
+
+                    )
+
                 }
             />
 
@@ -95,7 +103,18 @@ function VerifierApplicationPage() {
                 <TakeAction
                     application={application}
                     actionType="Verifier"
+
+                    bookingId={
+                        application.GHBookingID
+                    }
+
+                    verifyUrl="/api/verifier/verify"
+                    rejectUrl="/api/verifier/reject"
+
+                    redirectPath="/verifier"
+
                     showHeader={false}
+
                     onSuccess={() => {
                         setShowActionModal(false);
                         fetchApplication();

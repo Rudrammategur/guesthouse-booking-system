@@ -165,3 +165,46 @@ WHERE
     return result.recordset[0];
 
 };
+
+exports.getTransportBookingDetails = async (bookingId) => {
+
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+
+        .input(
+            "BookingID",
+            sql.VarChar,
+            bookingId
+        )
+
+        .query(`
+
+            SELECT
+
+                b.*,
+
+                ebi.DisplayName AS ApplicantName
+
+            FROM TransportBookings b
+
+            LEFT JOIN HR..EmployeeBasicInfo ebi
+                ON ebi.EmployeeId = b.BookedBy
+
+            WHERE
+
+                b.TransportBookingID = @BookingID
+
+                AND b.IsActive = 1
+
+        `);
+
+    if (result.recordset.length === 0) {
+
+        return null;
+
+    }
+
+    return result.recordset[0];
+
+};

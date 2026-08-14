@@ -9,6 +9,13 @@ const {
     getBookingDetails
 } = require("../services/bookingService");
 
+const NotificationService =
+    require("../notifications/notificationService");
+
+const {
+    getEmployeeById
+} = require("../services/employeeService");
+
 const AuthorizationService = require("../services/AuthorizationService");
 
 const { generateAllocationId } = require("../utils/idGenerator");
@@ -283,7 +290,9 @@ SELECT
 
     g.GuestHouseName,
 
-    gt.GuestTypeName
+    gt.GuestTypeName,
+
+    ebi.DisplayName AS ApplicantName
 
 FROM GuestHouseRoomBookings b
 
@@ -292,6 +301,9 @@ ON b.GuestHouseID = g.GuestHouseID
 
 LEFT JOIN GuestTypeMaster gt
 ON b.GuestTypeID = gt.GuestTypeID
+
+LEFT JOIN HR..EmployeeBasicInfo ebi
+ON ebi.EmployeeId = b.BookedBy
 
 WHERE
 
@@ -405,7 +417,7 @@ WHERE
 
         const workflowHistory =
             await getWorkflowHistory(
-                "GuestHouseBooking",
+                "GuestHouse",
                 bookingId
             );
 
@@ -878,7 +890,9 @@ SELECT
 
     GH.GuestHouseName,
 
-    GT.GuestTypeName
+    GT.GuestTypeName,
+
+    E.DisplayName AS ApplicantName
 
 FROM GuestHouseRoomBookings B
 
@@ -887,6 +901,10 @@ ON LTRIM(RTRIM(GH.GuestHouseID)) = LTRIM(RTRIM(B.GuestHouseID))
 
 LEFT JOIN GuestTypeMaster GT
 ON LTRIM(RTRIM(GT.GuestTypeID)) = LTRIM(RTRIM(B.GuestTypeID))
+
+LEFT JOIN HR..EmployeeBasicInfo E
+    ON LTRIM(RTRIM(E.EmployeeId)) =
+       LTRIM(RTRIM(B.BookedBy))
 
 WHERE
 
@@ -982,7 +1000,7 @@ ORDER BY
 
         const workflowHistory =
             await getWorkflowHistory(
-                "GuestHouseBooking",
+                "GuestHouse",
                 bookingId
             );
 
@@ -1210,7 +1228,7 @@ WHERE
 
                 bookingId,
 
-                moduleName: "GuestHouseBooking",
+                moduleName: "GuestHouse",
 
                 previousStatus: booking.BookingStatus,
 
@@ -1454,7 +1472,9 @@ SELECT
 
     GH.GuestHouseName,
 
-    GT.GuestTypeName
+    GT.GuestTypeName,
+
+    E.DisplayName AS ApplicantName
 
 FROM GuestHouseRoomBookings B
 
@@ -1465,6 +1485,10 @@ ON LTRIM(RTRIM(GH.GuestHouseID)) =
 LEFT JOIN GuestTypeMaster GT
 ON LTRIM(RTRIM(GT.GuestTypeID)) =
    LTRIM(RTRIM(B.GuestTypeID))
+
+LEFT JOIN HR..EmployeeBasicInfo E
+            ON LTRIM(RTRIM(E.EmployeeId)) =
+               LTRIM(RTRIM(B.BookedBy))
 
 WHERE
 
@@ -1577,7 +1601,7 @@ ORDER BY
         const workflowHistory =
             await getWorkflowHistory(
 
-                "GuestHouseBooking",
+                "GuestHouse",
 
                 bookingId
 
@@ -1635,34 +1659,61 @@ exports.allocateRooms = async (req, res) => {
 
     try {
 
-        const currentUser = getCurrentUser(req);
+        const currentUser =
+            getCurrentUser(req);
 
-        // Authentication
-        // AuthorizationService.ensureAuthenticated(currentUser);
+        if (!currentUser) {
 
-        // // Authorization
-        // await AuthorizationService.ensureAllocator(currentUser);
+            return res.status(401).json({
+
+                success: false,
+
+                message:
+                    "User authentication failed"
+
+            });
+
+        }
 
         await transaction.begin();
 
-        const bookingId = req.params.bookingId;
+
+        const bookingId =
+            req.params.bookingId;
+
 
         const {
-
             rooms,
-
             accommodationAmount,
-
             remarks = ""
-
         } = req.body;
+
+
+        //-------------------------------------------------------
+        // Validate request
+        //-------------------------------------------------------
+
+        if (
+            !Array.isArray(rooms) ||
+            rooms.length === 0
+        ) {
+
+            throw new Error(
+                "At least one room must be allocated."
+            );
+
+        }
+
 
         //-------------------------------------------------------
         // Fetch Booking
         //-------------------------------------------------------
 
         const booking =
-            await getBookingDetails(bookingId);
+            await getBookingDetails(
+                bookingId
+            );
+
 
         if (!booking) {
 
@@ -1672,12 +1723,31 @@ exports.allocateRooms = async (req, res) => {
 
         }
 
-        console.log("========== ALLOCATE ROOMS ==========");
-        console.log("Booking ID:", req.params.bookingId);
-        console.log("Current User:", currentUser);
-        console.log("Request Body:", req.body);
 
+        console.log(
+            "========== ALLOCATE ROOMS =========="
+        );
+
+        console.log(
+            "Booking ID:",
+            bookingId
+        );
+
+        console.log(
+            "Current User:",
+            currentUser
+        );
+
+        console.log(
+            "Request Body:",
+            req.body
+        );
+
+
+        //-------------------------------------------------------
         // Validate Assignment
+        //-------------------------------------------------------
+
         await AuthorizationService.ensureAssignedRole(
 
             booking.AssignedAllocatorID,
@@ -1688,7 +1758,11 @@ exports.allocateRooms = async (req, res) => {
 
         );
 
+
+        //-------------------------------------------------------
         // Validate Status
+        //-------------------------------------------------------
+
         AuthorizationService.ensureBookingStatus(
 
             booking,
@@ -1696,6 +1770,7 @@ exports.allocateRooms = async (req, res) => {
             "Approved"
 
         );
+
 
         //-------------------------------------------------------
         // Prevent Duplicate Allocation
@@ -1712,25 +1787,29 @@ exports.allocateRooms = async (req, res) => {
 
                 .query(`
 
-SELECT COUNT(*) AS Total
+                    SELECT COUNT(*) AS Total
 
-FROM GuestHouseRoomAllocation
+                    FROM GuestHouseRoomAllocation
 
-WHERE
+                    WHERE
 
-    GHBookingID = @BookingID
+                        GHBookingID = @BookingID
 
-    AND AllocationStatus = 'Allocated'
+                    AND AllocationStatus = 'Allocated'
 
-`);
+                `);
 
-        if (alreadyAllocated.recordset[0].Total > 0) {
+
+        if (
+            alreadyAllocated.recordset[0].Total > 0
+        ) {
 
             throw new Error(
                 "Rooms have already been allocated."
             );
 
         }
+
 
         //-------------------------------------------------------
         // Allocate Rooms
@@ -1739,7 +1818,10 @@ WHERE
         for (const room of rooms) {
 
             const allocationId =
-                await generateAllocationId(transaction);
+                await generateAllocationId(
+                    transaction
+                );
+
 
             await new sql.Request(transaction)
 
@@ -1781,37 +1863,38 @@ WHERE
 
                 .query(`
 
-INSERT INTO GuestHouseRoomAllocation
-(
-    GHRAllocationID,
-    GHBookingID,
-    AllocatedRoom,
-    AllocatedBy,
-    AllocatedOn,
-    AllocationStatus,
-    IsSingleOccupancy,
-    DayRate,
-    CreatedBy,
-    CreatedDate
-)
+                    INSERT INTO GuestHouseRoomAllocation
+                    (
+                        GHRAllocationID,
+                        GHBookingID,
+                        AllocatedRoom,
+                        AllocatedBy,
+                        AllocatedOn,
+                        AllocationStatus,
+                        IsSingleOccupancy,
+                        DayRate,
+                        CreatedBy,
+                        CreatedDate
+                    )
 
-VALUES
-(
-    @AllocationID,
-    @BookingID,
-    @RoomID,
-    @AllocatedBy,
-    GETDATE(),
-    'Allocated',
-    @IsSingleOccupancy,
-    @DayRate,
-    @AllocatedBy,
-    GETDATE()
-)
+                    VALUES
+                    (
+                        @AllocationID,
+                        @BookingID,
+                        @RoomID,
+                        @AllocatedBy,
+                        GETDATE(),
+                        'Allocated',
+                        @IsSingleOccupancy,
+                        @DayRate,
+                        @AllocatedBy,
+                        GETDATE()
+                    )
 
-`);
+                `);
 
         }
+
 
         //-------------------------------------------------------
         // Update Booking
@@ -1845,23 +1928,28 @@ VALUES
 
             .query(`
 
-UPDATE GuestHouseRoomBookings
+                UPDATE GuestHouseRoomBookings
 
-SET
+                SET
 
-    AccommodationAmount = @AccommodationAmount,
+                    AccommodationAmount =
+                        @AccommodationAmount,
 
-    AllocationRemarks = @Remarks,
+                    AllocationRemarks =
+                        @Remarks,
 
-    ModifiedBy = @AllocatedBy,
+                    ModifiedBy =
+                        @AllocatedBy,
 
-    ModifiedDate = GETDATE()
+                    ModifiedDate =
+                        GETDATE()
 
-WHERE
+                WHERE
 
-    GHBookingID = @BookingID
+                    GHBookingID = @BookingID
 
-`);
+            `);
+
 
         //-------------------------------------------------------
         // Update Workflow
@@ -1875,19 +1963,26 @@ WHERE
 
                 bookingId,
 
-                moduleName: "GuestHouseBooking",
+                moduleName:
+                    "GuestHouse",
 
-                previousStatus: booking.BookingStatus,
+                previousStatus:
+                    booking.BookingStatus,
 
-                currentStatus: "Allocated",
+                currentStatus:
+                    "Allocated",
 
-                actionName: "Allocate Room",
+                actionName:
+                    "Allocate Room",
 
-                authorityRole: "Guest House Incharge",
+                authorityRole:
+                    "Guest House Incharge",
 
-                authorityName: currentUser.EmployeeName,
+                authorityName:
+                    currentUser.EmployeeName,
 
-                actionBy: currentUser.EmployeeId,
+                actionBy:
+                    currentUser.EmployeeId,
 
                 remarks
 
@@ -1895,45 +1990,162 @@ WHERE
 
         );
 
+
+        //-------------------------------------------------------
+        // COMMIT DATABASE TRANSACTION
+        //-------------------------------------------------------
+
         await transaction.commit();
 
-        // try {
 
-        //     await NotificationService.sendRoomAllocated(
+        //-------------------------------------------------------
+        // SEND ROOM ALLOCATION EMAIL
+        //-------------------------------------------------------
 
-        //         req.user.EmployeeEmail,
+        try {
 
-        //         {
+            /*
+             * Applicant details
+             *
+             * BookedBy contains the applicant EmployeeID.
+             */
 
-        //             EmployeeName: req.user.EmployeeName,
+            const employee =
+                await getEmployeeById(
+                    booking.BookedBy
+                );
 
-        //             BookingNo: data.GHRBookingNo,
 
-        //             GuestName: data.GuestName,
+            /*
+             * Build room information for email.
+             *
+             * We use the room information already supplied
+             * by the allocator.
+             */
 
-        //             GuestType: data.GuestTypeName,
+            const allocatedRooms =
+                rooms.map(room => ({
 
-        //             Purpose: data.PurposeOfVisit,
+                    RoomNo:
+                        room.roomNo ||
+                        room.RoomNo ||
+                        room.roomNumber ||
+                        "-",
 
-        //             ArrivalDate: formatDate(booking.ArrivalDateTime),
+                    RoomTypeName:
+                        room.roomTypeName ||
+                        room.RoomTypeName ||
+                        "-",
 
-        //             DepartureDate: formatDate(booking.DepartureDateTime),
+                    NoOfRooms:
+                        1,
 
-        //             GuestHouse: data.GuestHouseName,
+                    DayRate:
+                        room.dayRate || 0
 
-        //             RoomNo: data.RoomNo,
+                }));
 
-        //             RoomType: data.RoomTypeName
 
-        //         }
+            await NotificationService.sendRoomAllocated(
 
-        //     );
+                /*
+                 * TO
+                 *
+                 * Guest email
+                 */
 
-        // } catch (err) {
+                booking.GuestEmailID,
 
-        //     console.error(err);
 
-        // }
+                /*
+                 * CC
+                 *
+                 * Employee / applicant email
+                 */
+
+                employee?.EmployeeEmail ||
+                employee?.PrimaryMail ||
+                employee?.Email ||
+                null,
+
+
+                /*
+                 * Template data
+                 */
+
+                {
+
+                    BookingNo:
+                        booking.GHRBookingNo,
+
+                    GuestName:
+                        booking.GuestName,
+
+                    EmployeeName:
+                        employee?.EmployeeName ||
+                        employee?.DisplayName ||
+                        currentUser.EmployeeName,
+
+                    GuestType:
+                        booking.GuestTypeName,
+
+                    GuestHouseName:
+                        booking.GuestHouseName,
+
+                    Purpose:
+                        booking.PurposeOfVisit,
+
+                    ArrivalDateTime:
+                        formatDate(
+                            booking.ArrivalDateTime
+                        ),
+
+                    DepartureDateTime:
+                        formatDate(
+                            booking.DepartureDateTime
+                        ),
+
+                    RoomDetails:
+                        allocatedRooms,
+
+                    Rooms:
+                        allocatedRooms,
+
+                    AccommodationAmount:
+                        accommodationAmount,
+
+                    Remarks:
+                        remarks
+
+                }
+
+            );
+
+
+            console.log(
+                "Room allocation email sent successfully."
+            );
+
+        }
+
+        catch (emailError) {
+
+            /*
+             * Email failure must NOT undo
+             * successful room allocation.
+             */
+
+            console.error(
+                "Room allocation email failed:",
+                emailError
+            );
+
+        }
+
+
+        //-------------------------------------------------------
+        // RESPONSE
+        //-------------------------------------------------------
 
         return res.status(200).json({
 
@@ -1949,21 +2161,43 @@ WHERE
     catch (err) {
 
         try {
-            if (transaction._aborted !== true) {
+
+            if (
+                transaction._aborted !== true
+            ) {
+
                 await transaction.rollback();
+
             }
-        }
-        catch (rollbackError) {
-            console.error("Rollback Error:", rollbackError);
+
         }
 
-        console.error("========== ALLOCATION ERROR ==========");
+        catch (rollbackError) {
+
+            console.error(
+                "Rollback Error:",
+                rollbackError
+            );
+
+        }
+
+
+        console.error(
+            "========== ALLOCATION ERROR =========="
+        );
+
         console.error(err);
+
         console.error(err.stack);
 
+
         return res.status(500).json({
+
             success: false,
-            message: err.message
+
+            message:
+                err.message
+
         });
 
     }
@@ -2109,7 +2343,7 @@ WHERE
 
                 bookingId,
 
-                moduleName: "GuestHouseBooking",
+                moduleName: "GuestHouse",
 
                 previousStatus: booking.BookingStatus,
 

@@ -3,46 +3,51 @@ const bookingInfoTable = require("./bookingInfoTable");
 
 module.exports = (data) => ({
 
-    subject: `Room Allocated - ${data.BookingNo}`,
+    subject:
+        `Room Allocated - ${data.BookingNo}`,
 
     html: emailLayout({
 
-        title: "Room Allocation Completed",
+        title:
+            "Room Allocation Completed",
 
         body: `
 
-<p>
+            <p>
+                Dear <strong>
+                    ${data.GuestName || "Guest"}
+                </strong>,
+            </p>
 
-Dear <strong>${data.EmployeeName}</strong>,
+            <p>
+                A room has been allocated for your stay.
+            </p>
 
-</p>
+            ${bookingInfoTable({
+                ...data,
+                Status: "Allocated"
+            })}
 
-<p>
+            <div class="next-step">
 
-A room has been allocated for your stay.
+                <strong>Please Note</strong>
 
-</p>
+                <ul>
 
-${bookingInfoTable({
-    ...data,
-    Status: "Allocated"
-})}
+                    <li>
+                        Please carry your Institute ID.
+                    </li>
 
-<div class="next-step">
+                    <li>
+                        Report to the Guest House Reception
+                        during check-in.
+                    </li>
 
-<strong>Please Note</strong>
+                </ul>
 
-<ul>
+            </div>
 
-<li>Please carry your Institute ID.</li>
-
-<li>Report to the Guest House Reception during check-in.</li>
-
-</ul>
-
-</div>
-
-`
+        `
 
     })
 

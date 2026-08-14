@@ -13,6 +13,9 @@ function ApplicantApplicationPage() {
 
     const { bookingId } = useParams();
 
+    console.log("ApplicantApplicationPage URL:", window.location.pathname);
+    console.log("ApplicantApplicationPage bookingId:", bookingId);
+
     const [application, setApplication] = useState(null);
 
     useEffect(() => {

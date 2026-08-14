@@ -7,6 +7,10 @@ import "../../styles/takeAction.css";
 function TakeAction({
     application,
     actionType,
+    bookingId,
+    verifyUrl,
+    rejectUrl,
+    redirectPath,
     onSuccess,
     showHeader = true
 }) {
@@ -23,78 +27,90 @@ function TakeAction({
             ? "Approved"
             : "Verified";
 
-    const [status, setStatus] = useState(approveStatus);
+    const [status, setStatus] =
+        useState(approveStatus);
 
-    const [remarks, setRemarks] = useState("");
+    const [remarks, setRemarks] =
+        useState("");
 
     const handleSubmit = async () => {
 
         try {
 
-            let url = "";
+            if (!bookingId) {
 
-            if (actionType === "Verifier") {
+                toast.error(
+                    "Booking ID is missing."
+                );
 
-                url =
-                    status === "Verified"
+                console.error(
+                    "TakeAction: bookingId is missing",
+                    application
+                );
 
-                        ? `/api/verifier/verify/${application.GHBookingID}`
-
-                        : `/api/verifier/reject/${application.GHBookingID}`;
-
+                return;
             }
 
-            else {
+            if (!verifyUrl || !rejectUrl) {
 
-                url =
-                    status === "Approved"
+                toast.error(
+                    "Workflow API configuration is missing."
+                );
 
-                        ? `/api/approver/approve/${application.GHBookingID}`
+                console.error(
+                    "TakeAction: verifyUrl/rejectUrl missing"
+                );
 
-                        : `/api/approver/reject/${application.GHBookingID}`;
-
+                return;
             }
 
-            const response = await api.put(
+            const url =
+                status === approveStatus
+                    ? `${verifyUrl}/${bookingId}`
+                    : `${rejectUrl}/${bookingId}`;
 
-                url,
-
-                {
-                    remarks
-                }
-
+            console.log(
+                "TakeAction URL:",
+                url
             );
 
-            toast.success(response.data.message);
+            const response =
+                await api.put(
+                    url,
+                    {
+                        remarks
+                    }
+                );
+
+            toast.success(
+                response.data.message
+            );
 
             onSuccess?.();
 
-            setTimeout(() => {
+            if (redirectPath) {
 
-                navigate(
+                setTimeout(() => {
 
-                    actionType === "Verifier"
+                    navigate(
+                        redirectPath
+                    );
 
-                        ? "/verifier"
+                }, 1000);
 
-                        : "/approver"
-
-                );
-
-            }, 1000);
+            }
 
         }
 
         catch (err) {
-
-            console.error(err);
+            console.error("TakeAction error:", err);
+            console.error("Response data:", err.response?.data);
+            console.error("Response status:", err.response?.status);
+            console.error("Response headers:", err.response?.headers);
 
             toast.error(
-
                 err.response?.data?.message ||
-
                 "Something went wrong."
-
             );
 
         }
@@ -105,28 +121,33 @@ function TakeAction({
 
         <div className="action-card">
 
-            {showHeader && <h3>Take Action</h3>}
+            {showHeader && (
+                <h3>
+                    Take Action
+                </h3>
+            )}
 
             <div className="decision-section">
 
-                <label>Decision</label>
+                <label>
+                    Decision
+                </label>
 
                 <div className="radio-group">
 
                     <label>
 
                         <input
-
                             type="radio"
-
                             value={approveStatus}
-
-                            checked={status === approveStatus}
-
-                            onChange={(e) =>
-                                setStatus(e.target.value)
+                            checked={
+                                status === approveStatus
                             }
-
+                            onChange={(e) =>
+                                setStatus(
+                                    e.target.value
+                                )
+                            }
                         />
 
                         {approveText}
@@ -136,17 +157,16 @@ function TakeAction({
                     <label>
 
                         <input
-
                             type="radio"
-
                             value="Rejected"
-
-                            checked={status === "Rejected"}
-
-                            onChange={(e) =>
-                                setStatus(e.target.value)
+                            checked={
+                                status === "Rejected"
                             }
-
+                            onChange={(e) =>
+                                setStatus(
+                                    e.target.value
+                                )
+                            }
                         />
 
                         Reject
@@ -159,34 +179,28 @@ function TakeAction({
 
             <div className="remarks-section">
 
-                <label>Remarks</label>
+                <label>
+                    Remarks
+                </label>
 
                 <textarea
-
                     rows="5"
-
                     value={remarks}
-
                     onChange={(e) =>
-                        setRemarks(e.target.value)
+                        setRemarks(
+                            e.target.value
+                        )
                     }
-
                     placeholder="Enter remarks"
-
                 />
 
             </div>
 
             <button
-
                 className="submit-btn"
-
                 onClick={handleSubmit}
-
             >
-
                 Submit
-
             </button>
 
         </div>

@@ -58,6 +58,21 @@ exports.generateGuestHouseBookingNo = (transaction) =>
         prefix: "GHR"
     });
 
+// Transport
+exports.generateTransportBookingId = (transaction) =>
+    generateId(transaction, {
+        table: "TransportBookings",
+        column: "TransportBookingID",
+        prefix: "TRB"
+    });
+
+exports.generateTransportBookingNo = (transaction) =>
+    generateId(transaction, {
+        table: "TransportBookings",
+        column: "TransportBookingNo",
+        prefix: "TR"
+    });
+
 exports.generateAllocationId = (transaction) =>
     generateId(transaction, {
         table: "GuestHouseRoomAllocation",
@@ -107,4 +122,3 @@ exports.generateUserAccessId = (transaction) =>
         prefix: "UA"
     });
 
-    

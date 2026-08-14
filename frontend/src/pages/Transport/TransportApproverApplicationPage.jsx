@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../api/axios";
@@ -5,66 +6,77 @@ import api from "../../api/axios";
 import ERPPage from "../../components/Common/ERPPage";
 import Button from "../../components/Common/Button/Button";
 import ERPFormModal from "../../components/Common/Form/ERPFormModal";
-import ApplicationView from "../../components/Dashboard/ApplicationView/ApplicationView";
+import TransportApplicationView from "../../components/Dashboard/TransportApplicationView/TransportApplicationView";
 import TakeAction from "../../components/Workflow/TakeAction";
-import { getUserHeader } from "../../utils/userHeader";
 
-const API_URL =
-    import.meta.env.VITE_API_URL ||
-    "/guesthouse-api";
 
-function ApproverApplicationPage() {
+function TransportApproverApplicationPage() {
 
-    const { bookingId } = useParams();
+    const { transportBookingId } = useParams();
 
-    const [application, setApplication] = useState(null);
+    const [application, setApplication] =
+        useState(null);
 
     const [showActionModal, setShowActionModal] =
         useState(false);
 
-    useEffect(() => {
-
-        fetchApplication();
-
-    }, [bookingId]);
 
     const fetchApplication = async () => {
 
         try {
 
             const res = await api.get(
-                `/api/approver/application/${bookingId}`
+                `/api/transport-approver/application/${transportBookingId}`
             );
 
-            console.log(res.data);
+            console.log(
+                "Transport Approver Application:",
+                res.data
+            );
 
-            setApplication(res.data.data);
+            setApplication(
+                res.data.data
+            );
 
         }
 
         catch (err) {
 
-            console.error(err);
+            console.error(
+                "Failed to fetch transport approver application:",
+                err
+            );
 
         }
 
     };
 
-    if (!application)
+
+    useEffect(() => {
+
+        fetchApplication();
+
+    }, [transportBookingId]);
+
+
+    if (!application) {
 
         return <h3>Loading...</h3>;
+
+    }
+
 
     return (
 
         <ERPPage>
 
-            <ApplicationView
+            <TransportApplicationView
 
                 application={application}
 
                 extraActions={
 
-                    application.BookingStatus === "Verified" && (<Button
+                    application.BookingStatus === "Verified" &&(<Button
                         onClick={() =>
                             setShowActionModal(true)
                         }
@@ -75,6 +87,7 @@ function ApproverApplicationPage() {
                 }
 
             />
+
 
             <ERPFormModal
 
@@ -91,27 +104,35 @@ function ApproverApplicationPage() {
             >
 
                 <TakeAction
+
                     application={application}
+
                     actionType="Approver"
 
                     bookingId={
-                        application.GHBookingID
+                        application.TransportBookingID
                     }
 
-                    verifyUrl="/api/approver/approve"
-                    rejectUrl="/api/approver/reject"
+                    verifyUrl="/api/transport-approver/approve"
 
-                    redirectPath="/approver"
+                    rejectUrl="/api/transport-approver/reject"
+
+                    redirectPath="/transport-approver"
 
                     showHeader={false}
 
                     onSuccess={() => {
+
                         setShowActionModal(false);
+
                         fetchApplication();
+
                     }}
+
                 />
 
             </ERPFormModal>
+
 
         </ERPPage>
 
@@ -119,4 +140,5 @@ function ApproverApplicationPage() {
 
 }
 
-export default ApproverApplicationPage;
+
+export default TransportApproverApplicationPage;

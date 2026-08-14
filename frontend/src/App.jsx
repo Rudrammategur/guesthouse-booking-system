@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Existing pages (unchanged)
 import UserDashboard from "./pages/user/UserDashboard";
-import TransportForm from "./pages/Transport/TransportForm";
 import MyTransportBookings from "./pages/Transport/MyTransportBookings";
 import MyRequests from "./pages/MyRequests";
 import RequestTracking from "./pages/RequestTracking";
@@ -49,13 +48,25 @@ import GuestTypeMaster from "./pages/Admin/GuestTypeMaster";
 import RoomChargesMaster from "./pages/Admin/RoomChargesMaster";
 import AdminRoomAvailability from "./pages/Admin/AdminRoomAvailability";
 
+//Transport pages
+import TransportForm from "./pages/Transport/TransportForm";
+import TransportPreview from "./pages/Transport/TransportPreview";
+import TransportApplicationPage from "./pages/Transport/TransportApplicationPage";
+import TransportPrintPage from "./components/Dashboard/TransportPrintPage";
+import TransportVerifierDashboard from "./pages/Transport/TransportVerifierDashboard";
+import TransportVerifierApplicationPage from "./pages/Transport/TransportVerifierApplicationPage";
+import TransportApproverDashboard from "./pages/Transport/TransportApproverDashboard";
+import TransportApproverApplicationPage from "./pages/Transport/TransportApproverApplicationPage";
+import TransportAllocatorDashboard from "./pages/Transport/TransportAllocatorDashboard";
+import TransportAllocatorApplicationPage from "./pages/Transport/TransportAllocatorApplicationPage";
+
 function App() {
   return (
     <BrowserRouter basename="/guesthouse">
       {/* <UserSwitcher /> */}
-      <FixERPUrl /> 
+      <FixERPUrl />
       <Routes>
-        <Route path="/" element={<MainDashboard />} />
+        {/* <Route path="/" element={<MainDashboard />} /> */}
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/tracking/:id" element={<RequestTracking />} />
         <Route path="/approver" element={<ApproverDashboard />} />
@@ -74,11 +85,8 @@ function App() {
         <Route path="/admin/guesthouses" element={<GuestHouseMaster />} />
         <Route path="/admin/guest-types" element={<GuestTypeMaster />} />
         <Route path="/admin/room-charges" element={<RoomChargesMaster />} />
-        <Route path="/gh-incharge/processed-applications"element={<GHProcessedApplicationsPage />}/>
-        <Route
-    path="/ghincharge/application/:bookingId"
-    element={<GHInchargeApplicationPage />}
-/>
+        <Route path="/gh-incharge/processed-applications" element={<GHProcessedApplicationsPage />} />
+        <Route path="/gh-incharge/application/:bookingId" element={<GHInchargeApplicationPage />} />
         {/* ===========================
    Guest House - Employee
 =========================== */}
@@ -99,9 +107,9 @@ function App() {
         />
 
         <Route
-    path="/application/:bookingId"
-    element={<ApplicantApplicationPage />}
-/>
+          path="/application/:bookingId"
+          element={<ApplicantApplicationPage />}
+        />
 
         <Route
           path="/my-bookings"
@@ -132,17 +140,17 @@ function App() {
           />
 
           <Route
-    path="application/:bookingId"
-    element={<AdminApplicationPage />}
-/>
+            path="application/:bookingId"
+            element={<AdminApplicationPage />}
+          />
 
           <Route
 
-path="workflow"
+            path="workflow"
 
-element={<WorkflowManagement />}
+            element={<WorkflowManagement />}
 
-/>
+          />
 
           <Route
             path="users"
@@ -182,8 +190,70 @@ element={<WorkflowManagement />}
           />
 
         </Route>
-        
-        <Route path="/admin/room-availability" element={<AdminRoomAvailability />}/>
+
+        <Route path="/admin/room-availability" element={<AdminRoomAvailability />} />
+
+        //Transport routes
+
+        <Route
+          path="/transport"
+          element={<TransportDashboard />}
+        />
+
+        <Route
+          path="/transport/apply"
+          element={<TransportForm />}
+        />
+
+        <Route
+          path="/transport/preview"
+          element={<TransportPreview />}
+        />
+
+        <Route
+          path="/transport/application/:transportBookingId"
+          element={<TransportApplicationPage />}
+        />
+
+        <Route
+          path="/transport/print/:id"
+          element={<TransportPrintPage />}
+        />
+
+        <Route
+          path="/verifier/dashboard"
+          element={<VerifierDashboard />}
+        />
+
+        <Route
+          path="/transport-verifier"
+          element={<TransportVerifierDashboard />}
+        />
+
+        <Route
+          path="/transport-verifier/application/:transportBookingId"
+          element={<TransportVerifierApplicationPage />}
+        />
+
+        <Route
+          path="/transport-approver"
+          element={<TransportApproverDashboard />}
+        />
+
+        <Route
+          path="/transport-approver/application/:transportBookingId"
+          element={<TransportApproverApplicationPage />}
+        />
+
+        <Route
+          path="/transport-allocator"
+          element={<TransportAllocatorDashboard />}
+        />
+
+        <Route
+          path="/transport-allocator/application/:transportBookingId"
+          element={<TransportAllocatorApplicationPage />}
+        />
 
       </Routes>
     </BrowserRouter>

@@ -1,17 +1,15 @@
-import { useNavigate } from "react-router-dom";
 import Button from "../Common/Button/Button";
 
-function BookingActions({ booking,
-
+function BookingActions({
+    booking,
     onView,
-
     onCancel,
+    onEdit
+}) {
 
-    // onPrint,
-
-    onEdit }) {
-
-    const navigate = useNavigate();
+    if (!booking) {
+        return null;
+    }
 
     switch (booking.BookingStatus) {
 
@@ -22,6 +20,7 @@ function BookingActions({ booking,
                     Edit
                 </Button>
             );
+
 
         case "Submitted":
 
@@ -42,6 +41,7 @@ function BookingActions({ booking,
                 </div>
             );
 
+
         case "Approved":
 
             return (
@@ -51,24 +51,23 @@ function BookingActions({ booking,
                         View
                     </Button>
 
-                    {/* <Button
-                        variant="outline"
-                        onClick={onPrint}
-                    >
-                        Print
-                    </Button> */}
-
                 </div>
             );
+
+
+        case "Cancelled":
+
+            return (
+                <Button onClick={onView}>
+                    View
+                </Button>
+            );
+
 
         default:
 
             return (
-                <Button
-                    onClick={() =>
-                        navigate(`/application/${booking.GHBookingID}`)
-                    }
-                >
+                <Button onClick={onView}>
                     View
                 </Button>
             );

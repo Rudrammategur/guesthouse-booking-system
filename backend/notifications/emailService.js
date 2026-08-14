@@ -53,7 +53,8 @@ async function sendEmail(
     to,
     subject,
     html,
-    attachments = []
+    attachments = [],
+    cc = []
 ) {
 
     if (!transporter) {
@@ -68,19 +69,20 @@ async function sendEmail(
 
     const info = await transporter.sendMail({
 
-        from:
-            `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_EMAIL}>`,
+    from:
+        `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_EMAIL}>`,
 
-        to,
+    to,
 
-        subject,
+    cc,
 
-        html,
+    subject,
 
-        attachments
+    html,
 
-    });
+    attachments
 
+});
     console.log("FROM:",
         `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_EMAIL}>`
     );

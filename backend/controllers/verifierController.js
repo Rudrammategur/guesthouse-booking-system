@@ -378,6 +378,8 @@ SELECT
 
     gh.GuestHouseName,
 
+    ebi.DisplayName AS ApplicantName,
+
     vr.RoleName AS VerifierRole,
 
     ar.RoleName AS ApproverRole,
@@ -392,7 +394,8 @@ ON gt.GuestTypeID=b.GuestTypeID
 LEFT JOIN GuestHouseMaster gh
 ON gh.GuestHouseID = b.GuestHouseID
 
-
+LEFT JOIN HR..EmployeeBasicInfo ebi
+ON ebi.EmployeeId = b.BookedBy
 
 LEFT JOIN Proof..OrgUnitRoleMapping ov
 ON ov.RoleMapID = b.AssignedVerifierID
@@ -483,7 +486,7 @@ d.GHBookingID=@BookingID
 
         application.WorkflowHistory =
             await getWorkflowHistory(
-                "GuestHouseBooking",
+                "GuestHouse",
                 bookingId
             );
 
@@ -553,42 +556,55 @@ exports.verifyApplication = async (req, res) => {
 
 
 
-        const booking =
-            await getBookingDetails(bookingId);
-
-
+        const booking = await getBookingDetails(bookingId);
 
         if (!booking) {
-
-
             await transaction.rollback();
 
-
             return res.status(404).json({
-
                 success: false,
-
                 message: "Booking not found."
-
             });
-
-
         }
-
-
 
         const currentUser = getCurrentUser(req);
 
-        await changeWorkflowStatus(transaction, {
-            bookingId,
-            previousStatus: booking.BookingStatus,
-            currentStatus: "Verified",
-            actionName: "Verify",
-            authorityRole: "Verifier",
-            authorityName: currentUser.EmployeeName,
-            actionBy: currentUser.EmployeeId,
-            remarks
-        });
+        if (!currentUser) {
+            await transaction.rollback();
+
+            return res.status(401).json({
+                success: false,
+                message: "User authentication failed"
+            });
+        }
+
+        AuthorizationService.ensureAssignedRole(
+            booking.AssignedVerifierID,
+            currentUser,
+            "Verifier"
+        );
+
+        AuthorizationService.ensureBookingStatus(
+            booking,
+            "Submitted"
+        );
+
+        await changeWorkflowStatus(
+            transaction,
+            {
+                bookingId,
+
+                moduleName: "GuestHouse",
+
+                previousStatus: booking.BookingStatus,
+                currentStatus: "Verified",
+                actionName: "Verify",
+                authorityRole: "Verifier",
+                authorityName: currentUser.EmployeeName,
+                actionBy: currentUser.EmployeeId,
+                remarks
+            }
+        );
 
 
 
@@ -844,7 +860,7 @@ exports.rejectApplication = async (req, res) => {
         AuthorizationService.ensureAssignedRole(
             booking.AssignedVerifierID,
             currentUser,
-            "Approver"
+            "Verifier"
         );
 
         // Status Validation
@@ -864,6 +880,8 @@ exports.rejectApplication = async (req, res) => {
             {
 
                 bookingId,
+
+                moduleName: "GuestHouse",
 
                 previousStatus: booking.BookingStatus,
 

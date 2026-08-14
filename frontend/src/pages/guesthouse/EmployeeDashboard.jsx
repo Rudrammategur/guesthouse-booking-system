@@ -517,7 +517,6 @@ function EmployeeDashboard() {
                     actions={(row) => (
 
                         <BookingActions
-
                             booking={row}
 
                             onView={() =>
@@ -531,11 +530,9 @@ function EmployeeDashboard() {
                             onCancel={() => {
 
                                 setSelectedBooking(row.GHBookingID);
-
                                 setShowCancelDialog(true);
 
                             }}
-
                         />
 
                     )}

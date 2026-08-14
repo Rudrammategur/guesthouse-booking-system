@@ -1,70 +1,82 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/axios";
 
 import ERPPage from "../../components/Common/ERPPage";
 import Button from "../../components/Common/Button/Button";
-import ERPFormModal from "../../components/Common/Form/ERPFormModal";
-import ApplicationView from "../../components/Dashboard/ApplicationView/ApplicationView";
+import TransportApplicationView from "../../components/Dashboard/TransportApplicationView/TransportApplicationView";
 import TakeAction from "../../components/Workflow/TakeAction";
-import { getUserHeader } from "../../utils/userHeader";
+import ERPFormModal from "../../components/Common/Form/ERPFormModal";
 
-const API_URL =
-    import.meta.env.VITE_API_URL ||
-    "/guesthouse-api";
+function TransportVerifierApplicationPage() {
 
-function ApproverApplicationPage() {
+    const { transportBookingId } = useParams();
 
-    const { bookingId } = useParams();
+    const navigate = useNavigate();
 
-    const [application, setApplication] = useState(null);
+    const [application, setApplication] =
+        useState(null);
 
     const [showActionModal, setShowActionModal] =
         useState(false);
 
-    useEffect(() => {
-
-        fetchApplication();
-
-    }, [bookingId]);
 
     const fetchApplication = async () => {
 
         try {
 
             const res = await api.get(
-                `/api/approver/application/${bookingId}`
+                `/api/transport-verifier/application/${transportBookingId}`
             );
 
-            console.log(res.data);
+            console.log(
+                "Transport Verifier Application:",
+                res.data
+            );
 
-            setApplication(res.data.data);
+            setApplication(
+                res.data.data
+            );
 
         }
 
         catch (err) {
 
-            console.error(err);
+            console.error(
+                "Failed to fetch transport application:",
+                err
+            );
 
         }
 
     };
 
-    if (!application)
+
+    useEffect(() => {
+
+        fetchApplication();
+
+    }, [transportBookingId]);
+
+
+    if (!application) {
 
         return <h3>Loading...</h3>;
+
+    }
+
 
     return (
 
         <ERPPage>
 
-            <ApplicationView
+            <TransportApplicationView
 
                 application={application}
 
                 extraActions={
 
-                    application.BookingStatus === "Verified" && (<Button
+                    application.BookingStatus === "Submitted" &&(<Button
                         onClick={() =>
                             setShowActionModal(true)
                         }
@@ -75,6 +87,7 @@ function ApproverApplicationPage() {
                 }
 
             />
+
 
             <ERPFormModal
 
@@ -92,16 +105,16 @@ function ApproverApplicationPage() {
 
                 <TakeAction
                     application={application}
-                    actionType="Approver"
+                    actionType="Verifier"
 
                     bookingId={
-                        application.GHBookingID
+                        application.TransportBookingID
                     }
 
-                    verifyUrl="/api/approver/approve"
-                    rejectUrl="/api/approver/reject"
+                    verifyUrl="/api/transport-verifier/verify"
+                    rejectUrl="/api/transport-verifier/reject"
 
-                    redirectPath="/approver"
+                    redirectPath="/transport-verifier"
 
                     showHeader={false}
 
@@ -119,4 +132,4 @@ function ApproverApplicationPage() {
 
 }
 
-export default ApproverApplicationPage;
+export default TransportVerifierApplicationPage;

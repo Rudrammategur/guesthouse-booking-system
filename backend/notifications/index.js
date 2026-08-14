@@ -22,6 +22,9 @@ module.exports = {
         require("./templates/checkedOut"),
 
     receiptGenerated:
-        require("./templates/receiptGenerated")
+        require("./templates/receiptGenerated"),
+
+    vehicleAllocated:
+    require("./templates/vehicleAllocated")
 
 };

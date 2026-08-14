@@ -18,18 +18,15 @@ exports.resolveWorkflow = async (
 
     applicantRoleMapId,
 
-    expenditureHead
+    expenditureHead,
+
+    moduleName
 
 ) => {
 
     const pool = await poolPromise;
 
-    const projectFund =
-        isProjectFund(expenditureHead);
-
-    console.log("ApplicantRoleMapID:", applicantRoleMapId);
-console.log("ExpenditureHead:", expenditureHead);
-console.log("IsProjectFund:", projectFund);
+    const projectFund = isProjectFund(expenditureHead);
 
     const workflowResult =
         await pool.request()
@@ -46,6 +43,12 @@ console.log("IsProjectFund:", projectFund);
                 projectFund
             )
 
+            .input(
+                "ModuleName",
+                sql.VarChar(50),
+                moduleName
+            )
+
             .query(`
 
 SELECT *
@@ -57,6 +60,8 @@ WHERE
 ApplicantRoleMapID = @ApplicantRoleMapID
 
 AND IsProjectFund = @IsProjectFund
+
+AND ModuleName = @ModuleName
 
 AND IsActive = 1
 

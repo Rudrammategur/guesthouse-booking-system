@@ -31,7 +31,7 @@ function WorkflowLogs({ moduleName, referenceId }) {
 
         }
 
-        catch (err) { console.log(err);}
+        catch (err) { console.log(err); }
 
         finally { setLoading(false); }
 
@@ -114,21 +114,20 @@ function WorkflowLogs({ moduleName, referenceId }) {
                             </p>
 
                             <p>
-
                                 <strong>Date :</strong>
-
                                 {" "}
-
                                 {
-
-                                    new Date(
-
-                                        log.ActionDateTime
-
-                                    ).toLocaleString()
-
+                                    new Date(log.ActionDateTime).toLocaleString("en-IN", {
+                                        timeZone: "Asia/Kolkata",
+                                        day: "2-digit",
+                                        month: "short",
+                                        year: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        second: "2-digit",
+                                        hour12: true
+                                    })
                                 }
-
                             </p>
 
                         </div>

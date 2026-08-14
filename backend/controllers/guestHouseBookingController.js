@@ -23,12 +23,16 @@ const { getWorkflowHistory } = require("../services/workflowService");
 
 const getCurrentUser = require("../utils/getCurrentUser");
 
-const testEmail = process.env.TEST_EMAIL || currentUser.EmployeeEmail;
+const testEmail = process.env.TEST_EMAIL;
+
+const {
+    getSupportingDocument
+} = require("../services/DocumentService");
 
 
 exports.createBooking = async (req, res) => {
 
-    const pool = await poolPromise;
+    const pool = await poolPromise; m
     const transaction = new sql.Transaction(pool);
 
 
@@ -60,7 +64,8 @@ exports.createBooking = async (req, res) => {
         const workflow =
             await WorkflowResolverService.resolveWorkflow(
                 Number(applicantRole.RoleMapId),
-                data.ExpenditureHead
+                data.ExpenditureHead,
+                "GuestHouse"
             );
 
         // Parse Room Requirements
@@ -333,7 +338,7 @@ VALUES(
 
         await insertWorkflowHistory(transaction, {
 
-            moduleName: "GuestHouseBooking",
+            moduleName: "GuestHouse",
 
             referenceId: bookingID,
 
@@ -666,6 +671,7 @@ SELECT
     b.ProjectNo,
     b.SplRequests,
     b.BookedBy,
+ebi.DisplayName AS ApplicantName,
     CASE
     WHEN b.SupportingDoc IS NOT NULL THEN 1
     ELSE 0
@@ -706,6 +712,9 @@ ON ol.RoleMapID = b.AssignedAllocatorID
 LEFT JOIN Proof..RoleMaster rl
 ON rl.RoleID = ol.RoleID
 
+LEFT JOIN HR..EmployeeBasicInfo ebi
+    ON ebi.EmployeeId = b.BookedBy
+
 WHERE
 
     b.GHBookingID = @BookingID
@@ -741,7 +750,7 @@ WHERE
 `),
 
             getWorkflowHistory(
-                "GuestHouseBooking",
+                "GuestHouse",
                 bookingId
             )
 
@@ -826,72 +835,65 @@ WHERE
 
 };
 
-const { fileTypeFromBuffer } = require("file-type");
+
 exports.getSupportingDocument = async (req, res) => {
 
     try {
 
         const pool = await poolPromise;
 
-        const result = await pool.request()
-            .input(
-                "BookingID",
-                sql.VarChar,
-                req.params.bookingId
-            )
-            .query(`
-                SELECT SupportingDoc
-                FROM GuestHouseRoomBookings
-                WHERE GHBookingID = @BookingID
-                  AND IsActive = 1
-            `);
+        const {
+            buffer,
+            mimeType
+        } = await getSupportingDocument({
 
-        if (result.recordset.length === 0) {
+            pool,
+            sql,
 
-            return res.status(404).json({
-                success: false,
-                message: "Application not found"
-            });
+            tableName:
+                "GuestHouseRoomBookings",
 
-        }
+            idColumn:
+                "GHBookingID",
 
-        const document = result.recordset[0].SupportingDoc;
+            idValue:
+                req.params.bookingId,
 
-        if (!document) {
+            documentColumn:
+                "SupportingDoc"
 
-            return res.status(404).json({
-                success: false,
-                message: "No supporting document found"
-            });
+        });
 
-        }
-
-        const buffer = Buffer.from(document);
-
-        const type = await fileTypeFromBuffer(buffer);
-
-        const mimeType = type?.mime || "application/octet-stream";
-
-        res.setHeader("Content-Type", mimeType);
+        res.setHeader(
+            "Content-Type",
+            mimeType
+        );
 
         res.setHeader(
             "Content-Disposition",
             "inline"
         );
 
-        res.send(document);
+        res.send(buffer);
 
     }
     catch (error) {
 
         console.error(
-            "Supporting document retrieval error:",
+            "Guest House supporting document retrieval error:",
             error
         );
 
-        res.status(500).json({
+        res.status(
+            error.statusCode || 500
+        ).json({
+
             success: false,
-            message: error.message
+
+            message:
+                error.message ||
+                "Unable to retrieve document"
+
         });
 
     }
@@ -990,7 +992,7 @@ WHERE
         // Workflow History
         await insertWorkflowHistory(transaction, {
 
-            moduleName: "GuestHouseBooking",
+            moduleName: "GuestHouse",
 
             referenceId: bookingId,
 

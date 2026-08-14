@@ -1,6 +1,7 @@
 const sql = require("mssql");
 
-const { poolPromise } = require("../config/db");
+const { poolPromise } =
+    require("../config/db");
 
 const {
     generateWorkflowHistoryId
@@ -8,24 +9,26 @@ const {
 
 
 /*
----------------------------------------------------------
+==================================================
 Workflow Users
----------------------------------------------------------
+==================================================
 */
 
 exports.getWorkflowUsers = async () => {
 
-    const pool = await poolPromise;
+    const pool =
+        await poolPromise;
 
-    const result = await pool.request().query(`
+    const result =
+        await pool.request().query(`
 
-        SELECT *
+            SELECT *
 
-        FROM GuestHouseUserAccess
+            FROM GuestHouseUserAccess
 
-        WHERE IsActive=1
+            WHERE IsActive = 1
 
-    `);
+        `);
 
     return result.recordset;
 
@@ -33,66 +36,134 @@ exports.getWorkflowUsers = async () => {
 
 
 /*
----------------------------------------------------------
+==================================================
 Update Booking Status
----------------------------------------------------------
+==================================================
 */
 
 exports.updateBookingStatus = async (
 
     transaction,
 
-    bookingId,
+    {
+        moduleName = "GuestHouse",
 
-    status,
+        bookingId,
 
-    employeeId
+        status,
+
+        employeeId
+
+    }
 
 ) => {
 
-    await new sql.Request(transaction)
+    let tableName;
+    let bookingIdColumn;
 
+
+    /*
+    ==============================================
+    Module-specific configuration
+    ==============================================
+    */
+
+    switch (moduleName) {
+
+        case "GuestHouse":
+
+            tableName =
+                "GuestHouseRoomBookings";
+
+            bookingIdColumn =
+                "GHBookingID";
+
+            break;
+
+
+        case "Transport":
+
+            tableName =
+                "TransportBookings";
+
+            bookingIdColumn =
+                "TransportBookingID";
+
+            break;
+
+
+        default:
+
+            throw new Error(
+                `Unsupported workflow module: ${moduleName}`
+            );
+
+    }
+
+
+    /*
+    ==============================================
+    Update Status
+    ==============================================
+    */
+
+    const query = `
+
+        UPDATE ${tableName}
+
+        SET
+
+            BookingStatus = @Status,
+
+            ActivityBy = @EmployeeID
+
+        WHERE
+
+            ${bookingIdColumn} = @BookingID
+
+    `;
+
+    console.log("========== updateBookingStatus DEBUG ==========");
+    console.log("moduleName:", moduleName);
+    console.log("bookingId:", bookingId, typeof bookingId);
+    console.log("status:", status, typeof status);
+    console.log("employeeId:", employeeId);
+    console.log("employeeId type:", typeof employeeId);
+    console.log("employeeId constructor:", employeeId?.constructor?.name);
+    console.log("employeeId JSON:", JSON.stringify(employeeId));
+    console.log("==============================================");
+
+
+    const normalizedEmployeeId =
+        employeeId == null
+            ? null
+            : String(employeeId);
+
+    await new sql.Request(transaction)
         .input(
             "BookingID",
             sql.VarChar,
             bookingId
         )
-
         .input(
             "Status",
             sql.VarChar,
             status
         )
-
         .input(
             "EmployeeID",
             sql.VarChar,
-            employeeId
+            normalizedEmployeeId
         )
-
-        .query(`
-
-UPDATE GuestHouseRoomBookings
-
-SET
-
-BookingStatus=@Status,
-
-ActivityBy=@EmployeeID
-
-WHERE
-
-GHBookingID=@BookingID
-
-`);
+        .query(query);
 
 };
 
 
 /*
----------------------------------------------------------
+==================================================
 Get Workflow History
----------------------------------------------------------
+==================================================
 */
 
 exports.getWorkflowHistory = async (
@@ -103,66 +174,69 @@ exports.getWorkflowHistory = async (
 
 ) => {
 
-    const pool = await poolPromise;
+    const pool =
+        await poolPromise;
 
-    const result = await pool.request()
+    const result =
+        await pool.request()
 
-        .input(
-            "ModuleName",
-            sql.VarChar,
-            moduleName
-        )
+            .input(
+                "ModuleName",
+                sql.VarChar,
+                moduleName
+            )
 
-        .input(
-            "ReferenceID",
-            sql.VarChar,
-            referenceId
-        )
+            .input(
+                "ReferenceID",
+                sql.VarChar,
+                referenceId
+            )
 
-        .query(`
+            .query(`
 
-SELECT
+                SELECT
 
-WorkflowHistoryID,
+                    WorkflowHistoryID,
 
-SequenceNo,
+                    SequenceNo,
 
-PreviousStatus,
+                    PreviousStatus,
 
-CurrentStatus,
+                    CurrentStatus,
 
-ActionName,
+                    ActionName,
 
-AuthorityRole,
+                    AuthorityRole,
 
-AuthorityName,
+                    AuthorityName,
 
-ActionBy,
+                    ActionBy,
 
-ActionDateTime,
+                    ActionDateTime,
 
-Remarks
+                    Remarks
 
-FROM WorkflowHistory
+                FROM WorkflowHistory
 
-WHERE
+                WHERE
 
-ModuleName=@ModuleName
+                    ModuleName = @ModuleName
 
-AND
+                AND
 
-ReferenceID=@ReferenceID
+                    ReferenceID = @ReferenceID
 
-AND
+                AND
 
-IsActive=1
+                    IsActive = 1
 
-ORDER BY
+                ORDER BY
 
-SequenceNo,
-ActionDateTime
+                    SequenceNo,
 
-`);
+                    ActionDateTime
+
+            `);
 
     return result.recordset;
 
@@ -170,9 +244,9 @@ ActionDateTime
 
 
 /*
----------------------------------------------------------
+==================================================
 Get Next Sequence No
----------------------------------------------------------
+==================================================
 */
 
 exports.getNextSequenceNo = async (
@@ -185,47 +259,52 @@ exports.getNextSequenceNo = async (
 
 ) => {
 
-    const result = await new sql.Request(transaction)
+    const result =
+        await new sql.Request(transaction)
 
-        .input(
-            "ModuleName",
-            sql.VarChar,
-            moduleName
-        )
+            .input(
+                "ModuleName",
+                sql.VarChar,
+                moduleName
+            )
 
-        .input(
-            "ReferenceID",
-            sql.VarChar,
-            referenceId
-        )
+            .input(
+                "ReferenceID",
+                sql.VarChar,
+                referenceId
+            )
 
-        .query(`
+            .query(`
 
-SELECT
+                SELECT
 
-ISNULL(MAX(SequenceNo),0)+1 AS NextSequence
+                    ISNULL(
+                        MAX(SequenceNo),
+                        0
+                    ) + 1 AS NextSequence
 
-FROM WorkflowHistory
+                FROM WorkflowHistory
 
-WHERE
+                WHERE
 
-ModuleName=@ModuleName
+                    ModuleName = @ModuleName
 
-AND
+                AND
 
-ReferenceID=@ReferenceID
+                    ReferenceID = @ReferenceID
 
-`);
+            `);
 
-    return result.recordset[0].NextSequence;
+    return result.recordset[0]
+        .NextSequence;
 
 };
 
 
 /*
----------------------------------------------------------
+==================================================
 Insert Workflow History
----------------------------------------------------------
+==================================================
 */
 
 exports.insertWorkflowHistory = async (
@@ -261,7 +340,10 @@ exports.insertWorkflowHistory = async (
 ) => {
 
     const workflowHistoryId =
-        await generateWorkflowHistoryId(transaction);
+        await generateWorkflowHistoryId(
+            transaction
+        );
+
 
     const sequenceNo =
         await exports.getNextSequenceNo(
@@ -273,6 +355,13 @@ exports.insertWorkflowHistory = async (
             referenceId
 
         );
+
+    
+    const normalizedActionBy =
+    actionBy == null
+        ? null
+        : String(actionBy);
+
 
     await new sql.Request(transaction)
 
@@ -333,7 +422,7 @@ exports.insertWorkflowHistory = async (
         .input(
             "ActionBy",
             sql.VarChar,
-            actionBy
+            normalizedActionBy
         )
 
         .input(
@@ -356,98 +445,184 @@ exports.insertWorkflowHistory = async (
 
         .query(`
 
-INSERT INTO WorkflowHistory
-(
-    WorkflowHistoryID,
-    ModuleName,
-    ReferenceID,
-    SequenceNo,
-    PreviousStatus,
-    CurrentStatus,
-    ActionName,
-    AuthorityRole,
-    AuthorityName,
-    ActionBy,
-    ActionDateTime,
-    Remarks,
-    IPAddress,
-    DeviceInfo,
-    IsActive,
-    CreatedDate
-)
+            INSERT INTO WorkflowHistory
+            (
+                WorkflowHistoryID,
 
-VALUES
-(
-    @WorkflowHistoryID,
-    @ModuleName,
-    @ReferenceID,
-    @SequenceNo,
-    @PreviousStatus,
-    @CurrentStatus,
-    @ActionName,
-    @AuthorityRole,
-    @AuthorityName,
-    @ActionBy,
-    GETDATE(),
-    @Remarks,
-    @IPAddress,
-    @DeviceInfo,
-    1,
-    GETDATE()
-)
+                ModuleName,
 
-`);
+                ReferenceID,
+
+                SequenceNo,
+
+                PreviousStatus,
+
+                CurrentStatus,
+
+                ActionName,
+
+                AuthorityRole,
+
+                AuthorityName,
+
+                ActionBy,
+
+                ActionDateTime,
+
+                Remarks,
+
+                IPAddress,
+
+                DeviceInfo,
+
+                IsActive,
+
+                CreatedDate
+            )
+
+            VALUES
+            (
+                @WorkflowHistoryID,
+
+                @ModuleName,
+
+                @ReferenceID,
+
+                @SequenceNo,
+
+                @PreviousStatus,
+
+                @CurrentStatus,
+
+                @ActionName,
+
+                @AuthorityRole,
+
+                @AuthorityName,
+
+                @ActionBy,
+
+                GETDATE(),
+
+                @Remarks,
+
+                @IPAddress,
+
+                @DeviceInfo,
+
+                1,
+
+                GETDATE()
+            )
+
+        `);
 
 };
 
 
 /*
----------------------------------------------------------
+==================================================
 Change Workflow Status
----------------------------------------------------------
+==================================================
 */
 
 exports.changeWorkflowStatus = async (
+
     transaction,
+
     {
+
         bookingId,
-        moduleName = "GuestHouseBooking",
+
+        moduleName = "GuestHouse",
+
         previousStatus,
+
         currentStatus,
+
         actionName,
+
         authorityRole,
+
         authorityName,
+
         actionBy,
+
         remarks = "",
+
         ipAddress = null,
+
         deviceInfo = null
+
     }
+
 ) => {
 
-    // Update booking status
+
+    /*
+    ==============================================
+    1. Update actual application
+    ==============================================
+    */
+
     await exports.updateBookingStatus(
+
         transaction,
-        bookingId,
-        currentStatus,
-        actionBy
+
+        {
+
+            moduleName,
+
+            bookingId,
+
+            status:
+                currentStatus,
+
+            employeeId:
+                actionBy
+
+        }
+
     );
 
-    // Insert workflow history
+
+    /*
+    ==============================================
+    2. Insert workflow history
+    ==============================================
+    */
+
     await exports.insertWorkflowHistory(
+
         transaction,
+
         {
+
             moduleName,
-            referenceId: bookingId,
+
+            referenceId:
+                bookingId,
+
             previousStatus,
+
             currentStatus,
+
             actionName,
+
             authorityRole,
+
             authorityName,
+
             actionBy,
+
             remarks,
+
             ipAddress,
+
             deviceInfo
+
         }
+
     );
 
 };
